@@ -3,6 +3,16 @@
 Work top to bottom, one ticket at a time: implement, test, commit as `<ID>: <summary>`, update `PROGRESS.md`.
 **[mock]** = must work with `MOCK_PROVIDERS=true`. **[sim]** = works with the callee simulator (real STT/TTS, no telephony). **[live]** = needs real telephony keys; if missing, finish mock/sim and move on.
 
+## Revision 2026-10-24 (read first; overrides the tickets below where they differ)
+Decisions are in `docs/DECISIONS.md`; spike results in `docs/SPIKE-bolna.md`.
+- **Speech:** Sarvam only (Saaras v3/v4 streaming STT, Bulbul v3 streaming TTS, transliterate/translate fallback). Deepgram and Cartesia are not used. Captions translate with Gemini + call context (Sarvam translate fallback).
+- **Telephony:** Twilio Media Streams for live relay legs (needs a Twilio upgrade for real calls; shared trial number cannot place them). Bolna is used for Call for me only; its relay path is a spike, not the product (no raw audio, fragmented turns, unauthorised idle prompts, poor number recognition on real audio).
+- **WhatsApp:** Twilio sandbox (free). No Exotel.
+- **M0:** M0-01/02 done (echo socket, audio codec). M0-03/04 (TTS and STT into a real call) wait for the Twilio upgrade; build and test them against the callee simulator first.
+- **Order now:** M2 relay core in mock/simulator mode (protocol models, RelaySession, relay WebSocket, entities), then M1-05/06 web shell, then Sarvam streaming adapters, then M3-M6. Twilio live (M2-08) when voice is unlocked.
+- **Typed speech:** same-language text is converted and spoken without confirmation; translated or drafted text needs one Enter (rule 3 kept). Implemented in `services/say_prep.py`.
+- **Known risk:** number recognition on real phone audio (Sarvam via Bolna got about 5 of 12 numeric facts). Mitigations are product features: number chips, confidence shading, ask-to-repeat, read-back.
+
 ## M0 — Audio spike (Sat 24 Oct, first half). Do this before anything else.
 
 | ID | Ticket | Acceptance |

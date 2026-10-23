@@ -18,3 +18,10 @@
 ## Unverified
 - See `docs/DECISIONS.md`
 - Bolna spike: first real call done (see docs/SPIKE-bolna.md); typed speech and captions work, turn fragmentation and unauthorised idle prompts are open problems
+
+## Unverified / limited (2026-10-24)
+- Twilio trial: shared number cannot be used for live voice; upgrade needed (voice from +1 737 number to Indian phones, caller ID spam filtering untested).
+- Bolna trial: only calls verified numbers.
+- Number recognition on real phone audio with Sarvam (via Bolna) is poor; Deepgram not measured on a comparable run.
+- Gemini free-tier quota under live load.
+- Prepare-before-speak latency about 1.4 s from a laptop; re-measure on Render.
