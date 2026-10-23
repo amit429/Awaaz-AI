@@ -91,8 +91,13 @@ async def relay(
 
     pump_task = asyncio.create_task(pump())
     try:
-        while True:
-            await session.handle_text(await ws.receive_text())
+        while not pump_task.done():
+            receive = asyncio.create_task(ws.receive_text())
+            await asyncio.wait({receive, pump_task}, return_when=asyncio.FIRST_COMPLETED)
+            if not receive.done():  # the call ended and the pump closed the socket
+                receive.cancel()
+                break
+            await session.handle_text(receive.result())
     except WebSocketDisconnect:
         pass
     finally:

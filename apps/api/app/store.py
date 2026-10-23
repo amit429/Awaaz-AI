@@ -26,6 +26,8 @@ class Store(Protocol):
     async def add_turn(self, call_id: str, turn: dict[str, Any]) -> None: ...
     async def get_call(self, call_id: str) -> dict[str, Any] | None: ...
     async def get_turns(self, call_id: str) -> list[dict[str, Any]]: ...
+    async def list_calls(self, user_id: str, limit: int = 30) -> list[dict[str, Any]]: ...
+    async def dev_user(self, email: str = "dev@awaaz.local") -> str: ...
 
 
 @dataclass
@@ -65,9 +67,32 @@ class InMemoryStore:
     async def get_turns(self, call_id: str) -> list[dict[str, Any]]:
         return list(self.turns.get(call_id, []))
 
+    async def list_calls(self, user_id: str, limit: int = 30) -> list[dict[str, Any]]:
+        mine = [c for c in self.calls.values() if c["user_id"] == user_id]
+        return sorted(mine, key=lambda c: c["created_at"], reverse=True)[:limit]
 
-_store: Store = InMemoryStore()
+    async def dev_user(self, email: str = "dev@awaaz.local") -> str:
+        return "dev-user"
+
+
+_store: Store | None = None
 
 
 def get_store() -> Store:
+    """Supabase when configured and live; in-memory in mock mode (and always in tests, see conftest)."""
+    global _store
+    if _store is None:
+        from app.config import get_settings
+
+        settings = get_settings()
+        if (
+            settings.supabase_url
+            and settings.supabase_service_role_key
+            and not settings.mock_providers
+        ):
+            from app.supabase_store import SupabaseStore
+
+            _store = SupabaseStore(settings)
+        else:
+            _store = InMemoryStore()
     return _store
