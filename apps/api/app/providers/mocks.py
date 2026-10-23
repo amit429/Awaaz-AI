@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
 
-SPECS_DIR = Path(__file__).resolve().parents[4] / "specs"
+from app.specs import SPECS_DIR
 
 
 class FakeCallee:
