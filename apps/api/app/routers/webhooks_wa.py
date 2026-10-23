@@ -5,9 +5,10 @@ import asyncio
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi.responses import PlainTextResponse
 
 from app.config import Settings, get_settings
-from app.providers import twilio_wa
+from app.providers import meta_wa, twilio_wa
 from app.providers.twilio_wa import Inbound, LogSender, make_sender
 from app.services.wa_bot import WaBot, get_bot
 from app.store import Store, get_store
@@ -58,6 +59,42 @@ async def twilio_inbound(
     _tasks.add(task)
     task.add_done_callback(_tasks.discard)
     return Response("<Response></Response>", media_type="text/xml")
+
+
+@router.get("/v1/webhooks/wa/meta")
+async def meta_verify(
+    mode: str | None = Query(None, alias="hub.mode"),
+    token: str | None = Query(None, alias="hub.verify_token"),
+    challenge: str | None = Query(None, alias="hub.challenge"),
+    settings: Settings = Depends(get_settings),
+) -> PlainTextResponse:
+    """Meta's one-time handshake when the webhook is saved in the dashboard."""
+    if (
+        mode == "subscribe"
+        and settings.meta_wa_verify_token
+        and token == settings.meta_wa_verify_token
+    ):
+        return PlainTextResponse(challenge or "")
+    raise HTTPException(status_code=403, detail="verification failed")
+
+
+@router.post("/v1/webhooks/wa/meta")
+async def meta_inbound(
+    request: Request,
+    settings: Settings = Depends(get_settings),
+    store: Store = Depends(get_store),
+) -> dict:
+    raw = await request.body()
+    if not settings.meta_wa_app_secret or not meta_wa.valid_signature(
+        settings.meta_wa_app_secret, raw, request.headers.get("X-Hub-Signature-256")
+    ):
+        raise HTTPException(status_code=403, detail="bad signature")
+    bot = bot_for(settings, store)
+    for msg in meta_wa.parse_webhook(await request.json()):
+        task = asyncio.create_task(bot.handle(msg))  # answer Meta right away
+        _tasks.add(task)
+        task.add_done_callback(_tasks.discard)
+    return {"ok": True}
 
 
 def _dev_only(settings: Settings) -> LogSender:

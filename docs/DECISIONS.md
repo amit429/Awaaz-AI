@@ -57,3 +57,8 @@ Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice clonin
 - The relay session talks to an `OtherLeg` (mock script, Bolna phone leg, browser simulator). Twilio Media Streams stays a documented future leg.
 - WhatsApp (Twilio sandbox) gets a live-relay mode: "call <number>" starts a call; captions arrive as messages; text typed in the chat is spoken (same conversion and confirmation rules); "end" hangs up.
 - Limits: Bolna trial only calls verified numbers; Twilio trial WhatsApp sandbox (join code per tester, daily message cap).
+
+## 2026-10-24: WhatsApp via Meta Cloud API (Twilio trial cannot push messages)
+- Twilio trial shared WhatsApp number: REST sends with a plain Body fail with 21654 "ContentSid Required"; the Content API is blocked on trial (20003). Only replies inside the inbound webhook (TwiML) work, which cannot push live captions.
+- Decision: `WA_PROVIDER=meta_cloud` (WhatsApp Cloud API test number: free, free-form text within 24 h of the user's last message, up to 5 verified recipients). Adapter `providers/meta_wa.py`; webhook `GET/POST /v1/webhooks/wa/meta` (verify token, X-Hub-Signature-256).
+- Twilio adapter stays for a paid account. Verified: bot logic end to end through the dev endpoint (`WA_PROVIDER=log`).

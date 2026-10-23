@@ -109,6 +109,10 @@ def normalise(params: dict[str, str]) -> Inbound:
 
 
 def make_sender(settings: Settings) -> WaSender:
+    from app.providers.meta_wa import MetaSender
+
+    if settings.wa_provider == "meta_cloud":
+        return MetaSender(settings)
     if settings.wa_provider == "twilio_sandbox":
         return TwilioSandboxSender(settings)
     return LogSender()
