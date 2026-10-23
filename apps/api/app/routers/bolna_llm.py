@@ -18,8 +18,6 @@ log = logging.getLogger("awaaz.bolna_llm")
 router = APIRouter(tags=["bolna-llm"])
 
 MODEL = "awaaz-relay"
-KEEPER_LINE = "Ek minute, please hold."
-WAIT_SECONDS = 12.0
 
 
 def require_bearer(
@@ -41,12 +39,26 @@ def sse_chunk(text: str | None, *, finish: bool = False) -> str:
     return f"data: {json.dumps(body, ensure_ascii=False)}\n\n"
 
 
-def last_user_text(messages: list[dict]) -> str:
+def _text(content: object) -> str:
+    if isinstance(content, str):
+        return content
+    return " ".join(p.get("text", "") for p in content or [] if isinstance(p, dict))
+
+
+def current_turn(messages: list[dict]) -> tuple[int, str]:
+    """(turn number, merged text of the other person's trailing messages).
+
+    The turn number is how many assistant messages precede the trailing user block, so all
+    fragments of one utterance share a turn.
+    """
+    tail: list[str] = []
     for m in reversed(messages):
         if m.get("role") == "user":
-            c = m.get("content")
-            return c if isinstance(c, str) else " ".join(p.get("text", "") for p in c or [])
-    return ""
+            tail.append(_text(m.get("content")).strip())
+        elif m.get("role") == "assistant":
+            break
+    assistants = sum(1 for m in messages if m.get("role") == "assistant")
+    return assistants, " ".join(reversed([t for t in tail if t]))
 
 
 @router.get("/v1/llm/models", dependencies=[Depends(require_bearer)])
@@ -57,14 +69,14 @@ async def models() -> dict:
 @router.post("/v1/llm/chat/completions", dependencies=[Depends(require_bearer)])
 async def chat(request: Request) -> StreamingResponse:
     body = await request.json()
-    heard = last_user_text(body.get("messages", []))
+    turn, heard = current_turn(body.get("messages", []))
     if heard:
-        bridge.caption(heard)
-        log.info("CAPTION: %s", heard)
+        bridge.hear(turn, heard)
+        log.info("CAPTION turn=%d: %s", turn, heard)
 
     async def stream() -> AsyncIterator[str]:
-        reply = await bridge.next_reply(WAIT_SECONDS)
-        yield sse_chunk(reply or KEEPER_LINE)
+        async for piece in bridge.respond():
+            yield sse_chunk(piece + " ")
         yield sse_chunk(None, finish=True)
         yield "data: [DONE]\n\n"
 
@@ -73,8 +85,14 @@ async def chat(request: Request) -> StreamingResponse:
 
 @router.post("/v1/dev/say", dependencies=[Depends(require_bearer)])
 async def dev_say(payload: dict) -> dict:
-    await bridge.replies.put(str(payload["text"]))
+    bridge.say(str(payload["text"]))
     return {"queued": True}
+
+
+@router.post("/v1/dev/typing", dependencies=[Depends(require_bearer)])
+async def dev_typing() -> dict:
+    bridge.typing()
+    return {"ok": True}
 
 
 @router.get("/v1/dev/captions", dependencies=[Depends(require_bearer)])

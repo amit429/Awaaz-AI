@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import bolna_llm, twilio_voice
+from app.routers import bolna_llm, dev_console, twilio_voice
 
 
 def create_app() -> FastAPI:
@@ -19,6 +19,7 @@ def create_app() -> FastAPI:
 
     app.include_router(twilio_voice.router)
     app.include_router(bolna_llm.router)
+    app.include_router(dev_console.router)
 
     @app.get("/v1/health")
     async def health() -> dict[str, object]:
