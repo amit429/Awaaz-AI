@@ -14,3 +14,4 @@
 - `seed.sql` not applied yet: stock voices need real Cartesia/Sarvam voice ids. The `kalpa` and `plivo` rows are dropped.
 - Still needed from Amit: `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_JWT_SECRET` (dashboard, Project Settings, API) in `apps/api/.env`.
 - Dev tunnel: ngrok static domain ruby-doorway-numbness.ngrok-free.dev (run: ngrok http --url=ruby-doorway-numbness.ngrok-free.dev 8000). Webhook URLs in Twilio point here for local dev.
+- Twilio trial uses a shared US number (+1 737 xxx 8034). Unverified: voice webhook and Media Streams on a shared number; trial preamble ("press a key") for the callee; whether Indian phones answer a US caller ID. Test in M0-01, then decide on upgrading.
