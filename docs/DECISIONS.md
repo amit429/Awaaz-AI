@@ -45,3 +45,9 @@ Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice clonin
 - The only real failure: Sarvam turned "तेलमा चालीस" into "Forty will be available in oil". Gemini kept "Telma 40" (with notes).
 - Decision: translate captions with **Gemini plus call context** (contact notes, call type), Sarvam translate as fallback on error or quota. Original text is always shown with a translation. Hinglish is a display transliteration only, never a pivot for translation.
 - Caveats: n=8, one entity trap; watch Gemini free-tier quota during live calls. The upstream error is speech recognition ("तेलमा"): mitigate with original text, low-confidence shading and ask-to-repeat.
+
+## 2026-10-24: Typed text to speech, less friction
+- Same language as the call (any script or spelling, e.g. Hinglish, Devanagari): converted to native script (Sarvam transliterate, numbers in spoken form) and spoken with no confirmation; the feed shows what was said and the original.
+- Different language (English, Marathi in Latin letters, ...): translated (Gemini) and shown; one Enter sends. Keeps the rule that translated or drafted text is spoken only after the user confirms. Relaxing that rule is a product decision for Amit.
+- Language detection: Gemini (`hindi_roman`/`marathi_roman`/`english`/`other`). Sarvam text-lid was unusable ("Theek hai" as Punjabi, "Thank you" as Tamil).
+- Latency: prepare is about 1.4 s from a laptop (Sarvam transliterate 1.3 s, Gemini 1.0 s, in parallel). Over the 1.2 s budget, so the console prepares while the user types (700 ms pause) and caches by text. Re-measure on Render.

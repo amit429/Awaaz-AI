@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     supabase_jwks_url: str = ""
     supabase_jwt_secret: str = ""
     sarvam_api_key: str = ""
+    llm_api_key: str = ""
+    llm_model: str = "gemini-3.5-flash-lite"
     mock_providers: bool = True
     webhook_secret: str = "change-me-32-chars"
     max_call_minutes: int = 15

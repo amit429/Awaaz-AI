@@ -13,7 +13,9 @@ from fastapi.responses import StreamingResponse
 
 from app.config import Settings, get_settings
 from app.providers import sarvam
+from app.providers.gemini import GeminiLlm
 from app.relay.dev_bridge import bridge
+from app.services.say_prep import prepare_say
 
 log = logging.getLogger("awaaz.bolna_llm")
 router = APIRouter(tags=["bolna-llm"])
@@ -96,6 +98,18 @@ async def dev_preview(payload: dict, settings: Settings = Depends(get_settings))
     original = str(payload["text"]).strip()
     hindi = await sarvam.transliterate(original, settings)
     return {"original": original, "hindi": hindi}
+
+
+@router.post("/v1/dev/prepare", dependencies=[Depends(require_bearer)])
+async def dev_prepare(payload: dict, settings: Settings = Depends(get_settings)) -> dict:
+    """What would be spoken for this typed text, and whether it needs a confirmation."""
+    p = await prepare_say(str(payload["text"]), "hi-IN", settings, GeminiLlm(settings))
+    return {
+        "spoken": p.spoken,
+        "needs_confirm": p.needs_confirm,
+        "kind": p.kind,
+        "detected": p.detected,
+    }
 
 
 @router.post("/v1/dev/typing", dependencies=[Depends(require_bearer)])

@@ -33,16 +33,28 @@ if(d.mode===mode)d.captions.forEach(c=>put(c,mode));st.textContent='Live. Captio
 poll();
 document.getElementById('t').addEventListener('input',()=>{if(Date.now()-typed>1500){typed=Date.now();fetch('/v1/dev/typing',{method:'POST',headers:H})}});
 const post=(u,b)=>fetch(u,{method:'POST',headers:H,body:b?JSON.stringify(b):undefined});
-function bubble(cls,text){const n=document.createElement('div');n.className='b '+cls;n.textContent=text;feed.appendChild(n);feed.scrollTop=feed.scrollHeight;return n}
-async function speak(text,node){await post('/v1/dev/say',{text});node.remove();bubble('you',text)}
-document.getElementById('f').addEventListener('submit',async e=>{e.preventDefault();const i=document.getElementById('t'),v=i.value.trim();if(!v)return;i.value='';
-const p=await(await post('/v1/dev/preview',{text:v})).json();
-if(p.hindi===p.original){bubble('you',v);await post('/v1/dev/say',{text:v});return}
-const n=document.createElement('div');n.className='b prev';feed.appendChild(n);
-n.append(document.createTextNode('Will be spoken as:'),document.createElement('br'));
-const t=document.createElement('strong');t.textContent=p.hindi;n.append(t,document.createElement('br'));
-for(const [label,txt] of [['Say this',p.hindi],['Say as typed',p.original]]){const bt=document.createElement('button');bt.type='button';bt.textContent=label;bt.onclick=()=>speak(txt,n);n.append(bt)}
-const x=document.createElement('button');x.type='button';x.textContent='Cancel';x.onclick=()=>n.remove();n.append(x);feed.scrollTop=feed.scrollHeight});
+function bubble(cls,text,sub){const n=document.createElement('div');n.className='b '+cls;n.textContent=text;
+if(sub){const o=document.createElement('small');o.style.display='block';o.style.opacity='.7';o.textContent=sub;n.append(o)}
+feed.appendChild(n);feed.scrollTop=feed.scrollHeight;return n}
+let pending=null;
+function clearPending(){if(pending){pending.node.remove();pending=null}}
+async function send(spoken,original){clearPending();await post('/v1/dev/say',{text:spoken});bubble('you',spoken,original&&original!==spoken?'You typed: '+original:null)}
+const input=document.getElementById('t');
+const cache={};let tm=null;
+function prepare(v){return cache[v]||(cache[v]=post('/v1/dev/prepare',{text:v}).then(r=>r.json()))}
+input.addEventListener('input',()=>{clearTimeout(tm);const v=input.value.trim();if(v)tm=setTimeout(()=>prepare(v),700)});
+document.getElementById('f').addEventListener('submit',async e=>{e.preventDefault();
+if(pending){await send(pending.spoken,pending.original);return}
+const v=input.value.trim();if(!v)return;input.value='';
+const p=await prepare(v);
+if(!p.needs_confirm){await send(p.spoken,v);return}
+const n=document.createElement('div');n.className='b prev';
+n.append(document.createTextNode(p.kind==='translated'?'Translated, press Enter to send:':'Please check, press Enter to send:'),document.createElement('br'));
+const t=document.createElement('strong');t.textContent=p.spoken;n.append(t,document.createElement('br'));
+const ed=document.createElement('button');ed.type='button';ed.textContent='Edit';ed.onclick=()=>{input.value=v;clearPending();input.focus()};n.append(ed);
+const x=document.createElement('button');x.type='button';x.textContent='Cancel';x.onclick=clearPending;n.append(x);
+feed.appendChild(n);feed.scrollTop=feed.scrollHeight;pending={node:n,spoken:p.spoken,original:v}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')clearPending()});
 </script></body></html>"""
 
 
