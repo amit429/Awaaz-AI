@@ -16,7 +16,7 @@ You are implementing **Awaaz**: phone calls for people who can’t hear or speak
 - `apps/api`: Python 3.12, FastAPI, Pydantic v2, asyncio, httpx, websockets; one Render Starter instance (sessions live in memory).
 - Supabase (Postgres + RLS, Auth, Realtime, Storage).
 - Telephony and WhatsApp: **Twilio** (Media Streams for live legs, WhatsApp sandbox for the bot). Plivo and Exotel dropped: India numbers need an India-registered business (see `docs/DECISIONS.md`).
-- Speech: Deepgram Flux (hi/en captions), Sarvam Saaras (other Indian languages), Cartesia Sonic-3 (typed speech, cloning), Cartesia with speed control for clear voice (Kalpa dropped), Sarvam Bulbul (other voices).
+- Speech: **Sarvam only** (Saaras v3 streaming STT, Bulbul v3 streaming TTS, translation). Deepgram and Cartesia dropped after a bake-off (see `docs/DECISIONS.md`); add a second provider only for a measured requirement.
 - Call for me: Bolna agents. LLM behind one adapter with JSON-schema output.
 - No WebRTC SFU, no Redis, no Next.js for v1.
 

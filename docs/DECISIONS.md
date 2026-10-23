@@ -22,3 +22,19 @@
 - Captions hi/en: Deepgram `flux-general-multi` (connects on /v2/listen). `flux-general-hi` does not exist. Marathi: Deepgram `nova-3` (lists `mr`) or Sarvam Saaras; decide after a Marathi test.
 - TTS: Cartesia `sonic-3`. Sarvam credits: ~$100; Bolna wallet ~471 (about $5).
 - Telephony: Bolna as the phone line first (custom LLM endpoint spike). Twilio media-stream path kept as full-feature fallback; Twilio voice from the shared trial number is blocked by the trial (see above).
+
+## 2026-10-24: Speech provider = Sarvam only (bake-off)
+Principle: one provider per function unless a measured requirement forces a second. Sponsor status is not a reason.
+Method: 11 phone-quality clips (Gemini TTS voices, downsampled to 8 kHz mu-law with light noise; hi 5, mr 5, en 1) and 3 sentences per language for TTS. Small sample; real phone audio still to be tested.
+
+| Requirement | Sarvam | Deepgram | Cartesia |
+|---|---|---|---|
+| STT hi/mr/en content | accurate; writes digits and ₹ (`₹420`, `6 बजे`), good for entity chips | accurate (nova-3 incl. Marathi); Flux-multi has no Marathi, ended turns early at commas in English | n/a |
+| STT streaming latency | transcript 0.34-0.52 s after speech ends; START/END_SPEECH events; 8 kHz input | Flux EOT 0.49 s (hi) | n/a |
+| TTS first audio | **0.19-0.24 s streaming WS** (mulaw 8 kHz output, pace 0.5-2.0); REST is slow (1.2-1.7 s) | n/a | 0.14-0.31 s |
+| TTS Marathi intelligibility | good (error 0.22) | n/a | **poor** (error 0.95, garbled) |
+| Voice cloning | docs list a voice-cloning API (to verify) | n/a | yes (Pro plan) |
+
+Decision: **Sarvam for STT, TTS and translation.** Deepgram and Cartesia are not used (keys stay in `.env`, unused). Revisit only if real phone audio shows Sarvam failing a requirement.
+Implementation notes: STT `wss://api.sarvam.ai/speech-to-text/ws` (`saaras:v3`, `vad_signals=true`, base64 JSON audio, `flush`); TTS `wss://api.sarvam.ai/text-to-speech/ws?model=bulbul:v3` (config then text then flush; `output_audio_codec=mulaw`).
+Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice cloning (P1): check Sarvam's cloning API before touching Cartesia.
