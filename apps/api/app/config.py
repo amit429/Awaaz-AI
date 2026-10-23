@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     bolna_api_key: str = ""
     bolna_api_base: str = "https://api.bolna.ai"
     bolna_relay_agent_id: str = ""
+    wa_provider: str = "log"  # log | twilio_sandbox
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+    twilio_wa_from: str = ""
     mock_providers: bool = True
     webhook_secret: str = "change-me-32-chars"
     max_call_minutes: int = 15

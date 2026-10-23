@@ -11,6 +11,7 @@
 - M2-01/02/03 relay core (mock): POST /v1/calls, WS /v1/relay/{id} with JWT, RelaySession (disclosure, say, captions with entities, keeper, ask again, mode.set, end, reconnect replay, scam digit block hook), in-memory store, contract tests against relay-events.schema.json
 - Typed speech in the relay: same-language converted and spoken, translations need say.confirm; dev-only /v1/dev/token
 - Web app shell (Vite PWA, prototype tokens and icons) with Home and live Call screens wired to the relay; reducer tests (vitest). Smoke test against the live API: Hinglish send to spoken 1.7 s, English preview 3.3 s (to optimise with prepare-while-typing)
+- Telephony decision: Twilio upgrade skipped; Bolna is the live phone leg (BolnaLeg, per-call routing by call-id token, status webhook). WhatsApp live relay on the Twilio sandbox (bot, webhook with secret and signature, dev endpoints). 92 API tests
 - Disclosure uses the name "Friend" until onboarding stores a profile (M1-06)
 - M1-03 JWT auth (JWKS, optional HS256 fallback) with tests
 

@@ -231,16 +231,22 @@ class RelaySession:
     async def _leg_hangup(self, reason: str) -> None:
         await self.end(reason)
 
+    async def hold(self) -> None:
+        """Tell the other person the user is typing, please hold (also used by WhatsApp's "hold")."""
+        if self.ended:
+            return
+        line = keeper_line(self.call_lang, self.name)
+        await self._you(line, "keeper", speaker="system")
+        self.emit({"t": "keeper.spoken"})
+        await self.leg.speak(line, final=False)
+
     async def _watchdog(self) -> None:
         """Keeper line while the user types; cost guard (max call length); idle cleanup."""
         while not self.ended:
             await asyncio.sleep(0.25)
             if self.keeper.due():
                 self.keeper.mark_spoken()
-                line = keeper_line(self.call_lang, self.name)
-                await self._you(line, "keeper", speaker="system")
-                self.emit({"t": "keeper.spoken"})
-                await self.leg.speak(line, final=False)
+                await self.hold()
             if time.monotonic() - self._t0 > self.max_seconds:
                 await self.end("max_call_minutes")
             elif (
