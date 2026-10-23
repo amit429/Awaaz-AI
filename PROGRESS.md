@@ -16,3 +16,4 @@
 
 ## Unverified
 - See `docs/DECISIONS.md`
+- Bolna spike: custom LLM `awaaz-relay` registered, agent `33a53d60-ee5f-4f4e-a746-31595df439e3` created (Deepgram nova-3 hi, Cartesia Rohan, Bolna default number). First call pending.
