@@ -107,6 +107,11 @@ async def dev_typing() -> dict:
 _read_cache: dict[tuple[str, str], str] = {}
 
 
+@router.get("/v1/dev/log", dependencies=[Depends(require_bearer)])
+async def dev_log() -> dict:
+    return {"events": bridge.events, "captions": bridge.captions}
+
+
 @router.get("/v1/dev/captions", dependencies=[Depends(require_bearer)])
 async def dev_captions(mode: str = "original", settings: Settings = Depends(get_settings)) -> dict:
     """Captions with a `read` field in the chosen reading mode (original text always included)."""

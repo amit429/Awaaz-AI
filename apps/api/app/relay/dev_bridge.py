@@ -24,7 +24,8 @@ TICK = 0.4
 
 @dataclass
 class DevBridge:
-    captions: list[dict] = field(default_factory=list)  # {"turn": int, "text": str}
+    captions: list[dict] = field(default_factory=list)  # turn, text, first_at, last_at, fragments
+    events: list[dict] = field(default_factory=list)  # timing log: {"t", "type", ...}
     replies: asyncio.Queue[str] = field(default_factory=asyncio.Queue)
     generation: int = 0
     typing_since: float | None = None
@@ -34,12 +35,20 @@ class DevBridge:
     max_wait: float = MAX_WAIT
     tick: float = TICK
 
+    def log(self, kind: str, **info: object) -> None:
+        self.events.append({"t": time.time(), "type": kind, **info})
+
     def hear(self, turn: int, text: str) -> None:
         """Record what the other person said; fragments of the same turn replace each other."""
+        now = time.time()
         if self.captions and self.captions[-1]["turn"] == turn:
-            self.captions[-1]["text"] = text
+            c = self.captions[-1]
+            c.update(text=text, last_at=now, fragments=c["fragments"] + 1)
         else:
-            self.captions.append({"turn": turn, "text": text})
+            self.captions.append(
+                {"turn": turn, "text": text, "first_at": now, "last_at": now, "fragments": 1}
+            )
+        self.log("heard", turn=turn, text=text)
 
     def typing(self) -> None:
         if self.typing_since is None:
@@ -47,6 +56,7 @@ class DevBridge:
 
     def say(self, text: str) -> None:
         self.typing_since = None
+        self.log("say", text=text)
         self.replies.put_nowait(text)
 
     def _keeper_due(self, now: float) -> bool:
@@ -60,9 +70,11 @@ class DevBridge:
         """Pieces of speech for one request; empty if superseded or nothing is said in time."""
         self.generation += 1
         mine = self.generation
+        self.log("request", generation=mine)
         deadline = time.monotonic() + self.max_wait
         while time.monotonic() < deadline:
             if self.generation != mine:
+                self.log("superseded", generation=mine)
                 return
             try:
                 reply = await asyncio.wait_for(self.replies.get(), self.tick)
@@ -70,13 +82,16 @@ class DevBridge:
                 now = time.monotonic()
                 if self._keeper_due(now):
                     self.last_keeper = now
+                    self.log("keeper")
                     yield KEEPER_LINE
                 continue
             if self.generation != mine:
                 self.replies.put_nowait(reply)  # a newer request owns the reply
                 return
+            self.log("spoken", text=reply)
             yield reply
             return
+        self.log("timeout", generation=mine)
 
 
 bridge = DevBridge()

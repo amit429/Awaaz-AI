@@ -34,6 +34,7 @@ def test_current_turn_merges_trailing_user_fragments():
 
 def test_caption_recorded_and_typed_reply_streamed():
     bridge.captions.clear()
+    bridge.events.clear()
     bridge.say("Theek hai")
     body = {
         "messages": [{"role": "assistant", "content": "hi"}, {"role": "user", "content": "Namaste"}]
@@ -43,7 +44,12 @@ def test_caption_recorded_and_typed_reply_streamed():
     assert ev[-1] == "[DONE]"
     assert json.loads(ev[0])["choices"][0]["delta"]["content"].strip() == "Theek hai"
     assert json.loads(ev[1])["choices"][0]["finish_reason"] == "stop"
-    assert bridge.captions == [{"turn": 1, "text": "Namaste"}]
+    assert [(c["turn"], c["text"]) for c in bridge.captions] == [(1, "Namaste")]
+    assert [e["type"] for e in bridge.events if e["type"] in ("say", "request", "spoken")] == [
+        "say",
+        "request",
+        "spoken",
+    ]
 
 
 def test_console_page_is_gated():

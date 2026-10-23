@@ -1,0 +1,268 @@
+{
+ "call": "pharmacy, you play the shopkeeper",
+ "lines": [
+  {
+   "id": "L01",
+   "say_hi": "हाँ जी, शर्मा मेडिकल, बोलिए।",
+   "say_roman": "Haan ji, Sharma Medical, boliye.",
+   "tests": "short opening",
+   "typist_reply": "Namaste, mujhe Telma 40 ki goli chahiye.",
+   "facts": [
+    [
+     "शर्मा",
+     "sharma"
+    ],
+    [
+     "मेडिकल",
+     "medical"
+    ]
+   ]
+  },
+  {
+   "id": "L02",
+   "say_hi": "जी, टेल्मा चालीस मिल जाएगी, कितनी गोली चाहिए?",
+   "say_roman": "Ji, Telma chalis mil jayegi, kitni goli chahiye?",
+   "tests": "medicine name + number word",
+   "typist_reply": "Das din ki chahiye.",
+   "facts": [
+    [
+     "चालीस",
+     "40"
+    ],
+    [
+     "गोली"
+    ]
+   ]
+  },
+  {
+   "id": "L03",
+   "say_hi": "दस दिन की गोलियाँ, कुल चार सौ बीस रुपये होंगे।",
+   "say_roman": "Das din ki goliyan, kul chaar sau bees rupaye honge.",
+   "tests": "price in words. TYPIST: wait 12 s before sending the reply (hold test)",
+   "typist_reply": "Theek hai, kya aaj mil jayegi?",
+   "facts": [
+    [
+     "420",
+     "चार सौ बीस"
+    ],
+    [
+     "दस",
+     "10"
+    ]
+   ]
+  },
+  {
+   "id": "L04",
+   "say_hi": "हाँ आज शाम छह बजे तक तैयार रहेगी, लेकिन अगर आप होम डिलीवरी चाहते हैं तो उसके तीस रुपये एक्स्ट्रा लगेंगे और डिलीवरी सात बजे तक पहुँच जाएगी।",
+   "say_roman": "Haan aaj shaam chhah baje tak taiyaar rahegi, lekin agar aap home delivery chahte hain to uske tees rupaye extra lagenge aur delivery saat baje tak pahunch jayegi.",
+   "tests": "one long sentence (about 30 words), 3 numbers",
+   "typist_reply": "Delivery chahiye, Rajiv Nagar, Pune.",
+   "facts": [
+    [
+     "6",
+     "छह"
+    ],
+    [
+     "30",
+     "तीस"
+    ],
+    [
+     "7",
+     "सात"
+    ],
+    [
+     "डिलीवरी",
+     "delivery"
+    ]
+   ]
+  },
+  {
+   "id": "L05",
+   "say_hi": "आपका पता... (2 second pause) ...पूरा बताइए, घर का नंबर भी।",
+   "say_roman": "Aapka pata... (2 second pause) ...poora bataiye, ghar ka number bhi.",
+   "tests": "pause in the middle of a sentence (fragmenting)",
+   "typist_reply": "Flat 402, Rajiv Nagar, Kothrud.",
+   "facts": [
+    [
+     "पता"
+    ],
+    [
+     "नंबर",
+     "number"
+    ]
+   ]
+  },
+  {
+   "id": "L06",
+   "say_hi": "फ्लैट चार सौ दो, ठीक है। और आपका फोन नंबर बताइए।",
+   "say_roman": "Flat chaar sau do, theek hai. Aur aapka phone number bataiye.",
+   "tests": "number in words",
+   "typist_reply": "Mera number 9 8 7 6 5 4 3 2 1 0 hai.",
+   "facts": [
+    [
+     "402",
+     "चार सौ दो"
+    ],
+    [
+     "फोन",
+     "phone"
+    ]
+   ]
+  },
+  {
+   "id": "L07",
+   "say_hi": "नौ आठ सात छह पाँच चार तीन दो एक शून्य, सही है?",
+   "say_roman": "Nau aath saat chhah paanch chaar teen do ek shoonya, sahi hai?",
+   "tests": "phone number digit by digit",
+   "typist_reply": "Haan, sahi hai.",
+   "facts": [
+    [
+     "9876543210",
+     "नौ आठ सात",
+     "9 8 7 6 5 4 3 2 1 0"
+    ]
+   ]
+  },
+  {
+   "id": "L08",
+   "say_hi": "ठीक है।",
+   "say_roman": "Theek hai.",
+   "tests": "very short utterance",
+   "typist_reply": "Shukriya.",
+   "facts": [
+    [
+     "ठीक"
+    ]
+   ]
+  },
+  {
+   "id": "L09",
+   "say_hi": "Okay, your order is confirmed, it will reach by seven pm.",
+   "say_roman": "(say it in English)",
+   "tests": "English inside a Hindi-set recognizer",
+   "typist_reply": "Thank you.",
+   "facts": [
+    [
+     "7",
+     "seven",
+     "सात"
+    ],
+    [
+     "order",
+     "ऑर्डर"
+    ]
+   ]
+  },
+  {
+   "id": "L10",
+   "say_hi": "डॉक्टर साहब बारह तारीख को सुबह दस बजे मिलेंगे, दवाई के साथ पर्ची ज़रूर लाइएगा।",
+   "say_roman": "Doctor sahab barah taareekh ko subah das baje milenge, dawai ke saath parchi zaroor laiyega.",
+   "tests": "date and time",
+   "typist_reply": "Parchi le aaunga.",
+   "facts": [
+    [
+     "12",
+     "बारह"
+    ],
+    [
+     "10",
+     "दस"
+    ],
+    [
+     "पर्ची",
+     "parchi"
+    ]
+   ]
+  },
+  {
+   "id": "L11",
+   "say_hi": "आपका BP चेक करना है तो clinic में आइए, fees पाँच सौ रुपये है।",
+   "say_roman": "Aapka BP check karna hai to clinic mein aaiye, fees paanch sau rupaye hai.",
+   "tests": "mixed Hindi and English words",
+   "typist_reply": "Fees thodi kam ho sakti hai?",
+   "facts": [
+    [
+     "500",
+     "पाँच सौ"
+    ],
+    [
+     "bp",
+     "बीपी"
+    ]
+   ]
+  },
+  {
+   "id": "L12",
+   "say_hi": "नहीं जी, फीस तो फिक्स है, लेकिन पहली बार आने वाले मरीज़ों को पचास रुपये की छूट मिलती है, यानी चार सौ पचास।",
+   "say_roman": "Nahi ji, fees to fix hai, lekin pehli baar aane wale mareezon ko pachaas rupaye ki chhoot milti hai, yaani chaar sau pachaas.",
+   "tests": "long sentence with 3 numbers",
+   "typist_reply": "Theek hai, 450 chalega.",
+   "facts": [
+    [
+     "450",
+     "चार सौ पचास"
+    ],
+    [
+     "50",
+     "पचास"
+    ],
+    [
+     "छूट"
+    ]
+   ]
+  },
+  {
+   "id": "L13",
+   "say_hi": "एक ज़रूरी बात, आपके फोन पर एक OTP आएगा, वो मुझे बता दीजिए।",
+   "say_roman": "Ek zaroori baat, aapke phone par ek OTP aayega, wo mujhe bata dijiye.",
+   "tests": "scam line (the final product must warn and block digits)",
+   "typist_reply": "Nahi, main OTP share nahi karunga.",
+   "facts": [
+    [
+     "otp",
+     "ओटीपी"
+    ]
+   ]
+  },
+  {
+   "id": "L14",
+   "say_hi": "हाँ। ठीक है। बिल्कुल। धन्यवाद।",
+   "say_roman": "Haan. Theek hai. Bilkul. Dhanyavaad.",
+   "tests": "rapid short phrases, one after another",
+   "typist_reply": "",
+   "facts": [
+    [
+     "धन्यवाद"
+    ]
+   ]
+  },
+  {
+   "id": "L15",
+   "say_hi": "(stay silent 20 seconds, then) हैलो, आप सुन रहे हैं?",
+   "say_roman": "(stay silent 20 seconds, then) Hello, aap sun rahe hain?",
+   "tests": "long silence; TYPIST: type slowly for more than 5 s (keeper line) before sending",
+   "typist_reply": "Haan, main yahin hoon.",
+   "facts": [
+    [
+     "हैलो",
+     "hello"
+    ],
+    [
+     "सुन"
+    ]
+   ]
+  },
+  {
+   "id": "L16",
+   "say_hi": "ठीक है, आपका दिन शुभ हो, नमस्ते।",
+   "say_roman": "Theek hai, aapka din shubh ho, namaste.",
+   "tests": "goodbye",
+   "typist_reply": "Namaste.",
+   "facts": [
+    [
+     "नमस्ते"
+    ]
+   ]
+  }
+ ]
+}
