@@ -1,7 +1,8 @@
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '../../components/Icons';
-import phrases from '../../data/phrases.json';
+import starterPhrases from '../../data/phrases.json';
+import { usePhrases } from '../../hooks/useData';
 import { applyEvent, initialState, splitByEntities, type FeedItem } from '../../lib/feed';
 import { RelayClient } from '../../lib/relay';
 
@@ -13,7 +14,7 @@ const STATUS_LABEL = {
   failed: 'Call failed',
 } as const;
 
-const usablePhrases = phrases.filter((p) => !p.text.includes('{')); // address/number need profile data
+const starter = starterPhrases.filter((p) => !p.text.includes('{')); // address/number need profile data
 
 function Them({ item }: { item: Extract<FeedItem, { kind: 'them' }> }) {
   return (
@@ -36,6 +37,8 @@ export function Call() {
   const nav = useNavigate();
   const who = (location.state as { name?: string; number?: string } | null) ?? {};
   const [state, dispatch] = useReducer(applyEvent, initialState);
+  const mine = usePhrases();
+  const usablePhrases = mine.data && mine.data.length > 0 ? mine.data : starter;
   const [online, setOnline] = useState(false);
   const [text, setText] = useState('');
   const [sheet, setSheet] = useState<'phrases' | 'keypad' | null>(null);
@@ -153,7 +156,7 @@ export function Call() {
         <div className="grab" />
         <h5>Phrases <button type="button" onClick={() => setSheet(null)}>Done</button></h5>
         {usablePhrases.map((p) => (
-          <button key={p.label} className="phr" type="button" onClick={() => { client.current?.send({ t: 'user.say', text: p.text, source: 'phrase' }); setSheet(null); }}>
+          <button key={p.label + p.text} className="phr" type="button" onClick={() => { client.current?.send({ t: 'user.say', text: p.text, source: 'phrase' }); setSheet(null); }}>
             {p.label}<small>{p.text}</small>
           </button>
         ))}
