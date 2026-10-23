@@ -19,3 +19,27 @@ Date: 2026-10-24. One real call to a verified number (~2 min). Agent: Sarvam saa
 
 ## Verdict
 Bolna is a viable phone line for Call for me. As the live relay it covers basic typed speech plus captions but not the product rules or the non-typing modes. The full relay needs a leg we control (Twilio Media Streams + Sarvam streaming STT/TTS), which needs a Twilio upgrade.
+
+## Call 2 (16-line script, Sarvam saaras:v4 hi, endpointing 1200 ms), 2026-10-24
+Call ran 4 min 20 s before the callee hung up; lines L12-L16 were not reached (the one person was both shopkeeper and typist, about 20-30 s per exchange). Cost 3.82 wallet units.
+
+### Fixed since call 1
+- Every typed reply spoken exactly once, in order (11 assistant lines in Bolna's transcript: welcome plus 10 replies). Keeper line fired 3 times, only after 5 s of typing, followed by the reply in the same response. No "are you still there".
+- 34 requests for 10 turns (fragments); older requests are cancelled by Bolna before our supersede check, so no reply attached to a stale request.
+- Captions grow inside one bubble as fragments arrive (up to 7 fragments per turn), which reads like live captioning.
+
+### Recognition on real phone audio (the serious finding)
+| Line | Said | Captured | Verdict |
+|---|---|---|---|
+| L02 | Telma chalis | तिलमा चालीस | name wrong, number right |
+| L03 | chaar sau bees rupaye (420) | "कुल्लू। चार। परसों। ₹20" | **price wrong** |
+| L04 | chhah baje (6) | "4 बजे" | **time wrong**; 30 and long sentence ok |
+| L06 | flat chaar sau do (402) | dropped | **number lost** |
+| L07 | 9876543210 digit by digit | "नौ आठ सात 6 बाकी 4 तीन दो 1010" | **garbled** |
+| L09 | English "...seven pm" | "ओके योर ऑर्डर इज कन्फर्मड इट विल रीच पी एम" | English in Devanagari, "seven" lost |
+| L10 | barah taareekh, das baje | "बराबर तरीक", "10 बजे" | date wrong, time right |
+| L11 | paanch sau (500) | ₹500 | ok |
+Numeric facts correct: about 5 of 12. The synthetic bake-off (clean TTS audio) was far too optimistic about numbers. This is the main product risk: a wrong price or time shown to a deaf user.
+
+### Next experiment
+Same script, same agent, only the transcriber swapped (Deepgram nova-3 hi/multi vs Sarvam saaras:v4), with scripted instant typist replies so the run is fast and measures recognition only.
