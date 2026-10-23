@@ -37,7 +37,9 @@ def test_missing_or_bad_token_is_401(headers):
 def test_wrong_secret_and_wrong_audience_rejected():
     c = _client(SECRET)
     assert c.get("/me", headers={"Authorization": f"Bearer {_token('x' * 40)}"}).status_code == 401
-    assert c.get("/me", headers={"Authorization": f"Bearer {_token(aud='anon')}"}).status_code == 401
+    assert (
+        c.get("/me", headers={"Authorization": f"Bearer {_token(aud='anon')}"}).status_code == 401
+    )
 
 
 def test_hs256_rejected_when_no_secret_configured():

@@ -49,6 +49,8 @@ async def current_user(
     return _user_id(creds.credentials if creds else None, settings)
 
 
-async def ws_user(token: str | None = Query(None), settings: Settings = Depends(get_settings)) -> str:
+async def ws_user(
+    token: str | None = Query(None), settings: Settings = Depends(get_settings)
+) -> str:
     """For WebSockets, where browsers cannot set headers: ?token=<jwt>."""
     return _user_id(token, settings)
