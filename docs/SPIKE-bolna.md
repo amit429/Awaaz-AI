@@ -43,3 +43,9 @@ Numeric facts correct: about 5 of 12. The synthetic bake-off (clean TTS audio) w
 
 ### Next experiment
 Same script, same agent, only the transcriber swapped (Deepgram nova-3 hi/multi vs Sarvam saaras:v4), with scripted instant typist replies so the run is fast and measures recognition only.
+
+## Call 3 (Deepgram nova-3 hi, scripted auto replies), 2026-10-24: not a valid comparison
+- Bug found: a stale "typing" flag (left from console testing) made the keeper line fire 5 times with nobody typing. Fixed: typing counts only while typing events keep arriving (stale after 4 s). Tests added.
+- The speaker did not read the script verbatim (natural rephrasing) and the call ended after about 1 min 40 s with 5 turns, so the analyzer score (4/16) means nothing.
+- Observation only: nova-3 kept English words in Latin script inside Hindi ("available", "home delivery", "four twenty rupees", "total four fifty rupees") and produced mostly whole-sentence turns (1 fragment per turn vs 3.6 for Sarvam). Not a measured accuracy result.
+- To compare properly: both transcribers, script read verbatim, same pace, both calls scripted replies.

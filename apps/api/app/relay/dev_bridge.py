@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 
 KEEPER_LINE = "Ek minute, please hold."
 KEEPER_AFTER = 5.0
+TYPING_STALE = 4.0  # typing events stop arriving: the user paused or left
 KEEPER_EVERY = 8.0
 MAX_WAIT = 60.0
 TICK = 0.4
@@ -29,6 +30,8 @@ class DevBridge:
     replies: asyncio.Queue[str] = field(default_factory=asyncio.Queue)
     generation: int = 0
     typing_since: float | None = None
+    last_typing: float | None = None
+    typing_stale: float = TYPING_STALE
     last_keeper: float = float("-inf")
     keeper_after: float = KEEPER_AFTER
     keeper_every: float = KEEPER_EVERY
@@ -54,17 +57,23 @@ class DevBridge:
         self.log("heard", turn=turn, text=text)
 
     def typing(self) -> None:
-        if self.typing_since is None:
-            self.typing_since = time.monotonic()
+        """A typing event. Each burst of events (gaps under typing_stale) is one stretch of typing."""
+        now = time.monotonic()
+        if self.last_typing is None or now - self.last_typing > self.typing_stale:
+            self.typing_since = now
+        self.last_typing = now
 
     def say(self, text: str) -> None:
         self.typing_since = None
+        self.last_typing = None
         self.log("say", text=text)
         self.replies.put_nowait(text)
 
     def _keeper_due(self, now: float) -> bool:
         return (
             self.typing_since is not None
+            and self.last_typing is not None
+            and now - self.last_typing <= self.typing_stale
             and now - self.typing_since >= self.keeper_after
             and now - self.last_keeper >= self.keeper_every
         )

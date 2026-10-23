@@ -77,3 +77,23 @@ async def test_typed_reply_beats_auto_reply():
     b = fast(auto_replies=["Auto"], auto_settle=0.2)
     b.say("Typed")
     assert [p async for p in b.respond(turn=1)] == ["Typed"]
+
+
+async def test_stale_typing_does_not_trigger_keeper():
+    b = fast(typing_stale=0.15)
+    b.typing()  # one old typing event, then the user stops
+    await asyncio.sleep(0.2)
+    task = asyncio.create_task(collect(b))
+    await asyncio.sleep(0.3)
+    b.say("Hello")
+    assert await task == ["Hello"]  # no keeper line spoken
+
+
+async def test_keeper_while_typing_events_keep_arriving():
+    b = fast(typing_stale=0.15)
+    task = asyncio.create_task(collect(b))
+    for _ in range(6):
+        b.typing()
+        await asyncio.sleep(0.05)
+    b.say("Done")
+    assert await task == [KEEPER_LINE, "Done"]
