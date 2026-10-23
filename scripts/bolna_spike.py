@@ -1,7 +1,7 @@
 """Bolna-as-phone-line spike. Usage (from apps/api): uv run python ../../scripts/bolna_spike.py <cmd>
 
   register        register our /v1/llm endpoint as a Bolna custom LLM
-  agent           create the relay agent (Deepgram STT, our LLM, Cartesia voice, Bolna default number)
+  agent           create the relay agent (Sarvam STT and TTS, our LLM, Bolna default number)
   call <number>   place a call to <number> (E.164)
 Reads keys from .env in the current directory; saves ids to ../../.spike-state.json (gitignored).
 """
@@ -21,7 +21,6 @@ STATE = Path("../../.spike-state.json")
 BASE = ENV.get("BOLNA_API_BASE") or "https://api.bolna.ai"
 HEAD = {"Authorization": f"Bearer {ENV['BOLNA_API_KEY']}", "Content-Type": "application/json"}
 MODEL = "awaaz-relay"
-VOICE_ID = "4877b818-c7fe-4c89-b1cf-eadf8e23da72"  # Cartesia "Rohan", Hindi male
 
 DISCLOSURE = (
     "Namaste, main Rafiq bol raha hoon. Main bol nahi sakta, isliye ek assistant meri likhi "
@@ -61,7 +60,10 @@ def agent() -> None:
             "tasks": [
                 {
                     "task_type": "conversation",
-                    "toolchain": {"execution": "sequential", "pipelines": [["transcriber", "llm", "synthesizer"]]},
+                    "toolchain": {
+                        "execution": "sequential",
+                        "pipelines": [["transcriber", "llm", "synthesizer"]],
+                    },
                     "tools_config": {
                         "llm_agent": {
                             "agent_type": "simple_llm_agent",
@@ -76,20 +78,23 @@ def agent() -> None:
                             },
                         },
                         "synthesizer": {
-                            "provider": "cartesia",
-                            "provider_config": {"voice": "Rohan", "voice_id": VOICE_ID, "model": "sonic-3", "language": "hi"},
+                            "provider": "sarvam",
+                            "provider_config": {
+                                "voice": "Rahul",
+                                "voice_id": "rahul",
+                                "model": "bulbul:v3",
+                                "language": "hi",
+                                "speed": 1.0,
+                            },
                             "stream": True,
                             "buffer_size": 100,
-                            "audio_format": "wav",
                         },
                         "transcriber": {
-                            "provider": "deepgram",
-                            "model": "nova-3",
+                            "provider": "sarvam",
+                            "model": "saaras:v4",
                             "language": "hi",
                             "stream": True,
-                            "encoding": "linear16",
-                            "sampling_rate": 16000,
-                            "endpointing": 400,
+                            "endpointing": 500,
                         },
                         "input": {"provider": "plivo", "format": "wav"},
                         "output": {"provider": "plivo", "format": "wav"},
@@ -98,7 +103,9 @@ def agent() -> None:
                 }
             ],
         },
-        "agent_prompts": {"task_1": {"system_prompt": "Relay agent. Replies come from the user's typed text."}},
+        "agent_prompts": {
+            "task_1": {"system_prompt": "Relay agent. Replies come from the user's typed text."}
+        },
     }
     out = show(httpx.post(f"{BASE}/v2/agent", headers=HEAD, json=cfg, timeout=60))
     save({**load(), "agent_id": out["agent_id"]})
