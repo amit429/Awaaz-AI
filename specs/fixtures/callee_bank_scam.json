@@ -1,0 +1,7 @@
+{ "id": "bank_scam", "contact": "Unknown number", "call_lang": "hi",
+  "repeat_on": ["phir se", "repeat"],
+  "lines": [
+    { "text": "नमस्ते, मैं SBI से बोल रहा हूँ। आपका कार्ड ब्लॉक होने वाला है।", "en": "Hello, I’m calling from SBI. Your card is about to be blocked." },
+    { "text": "ब्लॉक रोकने के लिए आपके फ़ोन पर आया OTP बताइए।", "en": "To stop the block, tell me the OTP on your phone.", "expect": "scam.warning:otp_request" },
+    { "text": "जल्दी बताइए, वरना कार्ड बंद हो जाएगा।", "en": "Quickly, or the card will be closed." }
+  ] }

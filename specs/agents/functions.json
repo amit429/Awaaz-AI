@@ -1,0 +1,22 @@
+{
+  "_note": "Bolna custom functions. ⚠️ VERIFY Bolna's tool definition format and timeout. Server URL: https://<api>/v1/tools/<path>?s=<WEBHOOK_SECRET>",
+  "functions": [
+    { "name": "needs_approval", "path": "needs-approval",
+      "description": "Ask the user to approve something outside their limits. Returns approved, declined, pending or no_answer.",
+      "parameters": { "type": "object", "properties": {
+        "task_id": { "type": "string" },
+        "question": { "type": "string", "description": "One line, e.g. 'Delivery Thursday for 950 rupees. Book it?'" },
+        "amount_inr": { "type": ["number","null"] },
+        "options": { "type": "array", "items": { "type": "string" } } },
+        "required": ["task_id","question"] },
+      "response_example": { "status": "approved", "answer": "approve" } },
+    { "name": "check_approval", "path": "check-approval",
+      "description": "Check whether the user has answered a pending approval.",
+      "parameters": { "type": "object", "properties": { "task_id": { "type": "string" } }, "required": ["task_id"] },
+      "response_example": { "status": "pending" } },
+    { "name": "press_keys", "path": "press-keys",
+      "description": "Send keypad tones in a phone menu.",
+      "parameters": { "type": "object", "properties": { "digits": { "type": "string", "pattern": "^[0-9*#]{1,10}$" } }, "required": ["digits"] },
+      "response_example": { "ok": true } }
+  ]
+}

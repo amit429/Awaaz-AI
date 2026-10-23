@@ -1,0 +1,8 @@
+{ "$schema":"https://json-schema.org/draft/2020-12/schema", "$id":"task_result", "type":"object", "additionalProperties":false,
+  "required":["outcome","agreed","reference_numbers","next_steps","summary_user_language"],
+  "properties":{
+    "outcome":{"enum":["done","partial","failed","no_answer"]},
+    "agreed":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["what","value"],"properties":{"what":{"type":"string"},"value":{"type":"string"}}}},
+    "reference_numbers":{"type":"array","items":{"type":"string"}},
+    "next_steps":{"type":"string"},
+    "summary_user_language":{"type":"string","maxLength":400} } }

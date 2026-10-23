@@ -1,0 +1,10 @@
+{ "id": "pharmacy", "contact": "Sharma Medical", "call_lang": "hi",
+  "repeat_on": ["phir se", "repeat", "dobara"],
+  "lines": [
+    { "text": "हाँ जी, शर्मा मेडिकल। बोलिए?", "en": "Yes, Sharma Medical. Go ahead?" },
+    { "text": "Telma 40, कितनी गोली चाहिए?", "en": "Telma 40, how many tablets?" },
+    { "text": "हाँ, मिल जाएगी। ₹420 होंगे, शाम 6 बजे तक तैयार।", "en": "Yes, available. It’ll be ₹420, ready by 6 pm." },
+    { "text": "होम डिलीवरी ₹30 एक्स्ट्रा। पता बताइए।", "en": "Home delivery is ₹30 extra. Tell me the address." },
+    { "text": "ठीक है, 7 बजे तक पहुँच जाएगा। कैश दे दीजिएगा।", "en": "Okay, it’ll reach you by 7 pm. Please pay cash." }
+  ],
+  "expect_summary": { "facts": ["₹420", "₹30", "6 pm", "7 pm"] } }

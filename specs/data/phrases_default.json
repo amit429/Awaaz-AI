@@ -1,0 +1,9 @@
+[
+  { "group": "Start", "label": "I’m typing, please wait", "text": "Main bol nahi sakta, type kar raha hoon. Kripya thoda intezaar kijiye." },
+  { "group": "Start", "label": "Please speak slowly", "text": "Kripya dheere boliye." },
+  { "group": "Start", "label": "Please repeat", "text": "Kripya phir se boliye." },
+  { "group": "Me", "label": "My address", "text": "Mera pata hai: {address}" },
+  { "group": "Me", "label": "My number", "text": "Mera number hai {phone}" },
+  { "group": "End", "label": "Thank you, bye", "text": "Dhanyavaad, namaste." },
+  { "group": "End", "label": "I’ll call back", "text": "Main baad mein call karta hoon." }
+]

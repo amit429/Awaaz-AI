@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Awaaz — product UI v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F5F7; --surface:#FFFFFF; --surface-2:#F0F1F4; --ink:#15171C; --ink-2:#5D6370; --ink-3:#9097A3; --line:#E4E6EB;
+  --accent:#FF9F1C; --accent-ink:#2B1A00; --accent-soft:#FFF0D9; --live:#16A34A; --live-soft:#E3F6EA; --danger:#E5484D; --danger-soft:#FDECEC;
+  --btn:#15171C; --btn-ink:#FFFFFF;
+  --r-lg:28px; --r-md:18px; --r-sm:12px;
+  --shadow:0 1px 2px rgba(16,18,24,.04), 0 12px 32px -16px rgba(16,18,24,.18);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1115; --surface:#181B21; --surface-2:#20242B; --ink:#F2F3F5; --ink-2:#A9AFBA; --ink-3:#6E7581; --line:#2A2F37;
+    --accent:#FFAE3D; --accent-soft:#3A2A10; --live:#3DD68C; --live-soft:#123326; --danger:#FF6B6F; --danger-soft:#3A1719;
+    --btn:#F2F3F5; --btn-ink:#15171C; --shadow:0 1px 2px rgba(0,0,0,.4), 0 16px 36px -18px rgba(0,0,0,.8);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1115; --surface:#181B21; --surface-2:#20242B; --ink:#F2F3F5; --ink-2:#A9AFBA; --ink-3:#6E7581; --line:#2A2F37;
+  --accent:#FFAE3D; --accent-soft:#3A2A10; --live:#3DD68C; --live-soft:#123326; --danger:#FF6B6F; --danger-soft:#3A1719;
+  --btn:#F2F3F5; --btn-ink:#15171C; --shadow:0 1px 2px rgba(0,0,0,.4), 0 16px 36px -18px rgba(0,0,0,.8);
+  color-scheme: dark;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+body{ margin:0; background:var(--bg); color:var(--ink); font-family:"Geist","Noto Sans Devanagari",system-ui,-apple-system,sans-serif; font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{ animation:none !important; transition:none !important; } }
+h1,h2,h3,h4{ margin:0; letter-spacing:-0.02em; font-weight:600; line-height:1.15; }
+p{ margin:.35rem 0; }
+button{ font:inherit; color:inherit; cursor:pointer; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:10px; }
+.hidden{ display:none !important; }
+.dv{ font-family:"Noto Sans Devanagari","Geist",sans-serif; }
+svg.i{ width:20px; height:20px; flex:0 0 auto; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+svg.i.sm{ width:16px; height:16px; } svg.i.lg{ width:26px; height:26px; }
+
+/* Top bar */
+.topbar{ position:sticky; top:env(safe-area-inset-top,0px); z-index:30; background:color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter:saturate(1.6) blur(16px); -webkit-backdrop-filter:saturate(1.6) blur(16px); border-bottom:1px solid var(--line); }
+body::before{ content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:31; background:var(--bg); }
+.topbar .in{ max-width:1400px; margin:0 auto; display:flex; align-items:center; gap:1rem; padding:.65rem clamp(.8rem,3vw,2rem); }
+.brand{ display:flex; align-items:center; gap:.5rem; font-weight:700; font-size:1.05rem; letter-spacing:-0.02em; white-space:nowrap; }
+.logo{ width:28px; height:28px; border-radius:9px; background:var(--btn); display:grid; place-items:center; }
+.logo span{ display:flex; gap:2px; align-items:center; height:14px; }
+.logo i{ display:block; width:3px; border-radius:2px; background:var(--btn-ink); }
+.logo i:nth-child(1){ height:6px; } .logo i:nth-child(2){ height:13px; } .logo i:nth-child(3){ height:9px; background:var(--accent); } .logo i:nth-child(4){ height:5px; background:var(--accent); }
+.seg{ display:flex; gap:2px; padding:3px; background:var(--surface-2); border-radius:999px; overflow-x:auto; scrollbar-width:none; flex:1; max-width:max-content; }
+.seg button{ border:0; background:transparent; padding:.42rem .85rem; border-radius:999px; font-weight:500; font-size:.88rem; color:var(--ink-2); white-space:nowrap; transition:background .15s, color .15s; }
+.seg button:hover{ color:var(--ink); }
+.seg button[aria-selected="true"]{ background:var(--surface); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.ghostbtn{ margin-left:auto; border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:.4rem .75rem; font-size:.84rem; color:var(--ink-2); display:inline-flex; gap:.4rem; align-items:center; white-space:nowrap; }
+
+.wrap{ max-width:1400px; margin:0 auto; padding:2.4rem clamp(.8rem,3vw,2rem) 4rem; }
+.head{ max-width:720px; margin-bottom:2rem; }
+.head h1{ font-size:clamp(1.8rem,3.4vw,2.6rem); font-weight:600; letter-spacing:-0.035em; }
+.head p{ color:var(--ink-2); font-size:1.05rem; margin-top:.6rem; }
+.stage{ display:flex; flex-wrap:wrap; gap:2.4rem 2rem; align-items:flex-start; }
+.figure{ margin:0; width:320px; }
+.figure figcaption{ margin-top:.9rem; padding:0 .3rem; }
+.figure figcaption b{ display:block; font-weight:600; }
+.figure figcaption span{ color:var(--ink-2); font-size:.88rem; }
+.aside{ flex:1 1 300px; min-width:0; max-width:460px; }
+.aside h3{ font-size:1.05rem; margin:0 0 .6rem; }
+.aside .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:1rem 1.1rem; margin-bottom:.8rem; }
+.aside ul{ margin:.3rem 0; padding-left:1.1rem; }
+.aside li{ margin:.3rem 0; color:var(--ink-2); }
+.aside li b{ color:var(--ink); font-weight:600; }
+.actions{ display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+.btn{ border:0; background:var(--btn); color:var(--btn-ink); border-radius:999px; padding:.55rem 1rem; font-weight:500; font-size:.88rem; display:inline-flex; align-items:center; gap:.4rem; }
+.btn.soft{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
+
+/* Phone frame */
+.phone{ width:320px; height:680px; border-radius:52px; padding:9px; background:#0B0C0F; box-shadow:0 0 0 1.5px #2A2D33 inset, var(--shadow); position:relative; }
+.phone::after{ content:""; position:absolute; top:19px; left:50%; transform:translateX(-50%); width:96px; height:28px; border-radius:20px; background:#000; z-index:20; }
+.scr{ position:relative; height:100%; border-radius:44px; overflow:hidden; background:var(--bg); display:flex; flex-direction:column; }
+.status{ height:50px; flex:0 0 auto; display:flex; justify-content:space-between; align-items:flex-end; padding:0 1.6rem .35rem; font-size:.78rem; font-weight:600; }
+.status .r{ display:flex; gap:.3rem; align-items:center; }
+.status .bat{ width:22px; height:11px; border:1.5px solid currentColor; border-radius:3px; position:relative; opacity:.9; }
+.status .bat::after{ content:""; position:absolute; inset:1.5px 4px 1.5px 1.5px; background:currentColor; border-radius:1px; }
+.navtitle{ padding:.4rem 1.2rem .6rem; display:flex; align-items:center; gap:.6rem; }
+.navtitle h4{ font-size:1.55rem; font-weight:700; letter-spacing:-0.03em; flex:1; }
+.navtitle .ib{ width:36px; height:36px; border-radius:50%; border:0; background:var(--surface); display:grid; place-items:center; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+.scroll{ flex:1; overflow-y:auto; padding:0 1rem 1rem; display:flex; flex-direction:column; gap:.7rem; scrollbar-width:none; }
+.group{ background:var(--surface); border-radius:var(--r-md); overflow:hidden; }
+.group .rowi{ display:flex; align-items:center; gap:.75rem; padding:.75rem .9rem; border-bottom:1px solid var(--line); width:100%; background:transparent; border-left:0; border-right:0; border-top:0; text-align:left; }
+.group .rowi:last-child{ border-bottom:0; }
+.rowi .tx{ flex:1; min-width:0; }
+.rowi .tx b{ display:block; font-weight:500; font-size:.95rem; }
+.rowi .tx small{ display:block; color:var(--ink-2); font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.av{ width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-weight:600; font-size:.85rem; background:var(--surface-2); color:var(--ink); flex:0 0 auto; }
+.av.acc{ background:var(--accent-soft); color:var(--accent-ink); }
+:root[data-theme="dark"] .av.acc{ color:var(--accent); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .av.acc{ color:var(--accent); } }
+.label{ font-size:.78rem; color:var(--ink-2); font-weight:500; padding:.4rem .3rem 0; }
+.hero-actions{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+.qa{ border:0; border-radius:var(--r-md); padding:.85rem; text-align:left; background:var(--surface); display:flex; flex-direction:column; gap:.9rem; min-height:110px; }
+.qa .ic{ width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:var(--surface-2); }
+.qa b{ font-weight:600; font-size:.95rem; display:block; }
+.qa small{ color:var(--ink-2); font-size:.78rem; }
+.qa.primary{ background:var(--btn); color:var(--btn-ink); }
+.qa.primary .ic{ background:color-mix(in srgb, var(--btn-ink) 14%, transparent); }
+.qa.primary small{ color:color-mix(in srgb, var(--btn-ink) 70%, transparent); }
+.pillstat{ display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:600; padding:.15rem .5rem; border-radius:999px; background:var(--live-soft); color:var(--live); }
+.tabbar{ display:flex; justify-content:space-around; padding:.5rem .5rem 1.4rem; background:color-mix(in srgb, var(--surface) 85%, transparent); backdrop-filter:blur(16px); border-top:1px solid var(--line); }
+.tabbar span{ display:flex; flex-direction:column; align-items:center; gap:.15rem; font-size:.66rem; color:var(--ink-3); font-weight:500; }
+.tabbar span.on{ color:var(--ink); }
+
+/* Call screen (always dark, immersive) */
+.call{ background:radial-gradient(120% 60% at 50% -10%, rgba(255,159,28,.22) 0%, rgba(255,159,28,0) 55%), linear-gradient(180deg,#14161B 0%, #0C0D10 100%); color:#F2F3F5; }
+.call .status{ color:#F2F3F5; }
+.callbar{ display:flex; align-items:center; gap:.7rem; padding:.3rem 1.1rem .7rem; }
+.callbar .av{ background:rgba(255,255,255,.1); color:#fff; }
+.callbar .who{ flex:1; min-width:0; }
+.callbar .who b{ display:block; font-weight:600; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.callbar .who small{ display:flex; align-items:center; gap:.35rem; font-size:.76rem; color:rgba(242,243,245,.65); }
+.dot{ width:7px; height:7px; border-radius:50%; background:#3DD68C; box-shadow:0 0 0 3px rgba(61,214,140,.2); }
+.hear{ display:flex; gap:4px; background:rgba(255,255,255,.08); border-radius:999px; padding:3px; }
+.hear button{ border:0; background:transparent; color:rgba(242,243,245,.6); width:32px; height:28px; border-radius:999px; display:grid; place-items:center; }
+.hear button[aria-pressed="true"]{ background:rgba(255,255,255,.16); color:#fff; }
+.feed{ flex:1; overflow-y:auto; padding:.2rem .9rem .6rem; display:flex; flex-direction:column; gap:.55rem; scrollbar-width:none; }
+.them{ align-self:flex-start; max-width:92%; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.08); border-radius:20px 20px 20px 6px; padding:.6rem .8rem; font-size:1.18rem; line-height:1.38; letter-spacing:-0.01em; font-weight:500; }
+.them .sub{ display:block; font-size:.78rem; color:rgba(242,243,245,.55); margin-top:.3rem; font-weight:400; letter-spacing:0; }
+.them.partial{ opacity:.6; }
+.you{ align-self:flex-end; max-width:86%; background:var(--accent); color:#2B1A00; border-radius:20px 20px 6px 20px; padding:.55rem .8rem; font-size:.98rem; font-weight:500; }
+.you small{ display:flex; align-items:center; gap:.25rem; font-size:.7rem; opacity:.75; margin-top:.15rem; font-weight:500; }
+.note{ align-self:center; font-size:.72rem; color:rgba(242,243,245,.55); background:rgba(255,255,255,.06); padding:.25rem .65rem; border-radius:999px; text-align:center; max-width:92%; }
+.draft{ align-self:stretch; background:rgba(255,255,255,.06); border:1px dashed rgba(255,174,61,.6); border-radius:18px; padding:.65rem .8rem; }
+.draft .h{ display:flex; align-items:center; gap:.35rem; font-size:.74rem; color:#FFAE3D; font-weight:600; }
+.draft p{ font-size:1rem; margin:.35rem 0 .55rem; }
+.draft .b{ display:flex; gap:.4rem; }
+.draft .b button{ border:0; border-radius:999px; padding:.35rem .8rem; font-weight:600; font-size:.8rem; }
+.draft .b .go{ background:#FFAE3D; color:#2B1A00; } .draft .b .no{ background:rgba(255,255,255,.1); color:#fff; }
+.chip{ display:inline-block; background:#FFAE3D; color:#2B1A00; border-radius:7px; padding:0 .32rem; font-weight:600; border:0; font:inherit; font-weight:600; cursor:pointer; }
+.replies{ display:flex; gap:.4rem; overflow-x:auto; padding:.35rem .9rem .5rem; scrollbar-width:none; }
+.replies button{ flex:0 0 auto; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06); color:#fff; border-radius:999px; padding:.45rem .8rem; font-size:.86rem; font-weight:500; }
+.replies button:hover{ background:rgba(255,255,255,.12); }
+.dock{ margin:0 .6rem .7rem; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.08); border-radius:26px; padding:.45rem; backdrop-filter:blur(20px); }
+.talkmode{ display:flex; gap:2px; background:rgba(0,0,0,.25); border-radius:999px; padding:3px; margin-bottom:.45rem; }
+.talkmode button{ white-space:nowrap; flex:1; border:0; background:transparent; color:rgba(242,243,245,.6); border-radius:999px; padding:.35rem .3rem; font-size:.74rem; font-weight:600; display:flex; align-items:center; justify-content:center; gap:.3rem; }
+.talkmode button[aria-pressed="true"]{ background:#F2F3F5; color:#15171C; }
+.compose{ display:flex; gap:.4rem; align-items:center; }
+.compose input{ flex:1; min-width:0; border:0; background:rgba(255,255,255,.08); color:#fff; border-radius:999px; padding:.65rem .9rem; font:inherit; font-size:.95rem; }
+.compose input::placeholder{ color:rgba(242,243,245,.45); }
+.compose input:focus{ outline:2px solid rgba(255,174,61,.6); }
+.round{ width:42px; height:42px; border-radius:50%; border:0; display:grid; place-items:center; flex:0 0 auto; }
+.round.send{ background:#FFAE3D; color:#2B1A00; }
+.round.dim{ background:rgba(255,255,255,.1); color:#fff; }
+.round.end{ background:#E5484D; color:#fff; }
+.micbig{ flex:1; border:0; border-radius:999px; height:48px; background:#F2F3F5; color:#15171C; font-weight:600; display:flex; align-items:center; justify-content:center; gap:.5rem; }
+.micbig.on{ background:#3DD68C; color:#06281A; }
+.toolsrow{ display:flex; justify-content:space-between; gap:.3rem; margin-top:.45rem; }
+.toolsrow button{ flex:1; border:0; background:transparent; color:rgba(242,243,245,.7); font-size:.68rem; font-weight:500; display:flex; flex-direction:column; align-items:center; gap:.15rem; padding:.25rem 0; border-radius:12px; }
+.toolsrow button:hover{ background:rgba(255,255,255,.06); }
+.sheet{ position:absolute; left:6px; right:6px; bottom:6px; background:#1E2128; color:#F2F3F5; border-radius:30px; padding:.9rem 1rem 1.2rem; transform:translateY(110%); transition:transform .28s cubic-bezier(.2,.8,.2,1); z-index:10; max-height:72%; overflow-y:auto; box-shadow:0 -20px 40px -10px rgba(0,0,0,.6); }
+.sheet.open{ transform:translateY(0); }
+.sheet .grab{ width:36px; height:5px; border-radius:3px; background:rgba(255,255,255,.25); margin:0 auto .7rem; }
+.sheet h5{ margin:0 0 .6rem; font-size:1rem; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+.sheet h5 button{ border:0; background:rgba(255,255,255,.1); color:#fff; border-radius:999px; padding:.2rem .65rem; font-size:.75rem; }
+.phr{ display:block; width:100%; text-align:left; border:0; background:rgba(255,255,255,.06); color:#fff; border-radius:14px; padding:.6rem .8rem; margin-bottom:.4rem; font-size:.92rem; }
+.phr small{ display:block; color:rgba(242,243,245,.55); font-size:.72rem; }
+.kp{ display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-top:.5rem; }
+.kp button{ border:0; background:rgba(255,255,255,.08); color:#fff; border-radius:50%; aspect-ratio:1; font-size:1.35rem; font-weight:500; width:64px; justify-self:center; }
+.ivr button{ display:flex; justify-content:space-between; width:100%; border:0; background:rgba(255,255,255,.06); color:#fff; border-radius:12px; padding:.5rem .7rem; margin:.3rem 0; font-size:.85rem; }
+.alert{ position:absolute; left:10px; right:10px; top:112px; background:#E5484D; color:#fff; border-radius:22px; padding:.85rem .95rem; z-index:9; box-shadow:0 18px 40px -12px rgba(229,72,77,.6); }
+.alert b{ display:flex; gap:.4rem; align-items:center; font-size:.98rem; }
+.alert p{ font-size:.82rem; opacity:.92; margin:.3rem 0 .55rem; }
+.alert button{ border:0; border-radius:999px; padding:.35rem .8rem; font-weight:600; font-size:.8rem; background:#fff; color:#C0262C; margin-right:.3rem; }
+.alert button.o{ background:rgba(255,255,255,.2); color:#fff; }
+
+/* Clear voice */
+.cvwrap{ flex:1; display:flex; flex-direction:column; padding:0 1rem 1.2rem; gap:.9rem; }
+.bigcap{ flex:1; border-radius:30px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); padding:1.1rem; display:flex; flex-direction:column; justify-content:center; }
+.bigcap .lab{ display:flex; align-items:center; gap:.45rem; font-size:.78rem; color:#FFAE3D; font-weight:600; }
+.bigcap .txt{ font-size:1.7rem; line-height:1.3; margin-top:.6rem; font-weight:500; letter-spacing:-0.01em; }
+.bigcap .en{ color:rgba(242,243,245,.55); font-size:.88rem; margin-top:.6rem; }
+.eq{ display:inline-flex; gap:2px; align-items:center; height:14px; }
+.eq i{ width:3px; height:4px; border-radius:2px; background:#FFAE3D; }
+.eq.on i{ animation:eq .7s ease-in-out infinite; }
+.eq i:nth-child(2){ animation-delay:.12s; } .eq i:nth-child(3){ animation-delay:.24s; } .eq i:nth-child(4){ animation-delay:.36s; }
+@keyframes eq{ 0%,100%{ height:3px; } 50%{ height:14px; } }
+.cvctl{ display:grid; grid-template-columns:repeat(3,1fr); gap:.7rem; justify-items:center; }
+.cvctl button{ border:0; width:78px; height:78px; border-radius:50%; background:rgba(255,255,255,.1); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.2rem; font-size:.72rem; font-weight:600; }
+.cvctl button.main{ background:#FFAE3D; color:#2B1A00; }
+.cvmeta{ text-align:center; font-size:.75rem; color:rgba(242,243,245,.55); }
+
+/* Profile builder */
+.builder{ flex:1 1 560px; min-width:0; max-width:720px; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:1.4rem; }
+.builder h3{ font-size:1.05rem; }
+.builder .sub{ color:var(--ink-2); font-size:.88rem; margin:.2rem 0 .9rem; }
+.presets{ display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1.3rem; }
+.presets button{ border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:.42rem .8rem; font-size:.85rem; font-weight:500; display:inline-flex; gap:.35rem; align-items:center; }
+.presets button[aria-pressed="true"]{ background:var(--btn); color:var(--btn-ink); border-color:var(--btn); }
+.opts{ display:grid; grid-template-columns:1fr 1fr; gap:.55rem; margin-bottom:1.3rem; }
+@media (max-width:620px){ .opts{ grid-template-columns:1fr; } }
+.opt{ display:flex; gap:.7rem; align-items:flex-start; text-align:left; border:1.5px solid var(--line); background:var(--surface); border-radius:var(--r-md); padding:.75rem .8rem; }
+.opt .ic{ width:34px; height:34px; border-radius:10px; background:var(--surface-2); display:grid; place-items:center; flex:0 0 auto; }
+.opt b{ display:block; font-weight:600; font-size:.92rem; }
+.opt small{ display:block; color:var(--ink-2); font-size:.8rem; }
+.opt .tag{ display:inline-block; margin-top:.3rem; font-size:.68rem; font-weight:600; padding:.05rem .45rem; border-radius:999px; background:var(--surface-2); color:var(--ink-2); }
+.opt[aria-pressed="true"]{ border-color:var(--ink); box-shadow:inset 0 0 0 1px var(--ink); }
+.opt[aria-pressed="true"] .ic{ background:var(--btn); color:var(--btn-ink); }
+.row2{ display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; }
+@media (max-width:620px){ .row2{ grid-template-columns:1fr; } }
+.sel{ border:1px solid var(--line); border-radius:var(--r-sm); padding:.55rem .7rem; background:var(--surface); }
+.sel label{ display:block; font-size:.72rem; color:var(--ink-2); font-weight:500; }
+.sel select{ width:100%; border:0; background:transparent; font:inherit; font-weight:500; color:var(--ink); padding:.1rem 0; }
+.toggle{ display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.6rem 0; border-top:1px solid var(--line); font-size:.9rem; }
+.sw{ width:44px; height:26px; border-radius:999px; border:0; background:var(--surface-2); position:relative; flex:0 0 auto; box-shadow:inset 0 0 0 1px var(--line); }
+.sw::after{ content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .18s; }
+.sw[aria-checked="true"]{ background:var(--live); box-shadow:none; }
+.sw[aria-checked="true"]::after{ transform:translateX(18px); }
+.summary{ margin-top:1rem; background:var(--surface-2); border-radius:var(--r-md); padding:.85rem 1rem; font-size:.9rem; }
+.summary b{ font-weight:600; }
+
+/* Generic light-screen pieces */
+.cardx{ background:var(--surface); border-radius:var(--r-md); padding:.9rem; }
+.cardx h5{ margin:0 0 .3rem; font-size:1rem; font-weight:600; }
+.kv{ display:grid; grid-template-columns:auto 1fr; gap:.35rem .9rem; font-size:.9rem; margin:.5rem 0; }
+.kv dt{ color:var(--ink-2); }
+.kv dd{ margin:0; font-weight:500; }
+.cta{ border:0; width:100%; min-height:52px; border-radius:999px; background:var(--btn); color:var(--btn-ink); font-weight:600; font-size:.98rem; display:flex; align-items:center; justify-content:center; gap:.4rem; }
+.cta.soft{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
+.tiles{ display:grid; grid-template-columns:1fr 1fr; gap:.6rem; }
+.tile{ border:0; background:var(--surface); border-radius:var(--r-md); padding:.9rem .8rem; text-align:left; display:flex; flex-direction:column; gap:.9rem; min-height:104px; }
+.tile .ic{ width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:var(--surface-2); }
+.tile b{ font-weight:600; font-size:.92rem; }
+.prog{ display:flex; flex-direction:column; gap:.1rem; }
+.step{ display:flex; gap:.7rem; align-items:flex-start; padding:.45rem 0; color:var(--ink-3); }
+.step .b{ width:22px; height:22px; border-radius:50%; border:1.5px solid var(--line); display:grid; place-items:center; flex:0 0 auto; background:var(--surface); }
+.step.done{ color:var(--ink); } .step.done .b{ background:var(--ink); border-color:var(--ink); color:var(--surface); }
+.step.now{ color:var(--ink); font-weight:600; } .step.now .b{ border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-soft); }
+.approval{ background:var(--surface); border-radius:var(--r-lg); padding:1rem; box-shadow:0 0 0 1.5px var(--accent) inset; }
+.approval .amt{ font-size:2.1rem; font-weight:700; letter-spacing:-0.04em; }
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.7rem; }
+.vnote{ display:flex; align-items:center; gap:.6rem; background:var(--surface-2); border-radius:999px; padding:.35rem .5rem .35rem .35rem; }
+.vnote .pl{ width:32px; height:32px; border-radius:50%; border:0; background:var(--btn); color:var(--btn-ink); display:grid; place-items:center; }
+.vnote .wf{ flex:1; height:18px; background:repeating-linear-gradient(90deg, var(--ink-3) 0 2px, transparent 2px 5px); border-radius:2px; opacity:.7; }
+.vnote span{ font-size:.75rem; color:var(--ink-2); }
+.wa{ background:#EFEAE2; } :root[data-theme="dark"] .wa{ background:#0B141A; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .wa{ background:#0B141A; } }
+.wahead{ display:flex; align-items:center; gap:.6rem; padding:.3rem .9rem .6rem; background:var(--surface); border-bottom:1px solid var(--line); }
+.wahead b{ display:block; font-weight:600; font-size:.95rem; }
+.wahead small{ color:var(--ink-2); font-size:.74rem; }
+.wafeed{ flex:1; overflow-y:auto; padding:.7rem .6rem; display:flex; flex-direction:column; gap:.4rem; font-size:.86rem; scrollbar-width:none; }
+.b-in, .b-out{ max-width:85%; padding:.45rem .6rem .35rem; border-radius:14px; box-shadow:0 1px 0 rgba(0,0,0,.06); }
+.b-in{ align-self:flex-start; background:var(--surface); border-top-left-radius:4px; }
+.b-out{ align-self:flex-end; background:#D9FDD3; color:#15171C; border-top-right-radius:4px; }
+:root[data-theme="dark"] .b-out{ background:#144D37; color:#F2F3F5; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .b-out{ background:#144D37; color:#F2F3F5; } }
+.b-in .t, .b-out .t{ display:block; text-align:right; font-size:.62rem; color:var(--ink-3); }
+.b-live{ align-self:flex-start; max-width:85%; background:var(--surface); border-left:3px solid var(--live); border-radius:6px 14px 14px 6px; padding:.45rem .6rem; }
+.b-live .h{ font-size:.68rem; font-weight:600; color:var(--live); display:flex; align-items:center; gap:.3rem; }
+.qbtns{ display:flex; flex-wrap:wrap; gap:.3rem; max-width:85%; }
+.qbtns span{ background:var(--surface); color:#0A7C66; border-radius:999px; padding:.3rem .7rem; font-size:.78rem; font-weight:600; box-shadow:0 1px 0 rgba(0,0,0,.06); }
+.wainput{ display:flex; gap:.4rem; padding:.45rem .5rem 1.2rem; align-items:center; }
+.wainput div{ flex:1; background:var(--surface); border-radius:999px; padding:.55rem .85rem; color:var(--ink-3); font-size:.85rem; }
+.wainput i{ width:40px; height:40px; border-radius:50%; background:#0A7C66; display:grid; place-items:center; color:#fff; }
+.syscall{ background:linear-gradient(180deg,#1A2A22 0%,#0C0D10 100%); color:#fff; }
+.banner{ margin:0 .8rem; background:rgba(255,255,255,.95); color:#15171C; border-radius:22px; padding:.75rem .85rem; box-shadow:0 18px 40px -16px rgba(0,0,0,.6); }
+.banner .t{ display:flex; gap:.5rem; align-items:center; font-size:.78rem; color:#5D6370; }
+.banner b{ display:block; font-size:.95rem; margin:.25rem 0; }
+.banner .two button{ border:0; border-radius:999px; padding:.5rem; font-weight:600; font-size:.85rem; }
+.ff{ display:flex; flex-direction:column; height:100%; }
+.ff .top{ flex:1; background:var(--surface); transform:rotate(180deg); display:flex; flex-direction:column; justify-content:center; padding:1.2rem; }
+.ff .top .big{ font-size:1.5rem; font-weight:600; letter-spacing:-0.02em; line-height:1.3; }
+.ff .top small{ color:var(--ink-2); }
+.ff .divider{ height:44px; display:flex; align-items:center; justify-content:center; gap:.5rem; background:var(--btn); color:var(--btn-ink); font-size:.78rem; font-weight:600; }
+.ff .bottom{ flex:1; display:flex; flex-direction:column; padding:.8rem 1rem 1.4rem; gap:.5rem; }
+.ff .bottom .cap{ font-size:1.25rem; font-weight:500; line-height:1.35; }
+
+/* Integrations */
+.ints{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; }
+.int{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.55rem; }
+.int .top{ display:flex; align-items:center; gap:.7rem; }
+.int .ic{ width:40px; height:40px; border-radius:12px; background:var(--surface-2); display:grid; place-items:center; }
+.int h4{ font-size:1rem; flex:1; }
+.int p{ color:var(--ink-2); font-size:.88rem; margin:0; }
+.int ul{ margin:0; padding-left:1.1rem; color:var(--ink-2); font-size:.86rem; }
+.int li{ margin:.2rem 0; }
+.badge{ font-size:.7rem; font-weight:600; padding:.15rem .55rem; border-radius:999px; white-space:nowrap; }
+.badge.v1{ background:var(--live-soft); color:var(--live); }
+.badge.and{ background:var(--accent-soft); color:var(--accent-ink); }
+:root[data-theme="dark"] .badge.and{ color:var(--accent); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .badge.and{ color:var(--accent); } }
+.badge.later{ background:var(--surface-2); color:var(--ink-2); }
+.badge.no{ background:var(--danger-soft); color:var(--danger); }
+.matrix{ overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); margin-bottom:2rem; }
+.matrix table{ border-collapse:collapse; width:100%; min-width:760px; font-size:.88rem; }
+.matrix th, .matrix td{ text-align:left; padding:.75rem 1rem; border-bottom:1px solid var(--line); vertical-align:top; }
+.matrix th{ font-weight:600; color:var(--ink-2); font-size:.8rem; background:var(--surface-2); }
+.matrix tr:last-child td{ border-bottom:0; }
+.matrix td:first-child{ font-weight:600; white-space:nowrap; }
+.toast{ position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 24px); transform:translateX(-50%) translateY(16px); opacity:0; background:var(--btn); color:var(--btn-ink); padding:.7rem 1.05rem; border-radius:999px; font-weight:500; font-size:.88rem; z-index:60; transition:opacity .2s, transform .2s; pointer-events:none; max-width:calc(100% - 2rem); box-shadow:var(--shadow); }
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.readable, .readable *{ font-family:"Atkinson Hyperlegible","Noto Sans Devanagari",sans-serif !important; }
+footer.note{ margin-top:2.4rem; color:var(--ink-3); font-size:.8rem; max-width:80ch; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></symbol>
+    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10a7 7 0 0 1-14 0M12 17v5"/></symbol>
+    <symbol id="i-cc" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M7 10h4M13 10h4M7 14h10"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12v0M7 8v8M11 4v16M15 8v8M19 10v4"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M11 3l1.9 4.6L17.5 9.5l-4.6 1.9L11 16l-1.9-4.6L4.5 9.5l4.6-1.9z"/><path d="M19 14l.8 1.9 1.9.8-1.9.8-.8 1.9-.8-1.9-1.9-.8 1.9-.8z"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8.5 8.5 0 0 1-12.3 7.6L3 21l1.4-5.4A8.5 8.5 0 1 1 21 12z"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v5M12 16h.01"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 11V4a1.5 1.5 0 0 1 3 0v7M14 11V5.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.5a6 6 0 0 1-5-2.7L3 15.5a1.5 1.5 0 0 1 2.5-1.6L8 16"/></symbol>
+    <symbol id="i-ear" viewBox="0 0 24 24"><path d="M6 8.5a6 6 0 1 1 12 0c0 4-3 5-3 8a3.5 3.5 0 0 1-7 0"/><path d="M10 9a2 2 0 1 1 4 0"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+    <symbol id="i-slow" viewBox="0 0 24 24"><path d="M3.5 17a9 9 0 1 1 17 0"/><path d="M12 14l-3-4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><path d="M6 5h.01M12 5h.01M18 5h.01M6 11h.01M12 11h.01M18 11h.01M6 17h.01M12 17h.01M18 17h.01" stroke-width="3.2"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M16 3v4M8 3v4M3 11h18"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 21a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2.5"/><path d="M16 10l6-3v10l-6-3"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3.5"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 16.5h5"/></symbol>
+    <symbol id="i-watch" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 6l1-4h4l1 4M9 18l1 4h4l1-4"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0M14 20a4.5 4.5 0 0 1 8 -2.8"/></symbol>
+    <symbol id="i-merge" viewBox="0 0 24 24"><path d="M6 3v5a4 4 0 0 0 4 4h4a4 4 0 0 1 4 4v5"/><path d="M18 3v5a4 4 0 0 1-4 4"/></symbol>
+    <symbol id="i-pill" viewBox="0 0 24 24"><path d="M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4 0 7-3 7-7 0-5-5-7-5-12-3 2-4 5-4 7-1-1-2-2-2-4-2 2-3 5-3 9 0 4 3 7 7 7z"/></symbol>
+    <symbol id="i-steth" viewBox="0 0 24 24"><path d="M5 3v6a5 5 0 0 0 10 0V3"/><path d="M10 14v1a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="11" r="2"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></symbol>
+    <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-lang" viewBox="0 0 24 24"><path d="M4 5h8M8 3v2M6 5c0 4 3 7 6 8M10 5c-1 4-4 7-6 8"/><path d="M13 21l4-10 4 10M14.5 17.5h5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="in">
+    <div class="brand"><span class="logo"><span><i></i><i></i><i></i><i></i></span></span>Awaaz</div>
+    <nav class="seg" role="tablist" aria-label="Sections">
+      <button role="tab" data-view="call" aria-selected="true">Live call</button>
+      <button role="tab" data-view="profile" aria-selected="false">How I talk and hear</button>
+      <button role="tab" data-view="clear" aria-selected="false">Clear voice</button>
+      <button role="tab" data-view="task" aria-selected="false">Call for me</button>
+      <button role="tab" data-view="whatsapp" aria-selected="false">WhatsApp</button>
+      <button role="tab" data-view="number" aria-selected="false">My own number</button>
+      <button role="tab" data-view="face" aria-selected="false">Face to face</button>
+      <button role="tab" data-view="integrations" aria-selected="false">Integrations</button>
+    </nav>
+    <button class="ghostbtn" id="themebtn" type="button"><svg class="i sm"><use href="#i-sun"/></svg>Theme</button>
+  </div>
+</header>
+
+<!-- ============ LIVE CALL ============ -->
+<main class="wrap view" id="v-call">
+  <div class="head">
+    <h1>One call screen, every way of talking.</h1>
+    <p>Switch how you talk at any moment: type and Awaaz speaks, use your own voice, or say a few words and let AI phrase it. Replies arrive as captions, clear audio, or both.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure">
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span class="r">5G <span class="bat"></span></span></div>
+        <div class="navtitle"><h4>Awaaz</h4><button class="ib" type="button" aria-label="Search"><svg class="i"><use href="#i-search"/></svg></button></div>
+        <div class="scroll">
+          <div class="hero-actions">
+            <button class="qa primary" type="button"><span class="ic"><svg class="i"><use href="#i-phone"/></svg></span><span><b>New call</b><small>Type, talk or let AI help</small></span></button>
+            <button class="qa" type="button"><span class="ic"><svg class="i"><use href="#i-bot"/></svg></span><span><b>Call for me</b><small>Awaaz handles it</small></span></button>
+          </div>
+          <div class="label">Favourites</div>
+          <div class="group">
+            <button class="rowi" type="button"><span class="av acc">SM</span><span class="tx"><b>Sharma Medical</b><small>Hindi, you type, they hear your voice</small></span><svg class="i sm" style="color:var(--ink-3)"><use href="#i-chev"/></svg></button>
+            <button class="rowi" type="button"><span class="av">DJ</span><span class="tx"><b>Dr. Joshi’s clinic</b><small>Marathi, clear voice on</small></span><svg class="i sm" style="color:var(--ink-3)"><use href="#i-chev"/></svg></button>
+            <button class="rowi" type="button"><span class="av">AR</span><span class="tx"><b>Arif</b><small>Son, prefers WhatsApp</small></span><svg class="i sm" style="color:var(--ink-3)"><use href="#i-chev"/></svg></button>
+          </div>
+          <div class="label">Recent</div>
+          <div class="group">
+            <div class="rowi"><span class="av">SB</span><span class="tx"><b>SBI branch</b><small>Message taken: collect card before 30 Nov</small></span><span class="pillstat" style="background:var(--accent-soft);color:var(--accent-ink)">New</span></div>
+            <div class="rowi"><span class="av">BG</span><span class="tx"><b>Bharat Gas</b><small>Booked for Thursday, ₹950</small></span><svg class="i sm" style="color:var(--live)"><use href="#i-check"/></svg></div>
+          </div>
+        </div>
+        <div class="tabbar"><span class="on"><svg class="i"><use href="#i-phone"/></svg>Calls</span><span><svg class="i"><use href="#i-bot"/></svg>Tasks</span><span><svg class="i"><use href="#i-people"/></svg>Face to face</span><span><svg class="i"><use href="#i-user"/></svg>Me</span></div>
+      </div></div>
+      <figcaption><b>Home</b><span>Favourites remember each contact’s language and how you like to talk with them.</span></figcaption>
+    </figure>
+
+    <figure class="figure">
+      <div class="phone"><div class="scr call" id="callScr">
+        <div class="status"><span>9:42</span><span class="r">5G <span class="bat"></span></span></div>
+        <div class="callbar">
+          <span class="av" id="cAv">SM</span>
+          <div class="who"><b id="cName">Sharma Medical</b><small><span class="dot"></span><span id="cState">Calling…</span></small></div>
+          <div class="hear" role="group" aria-label="How you hear">
+            <button type="button" aria-pressed="true" id="hCap" aria-label="Captions"><svg class="i sm"><use href="#i-cc"/></svg></button>
+            <button type="button" aria-pressed="false" id="hClear" aria-label="Clear voice"><svg class="i sm"><use href="#i-ear"/></svg></button>
+            <button type="button" aria-pressed="false" id="hLang" aria-label="Read in English"><svg class="i sm"><use href="#i-lang"/></svg></button>
+          </div>
+        </div>
+        <div class="feed" id="feed" aria-live="polite"></div>
+        <div class="replies" id="replies"></div>
+        <div class="dock">
+          <div class="talkmode" role="group" aria-label="How you talk">
+            <button type="button" data-tm="type" aria-pressed="true"><svg class="i sm"><use href="#i-keyboard"/></svg>Type</button>
+            <button type="button" data-tm="voice" aria-pressed="false"><svg class="i sm"><use href="#i-mic"/></svg>My voice</button>
+            <button type="button" data-tm="help" aria-pressed="false"><svg class="i sm"><use href="#i-spark"/></svg>Help me say</button>
+          </div>
+          <div class="compose" id="cType">
+            <input id="msg" type="text" placeholder="Type, they hear it" aria-label="Type a message">
+            <button class="round send" type="button" id="sendBtn" aria-label="Speak"><svg class="i"><use href="#i-send"/></svg></button>
+          </div>
+          <div class="compose hidden" id="cVoice">
+            <button class="micbig" type="button" id="micBtn"><svg class="i"><use href="#i-mic"/></svg><span>Hold to talk</span></button>
+          </div>
+          <div class="compose hidden" id="cHelp">
+            <input id="intent" type="text" placeholder="Say or type a few words" aria-label="Few words for AI">
+            <button class="round send" type="button" id="helpBtn" aria-label="Draft"><svg class="i"><use href="#i-spark"/></svg></button>
+          </div>
+          <div class="toolsrow">
+            <button type="button" id="tPhr"><svg class="i"><use href="#i-chat"/></svg>Phrases</button>
+            <button type="button" id="tKey"><svg class="i"><use href="#i-grid"/></svg>Keypad</button>
+            <button type="button" id="tRep"><svg class="i"><use href="#i-repeat"/></svg>Ask again</button>
+            <button type="button" id="tEnd" style="color:#FF6B6F"><svg class="i" style="transform:rotate(135deg)"><use href="#i-phone"/></svg>End</button>
+          </div>
+        </div>
+        <div class="sheet" id="sPhr"><div class="grab"></div><h5>Phrases <button type="button" data-close>Done</button></h5>
+          <button class="phr" type="button" data-say="Mera pata hai: Flat 12, Shanti Nagar, Nagpur">My address<small>Flat 12, Shanti Nagar, Nagpur</small></button>
+          <button class="phr" type="button" data-say="Main bol nahi sakta, type kar raha hoon. Kripya intezaar kijiye.">I’m typing, please wait<small>Main bol nahi sakta, type kar raha hoon</small></button>
+          <button class="phr" type="button" data-say="Meri dawai Telma 40 hai, 30 goli.">My BP medicine<small>Telma 40, 30 goli</small></button>
+          <button class="phr" type="button" data-say="Kripya dheere boliye.">Please speak slowly<small>Kripya dheere boliye</small></button>
+        </div>
+        <div class="sheet" id="sKey"><div class="grab"></div><h5>Keypad <button type="button" data-close>Done</button></h5>
+          <div class="ivr"><small style="color:rgba(242,243,245,.55)">Menu heard</small>
+            <button type="button" data-dtmf="1"><span>Balance and statement</span><b>1</b></button>
+            <button type="button" data-dtmf="2"><span>Block card</span><b>2</b></button>
+            <button type="button" data-dtmf="9"><span>Talk to an agent</span><b>9</b></button></div>
+          <div class="kp">
+            <button type="button" data-dtmf="1">1</button><button type="button" data-dtmf="2">2</button><button type="button" data-dtmf="3">3</button>
+            <button type="button" data-dtmf="4">4</button><button type="button" data-dtmf="5">5</button><button type="button" data-dtmf="6">6</button>
+            <button type="button" data-dtmf="7">7</button><button type="button" data-dtmf="8">8</button><button type="button" data-dtmf="9">9</button>
+            <button type="button" data-dtmf="*">*</button><button type="button" data-dtmf="0">0</button><button type="button" data-dtmf="#">#</button>
+          </div>
+        </div>
+        <div class="alert hidden" id="scam"><b><svg class="i sm"><use href="#i-shield"/></svg>They asked for your OTP</b><p>Banks never ask for an OTP on a call. Awaaz won’t read out OTPs or PINs on this call.</p><button type="button" id="scamEnd">End call</button><button type="button" class="o" id="scamOk">Continue</button></div>
+      </div></div>
+      <figcaption><b>Live call</b><span>Three ways to talk in one dock. Hearing options top right: captions, clear voice, read in English.</span></figcaption>
+    </figure>
+
+    <div class="aside">
+      <div class="actions">
+        <button class="btn" type="button" id="rePharm"><svg class="i sm"><use href="#i-repeat"/></svg>Restart pharmacy call</button>
+        <button class="btn soft" type="button" id="reBank"><svg class="i sm"><use href="#i-shield"/></svg>Try a scam call</button>
+      </div>
+      <div class="card"><h3>Try each way of talking</h3>
+        <ul>
+          <li><b>Type.</b> Tap a suggested reply or type; the pharmacist hears it in your voice.</li>
+          <li><b>My voice.</b> For deaf people who speak: tap “Hold to talk” and talk normally. You still read their replies as captions.</li>
+          <li><b>Help me say.</b> Type a few words like “delivery?” and AI drafts a polite sentence. Nothing is said until you tap Say it.</li>
+        </ul></div>
+      <div class="card"><h3>Also in this screen</h3>
+        <ul>
+          <li><b>Number chips</b> for prices and times, tap to save.</li>
+          <li><b>Please hold.</b> Pause typing for 5 seconds and Awaaz tells them you’re typing.</li>
+          <li><b>Ask again</b> politely asks them to repeat.</li>
+          <li><b>Scam shield</b> blocks reading out OTPs.</li>
+        </ul></div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ PROFILE ============ -->
+<main class="wrap view hidden" id="v-profile">
+  <div class="head">
+    <h1>Set how you talk and how you hear.</h1>
+    <p>Every person is different. Pick a starting point, then turn on any mix of options. Each contact can override it, and you can switch mid-call.</p>
+  </div>
+  <div class="stage">
+    <section class="builder" aria-label="Communication profile">
+      <h3>Start from</h3>
+      <p class="sub">A preset only sets defaults.</p>
+      <div class="presets" id="presets">
+        <button type="button" data-p="mute" aria-pressed="true"><svg class="i sm"><use href="#i-keyboard"/></svg>I can’t speak</button>
+        <button type="button" data-p="deafspeak" aria-pressed="false"><svg class="i sm"><use href="#i-mic"/></svg>Deaf, I can speak</button>
+        <button type="button" data-p="deaftype" aria-pressed="false"><svg class="i sm"><use href="#i-cc"/></svg>Deaf, I prefer typing</button>
+        <button type="button" data-p="hoh" aria-pressed="false"><svg class="i sm"><use href="#i-ear"/></svg>Hard of hearing</button>
+        <button type="button" data-p="speech" aria-pressed="false"><svg class="i sm"><use href="#i-wave"/></svg>My speech is unclear</button>
+        <button type="button" data-p="lowread" aria-pressed="false"><svg class="i sm"><use href="#i-volume"/></svg>I don’t read much</button>
+      </div>
+
+      <h3>How I talk</h3>
+      <p class="sub">Choose all that you use. The first one is your default.</p>
+      <div class="opts" id="talkOpts">
+        <button class="opt" type="button" data-o="voice"><span class="ic"><svg class="i"><use href="#i-mic"/></svg></span><span><b>My own voice</b><small>I speak; they hear me directly.</small></span></button>
+        <button class="opt" type="button" data-o="type"><span class="ic"><svg class="i"><use href="#i-keyboard"/></svg></span><span><b>Type, Awaaz speaks</b><small>In my cloned voice or a voice I pick.</small></span></button>
+        <button class="opt" type="button" data-o="replies"><span class="ic"><svg class="i"><use href="#i-chat"/></svg></span><span><b>Phrases and smart replies</b><small>One tap answers.</small></span></button>
+        <button class="opt" type="button" data-o="help"><span class="ic"><svg class="i"><use href="#i-spark"/></svg></span><span><b>Help me say it</b><small>A few words in, a clear sentence out. I approve first.</small></span></button>
+        <button class="opt" type="button" data-o="clarity"><span class="ic"><svg class="i"><use href="#i-wave"/></svg></span><span><b>Speak clearly for me</b><small>I talk; Awaaz re-says it clearly if my speech is hard to understand.</small><span class="tag">Learns my speech over time</span></span></button>
+        <button class="opt" type="button" data-o="sign"><span class="ic"><svg class="i"><use href="#i-hand"/></svg></span><span><b>Sign language</b><small>Connect a human ISL interpreter by video.</small><span class="tag">Partner service</span></span></button>
+      </div>
+
+      <h3>How I hear them</h3>
+      <p class="sub">Mix freely, for example captions and clear voice together.</p>
+      <div class="opts" id="hearOpts">
+        <button class="opt" type="button" data-o="captions"><span class="ic"><svg class="i"><use href="#i-cc"/></svg></span><span><b>Live captions</b><small>Big text, numbers highlighted.</small></span></button>
+        <button class="opt" type="button" data-o="clear"><span class="ic"><svg class="i"><use href="#i-ear"/></svg></span><span><b>Clear voice</b><small>Each sentence repeated slower and louder.</small></span></button>
+        <button class="opt" type="button" data-o="audio"><span class="ic"><svg class="i"><use href="#i-volume"/></svg></span><span><b>Normal audio</b><small>Straight through, boosted for speech.</small></span></button>
+        <button class="opt" type="button" data-o="summary"><span class="ic"><svg class="i"><use href="#i-bell"/></svg></span><span><b>Spoken summary after</b><small>What was agreed, as a voice note.</small></span></button>
+        <button class="opt" type="button" data-o="vibe"><span class="ic"><svg class="i"><use href="#i-watch"/></svg></span><span><b>Vibration cues</b><small>Phone or watch buzzes when they start and stop talking.</small></span></button>
+        <button class="opt" type="button" data-o="translate"><span class="ic"><svg class="i"><use href="#i-lang"/></svg></span><span><b>Translate for me</b><small>Read and type in my language, whatever they speak.</small></span></button>
+      </div>
+
+      <h3>Languages and voice</h3>
+      <div class="row2" style="margin-top:.6rem">
+        <div class="sel"><label for="lr">I read</label><select id="lr"><option>Hindi</option><option>English</option><option>Marathi</option><option>Tamil</option><option>Bengali</option></select></div>
+        <div class="sel"><label for="lt">I type</label><select id="lt"><option>Hindi in English letters</option><option>Hindi</option><option>English</option><option>Marathi</option></select></div>
+        <div class="sel"><label for="lv">My voice</label><select id="lv"><option>My own voice (cloned)</option><option>Calm, man, 50s</option><option>Warm, woman, 30s</option></select></div>
+      </div>
+      <div style="margin-top:1rem">
+        <div class="toggle"><span>Use the easy-reading font</span><button class="sw" type="button" role="switch" aria-checked="false" id="readSw" aria-label="Easy-reading font"></button></div>
+        <div class="toggle"><span>Tell the other person I’m using an assistant</span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="Disclosure" disabled></button></div>
+        <div class="toggle"><span>Share call summaries with family</span><button class="sw" type="button" role="switch" aria-checked="false" aria-label="Share with family"></button></div>
+      </div>
+      <div class="summary" id="profSum"></div>
+    </section>
+
+    <figure class="figure" style="position:sticky;top:90px">
+      <div class="phone"><div class="scr call">
+        <div class="status"><span>9:42</span><span class="r">5G <span class="bat"></span></span></div>
+        <div class="callbar"><span class="av">DJ</span><div class="who"><b>Dr. Joshi’s clinic</b><small><span class="dot"></span>Preview of your settings</small></div></div>
+        <div class="feed" id="pvFeed"></div>
+        <div class="dock" id="pvDock"></div>
+      </div></div>
+      <figcaption><b>Live preview</b><span>Updates as you change options.</span></figcaption>
+    </figure>
+  </div>
+</main>
+
+<!-- ============ CLEAR VOICE ============ -->
+<main class="wrap view hidden" id="v-clear">
+  <div class="head">
+    <h1>For people who can speak, but can’t hear well.</h1>
+    <p>You talk normally. After each sentence, Awaaz says it again in your ear, slower and louder, in your language. No reading needed: three buttons, or just say “phir se”.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure">
+      <div class="phone"><div class="scr call">
+        <div class="status"><span>11:05</span><span class="r">4G <span class="bat"></span></span></div>
+        <div class="callbar"><span class="av">NC</span><div class="who"><b>Netra Clinic</b><small><span class="dot"></span>Clear voice on, 00:48</small></div></div>
+        <div class="cvwrap">
+          <div class="bigcap">
+            <div class="lab"><span class="eq on" id="cvEq"><i></i><i></i><i></i><i></i></span><span id="cvLab">Repeating slowly</span></div>
+            <div class="txt dv" id="cvTxt"></div>
+            <div class="en" id="cvEn"></div>
+          </div>
+          <div class="cvmeta" id="cvMeta">Speed 0.75×, volume high</div>
+          <div class="cvctl">
+            <button type="button" id="cvSlow"><svg class="i lg"><use href="#i-slow"/></svg>Slower</button>
+            <button type="button" class="main" id="cvRep"><svg class="i lg"><use href="#i-repeat"/></svg>Repeat</button>
+            <button type="button" id="cvLoud"><svg class="i lg"><use href="#i-volume"/></svg>Louder</button>
+          </div>
+          <button class="micbig" type="button" id="cvNext" style="height:44px;background:rgba(255,255,255,.1);color:#fff">Next sentence (demo)</button>
+        </div>
+      </div></div>
+      <figcaption><b>During the call</b><span>Captions are optional; the repeat is the main thing.</span></figcaption>
+    </figure>
+    <figure class="figure">
+      <div class="phone"><div class="scr">
+        <div class="status"><span>11:07</span><span class="r">4G <span class="bat"></span></span></div>
+        <div class="navtitle"><button class="ib" type="button" aria-label="Back"><svg class="i"><use href="#i-back"/></svg></button><h4 style="font-size:1.2rem">Netra Clinic</h4></div>
+        <div class="scroll">
+          <div class="cardx">
+            <div class="vnote"><button class="pl" type="button" aria-label="Play" data-toast="Playing summary in Marathi"><svg class="i sm"><use href="#i-play"/></svg></button><span class="wf"></span><span>0:20</span></div>
+            <p style="color:var(--ink-2);font-size:.82rem;margin-top:.5rem">Summary in Marathi, read slowly</p>
+          </div>
+          <div class="group">
+            <div class="rowi"><span class="av acc"><svg class="i sm"><use href="#i-cal"/></svg></span><span class="tx"><b>Operation, 12 Nov, 9 am</b><small>Netra Clinic, Kothrud</small></span><button class="btn" type="button" style="padding:.35rem .7rem" data-toast="Reminder set for 11 Nov, 6 pm">Remind</button></div>
+            <div class="rowi"><span class="av"><svg class="i sm"><use href="#i-alert"/></svg></span><span class="tx"><b>No food after 10 pm</b><small>The night before</small></span></div>
+            <div class="rowi"><span class="av"><svg class="i sm"><use href="#i-check"/></svg></span><span class="tx"><b>Bring old reports</b><small>From the last visit</small></span></div>
+          </div>
+          <button class="cta soft" type="button" data-toast="Shared with Neha on WhatsApp"><svg class="i sm"><use href="#i-chat"/></svg>Share with Neha</button>
+        </div>
+      </div></div>
+      <figcaption><b>After the call</b><span>Key facts as rows with one-tap reminders, plus a spoken summary.</span></figcaption>
+    </figure>
+    <div class="aside">
+      <div class="card"><h3>How it works</h3><ul>
+        <li><b>Your phone rings</b> from Awaaz, or you call through the app with headphones or hearing aids.</li>
+        <li><b>Exact words.</b> Awaaz repeats what they said, only translated if you asked. Numbers, dates and names never change.</li>
+        <li><b>They hear a soft tone</b> during the repeat, so they pause.</li>
+        <li><b>Voice commands</b> work in Hindi, Marathi and English: “phir se”, “dheere”, “number kya tha”.</li>
+      </ul></div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ CALL FOR ME ============ -->
+<main class="wrap view hidden" id="v-task">
+  <div class="head">
+    <h1>Hand the whole call to Awaaz.</h1>
+    <p>For anyone who can’t or doesn’t want to do the call live. Pick a task, set limits, approve anything outside them, and get the result back.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure">
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:30</span><span class="r">4G <span class="bat"></span></span></div>
+        <div class="navtitle"><button class="ib hidden" type="button" id="tBack" aria-label="Back"><svg class="i"><use href="#i-back"/></svg></button><h4 id="tTitle" style="font-size:1.35rem">Call for me</h4></div>
+        <div class="scroll" id="tBody"></div>
+      </div></div>
+      <figcaption><b>Task flow</b><span>Tap through: choose, limits, live progress, approval, result.</span></figcaption>
+    </figure>
+    <div class="aside">
+      <div class="card"><h3>What the agent may and may not do</h3><ul>
+        <li><b>Opens honestly:</b> “I’m an assistant calling on behalf of Shankar More, who is deaf.”</li>
+        <li><b>Shares only</b> the facts on the task: consumer number, address, medicine name.</li>
+        <li><b>Asks you first</b> before agreeing to a price, date or change outside your limits.</li>
+        <li><b>Never</b> shares OTPs, PINs or card numbers, and never agrees to pay.</li>
+      </ul></div>
+      <div class="card"><h3>Start it from anywhere</h3><ul>
+        <li>The app, a WhatsApp message to the Awaaz bot, or a voice note.</li>
+        <li>Results come back in the app and on WhatsApp.</li>
+      </ul></div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ WHATSAPP ============ -->
+<main class="wrap view hidden" id="v-whatsapp">
+  <div class="head">
+    <h1>Awaaz inside WhatsApp.</h1>
+    <p>No app needed. Chat with the Awaaz bot to start calls and tasks, read live captions as messages, turn voice notes into text, and send voice notes in your own voice.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure">
+      <div class="phone"><div class="scr wa">
+        <div class="status" style="background:var(--surface)"><span>10:12</span><span class="r">5G <span class="bat"></span></span></div>
+        <div class="wahead"><span class="logo"><span><i></i><i></i><i></i><i></i></span></span><div><b>Awaaz</b><small>Business account</small></div></div>
+        <div class="wafeed">
+          <div class="b-out">Sharma Medical ko call karo. Telma 40 ki 30 goli chahiye, ghar bhejni hai.<span class="t">10:12 ✓✓</span></div>
+          <div class="b-in">Calling Sharma Medical now. Their replies will appear here. Type to answer; I’ll say it in your voice.<span class="t">10:12</span></div>
+          <div class="b-live"><span class="h"><span class="dot"></span>Sharma Medical</span><span class="dv">हाँ, मिल जाएगी। ₹420 होंगे। होम डिलीवरी ₹30 एक्स्ट्रा।</span></div>
+          <div class="qbtns"><span>Theek hai, bhej dijiye</span><span>Phir se boliye</span></div>
+          <div class="b-out">Theek hai, bhej dijiye<span class="t">10:13 ✓✓</span></div>
+          <div class="b-live"><span class="h"><span class="dot"></span>Sharma Medical</span><span class="dv">ठीक है, 7 बजे तक पहुँच जाएगा।</span></div>
+          <div class="b-in"><b>Call finished</b><br>Telma 40, 30 tablets. ₹450 with delivery, arriving by 7 pm, pay cash.<span class="t">10:14</span></div>
+        </div>
+        <div class="wainput"><div>Message</div><i><svg class="i"><use href="#i-mic"/></svg></i></div>
+      </div></div>
+      <figcaption><b>Live relay in a chat</b><span>Captions arrive as messages; replies typed in WhatsApp are spoken into the call.</span></figcaption>
+    </figure>
+    <figure class="figure">
+      <div class="phone"><div class="scr wa">
+        <div class="status" style="background:var(--surface)"><span>18:40</span><span class="r">5G <span class="bat"></span></span></div>
+        <div class="wahead"><span class="logo"><span><i></i><i></i><i></i><i></i></span></span><div><b>Awaaz</b><small>Business account</small></div></div>
+        <div class="wafeed">
+          <div class="b-out"><div class="vnote" style="background:transparent;padding:0"><button class="pl" type="button" aria-label="Play"><svg class="i sm"><use href="#i-play"/></svg></button><span class="wf"></span><span>0:34</span></div><small style="color:var(--ink-3)">Forwarded from Arif</small><span class="t">18:40 ✓✓</span></div>
+          <div class="b-in"><b>Arif said:</b> “Abbu, main kal subah 10 baje aaunga, aapko doctor ke paas le chalenge. Reports ready rakhna.”<br><small style="color:var(--ink-2)">Arif will come tomorrow at 10 am to take you to the doctor. Keep the reports ready.</small><span class="t">18:40</span></div>
+          <div class="qbtns"><span>Remind me 9:30 am</span><span>Reply in my voice</span></div>
+          <div class="b-out">Reply in my voice: Theek hai beta, main taiyaar rahunga.<span class="t">18:41 ✓✓</span></div>
+          <div class="b-in"><div class="vnote" style="padding:.3rem"><button class="pl" type="button" aria-label="Play"><svg class="i sm"><use href="#i-play"/></svg></button><span class="wf"></span><span>0:04</span></div>Here’s your voice note in your own voice. Forward it to Arif.<span class="t">18:41</span></div>
+        </div>
+        <div class="wainput"><div>Message</div><i><svg class="i"><use href="#i-mic"/></svg></i></div>
+      </div></div>
+      <figcaption><b>Voice notes, both ways</b><span>Forward a voice note to read it. Type a reply to get a voice note in your own voice.</span></figcaption>
+    </figure>
+    <figure class="figure">
+      <div class="phone"><div class="scr syscall">
+        <div class="status"><span>11:02</span><span class="r">4G <span class="bat"></span></span></div>
+        <div style="text-align:center;padding:2.2rem 1rem 0">
+          <div class="logo" style="width:84px;height:84px;border-radius:28px;margin:0 auto"><span style="height:34px;gap:5px"><i style="width:6px;height:14px"></i><i style="width:6px;height:32px"></i><i style="width:6px;height:22px"></i><i style="width:6px;height:12px"></i></span></div>
+          <div style="font-size:1.4rem;font-weight:600;margin-top:1rem">Awaaz</div>
+          <div style="opacity:.65;font-size:.85rem">WhatsApp voice call</div>
+          <div style="margin:1.4rem auto 0;max-width:240px;background:rgba(255,255,255,.08);border-radius:20px;padding:.8rem;font-size:.9rem">Connecting you to <b>Dr. Joshi’s clinic</b>. I’ll repeat everything they say slowly.</div>
+        </div>
+        <div style="margin-top:auto;padding:0 1.2rem 1.6rem">
+          <div class="banner" style="margin:0 0 1rem"><div class="t"><svg class="i sm"><use href="#i-link"/></svg>Share with family and friends</div><b>wa.me/Awaaz?call=kamla</b><span style="font-size:.8rem;color:#5D6370">When they tap it, they reach you through Awaaz, with clear voice on.</span></div>
+          <div style="display:flex;justify-content:space-around"><span class="round dim" style="width:58px;height:58px"><svg class="i"><use href="#i-volume"/></svg></span><span class="round dim" style="width:58px;height:58px"><svg class="i"><use href="#i-mic"/></svg></span><span class="round end" style="width:58px;height:58px"><svg class="i" style="transform:rotate(135deg)"><use href="#i-phone"/></svg></span></div>
+        </div>
+      </div></div>
+      <figcaption><b>WhatsApp calling</b><span>Call Awaaz on WhatsApp (free for you) and it connects your call. Friends can reach you through a link.</span></figcaption>
+    </figure>
+  </div>
+</main>
+
+<!-- ============ MY OWN NUMBER ============ -->
+<main class="wrap view hidden" id="v-number">
+  <div class="head">
+    <h1>Use Awaaz on calls to your own number.</h1>
+    <p>Apps can’t listen to normal phone calls, so Awaaz joins as a third person. On Android, when Awaaz is your phone app, it adds itself with one tap. The other person still sees your own number.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure">
+      <div class="phone"><div class="scr syscall" style="background:linear-gradient(180deg,#22262E 0%,#0C0D10 100%)">
+        <div class="status"><span>14:12</span><span class="r">4G <span class="bat"></span></span></div>
+        <div style="text-align:center;padding:1.6rem 1rem 0">
+          <div style="opacity:.65;font-size:.85rem">Incoming call on your SIM</div>
+          <div style="font-size:1.6rem;font-weight:600;margin-top:.4rem">SBI branch</div>
+          <div style="opacity:.65;font-size:.85rem">+91 20 2xxx xx00</div>
+        </div>
+        <div style="margin-top:1.4rem" class="banner"><div class="t"><span class="logo" style="width:20px;height:20px;border-radius:6px"><span style="height:9px;gap:1px"><i style="width:2px;height:4px"></i><i style="width:2px;height:9px"></i><i style="width:2px;height:6px"></i><i style="width:2px;height:3px"></i></span></span>Awaaz</div><b>Answer with captions and typing?</b><span style="font-size:.8rem;color:#5D6370">Awaaz joins as a third line. SBI keeps seeing your number.</span>
+          <div class="two"><button type="button" style="background:#15171C;color:#fff" data-toast="Answering and adding Awaaz">Answer with Awaaz</button><button type="button" style="background:#F0F1F4" data-toast="Answering normally">Just answer</button></div></div>
+        <div style="margin-top:auto;padding:0 2rem 2rem;display:flex;justify-content:space-between"><span class="round end" style="width:64px;height:64px"><svg class="i" style="transform:rotate(135deg)"><use href="#i-phone"/></svg></span><span class="round" style="width:64px;height:64px;background:#16A34A;color:#fff"><svg class="i"><use href="#i-phone"/></svg></span></div>
+      </div></div>
+      <figcaption><b>Incoming normal call</b><span>Awaaz offers to join before you answer.</span></figcaption>
+    </figure>
+    <figure class="figure">
+      <div class="phone"><div class="scr call">
+        <div class="status"><span>14:13</span><span class="r">4G <span class="bat"></span></span></div>
+        <div class="callbar"><span class="av">SB</span><div class="who"><b>SBI branch</b><small><span class="dot"></span>On your number, Awaaz joined</small></div><span class="pillstat"><svg class="i sm"><use href="#i-merge"/></svg>3-way</span></div>
+        <div class="feed">
+          <div class="note">Awaaz told them: “Priya is deaf and is using an assistant. Please talk normally.”</div>
+          <div class="them"><span class="dv">आपका नया डेबिट कार्ड आ गया है। <span class="chip">30 नवंबर</span> से पहले ब्रांच से ले लीजिए।</span><span class="sub">Your new debit card has arrived. Collect it from the branch before 30 Nov.</span></div>
+          <div class="you">Kya main Saturday ko aa sakti hoon?<small><svg class="i sm"><use href="#i-keyboard"/></svg>Typed, spoken in your voice</small></div>
+          <div class="them"><span class="dv">हाँ, शनिवार <span class="chip">10 से 2</span> बजे तक।</span><span class="sub">Yes, Saturday 10 to 2.</span></div>
+        </div>
+        <div class="dock"><div class="compose"><input type="text" placeholder="Type, they hear it" aria-label="Type"><button class="round send" type="button" aria-label="Speak"><svg class="i"><use href="#i-send"/></svg></button></div></div>
+      </div></div>
+      <figcaption><b>Merged call</b><span>Captions and typing work on your own number.</span></figcaption>
+    </figure>
+    <figure class="figure">
+      <div class="phone"><div class="scr">
+        <div class="status"><span>9:41</span><span class="r">5G <span class="bat"></span></span></div>
+        <div class="navtitle"><h4 style="font-size:1.35rem">Calls to my number</h4></div>
+        <div class="scroll">
+          <div class="group">
+            <div class="rowi"><span class="tx"><b>Use Awaaz as my phone app</b><small>Android: adds Awaaz to calls in one tap</small></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="Default phone app"></button></div>
+            <div class="rowi"><span class="tx"><b>Offer Awaaz on every call</b><small>Show the banner for incoming calls</small></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="Offer on calls"></button></div>
+            <div class="rowi"><span class="tx"><b>Missed calls go to Awaaz</b><small>Unanswered calls become captioned messages</small></span><button class="sw" type="button" role="switch" aria-checked="false" aria-label="Forward missed calls"></button></div>
+          </div>
+          <div class="label">My Awaaz number</div>
+          <div class="group"><div class="rowi"><span class="av acc"><svg class="i sm"><use href="#i-phone"/></svg></span><span class="tx"><b>+91 20 4xxx xx17</b><small>Calls you make through Awaaz show this number</small></span></div></div>
+          <div class="label">On iPhone</div>
+          <div class="cardx" style="font-size:.86rem;color:var(--ink-2)">During a call, tap <b style="color:var(--ink)">Add call</b>, choose <b style="color:var(--ink)">Awaaz</b>, then <b style="color:var(--ink)">Merge</b>. Awaaz shortcuts make this two taps.</div>
+        </div>
+      </div></div>
+      <figcaption><b>Settings</b><span>Your own number, your Awaaz number, and missed-call forwarding.</span></figcaption>
+    </figure>
+  </div>
+</main>
+
+<!-- ============ FACE TO FACE ============ -->
+<main class="wrap view hidden" id="v-face">
+  <div class="head">
+    <h1>At the counter, the clinic, or a speakerphone call.</h1>
+    <p>Lay the phone between you. The top half faces the other person and shows what you typed or said; the bottom half shows you their words as captions. Also works next to a speakerphone, for WhatsApp or video calls on another device.</p>
+  </div>
+  <div class="stage">
+    <figure class="figure">
+      <div class="phone"><div class="scr">
+        <div class="ff">
+          <div class="top"><small>Priya says</small><div class="big">Do you have this in a smaller size? I’d like to try it.</div></div>
+          <div class="divider"><svg class="i sm"><use href="#i-people"/></svg>Face to face, Hindi and English</div>
+          <div class="bottom">
+            <small style="color:var(--ink-2)">Shopkeeper says</small>
+            <div class="cap dv">हाँ, मीडियम है। ट्रायल रूम बाईं तरफ़ है।</div>
+            <small style="color:var(--ink-2)">Yes, we have medium. The trial room is on the left.</small>
+            <div class="compose" style="margin-top:auto;background:var(--surface);border-radius:999px;padding:.3rem"><input type="text" placeholder="Type to show and speak" aria-label="Type" style="background:transparent;color:var(--ink)"><button class="round send" type="button" aria-label="Speak"><svg class="i"><use href="#i-send"/></svg></button></div>
+          </div>
+        </div>
+      </div></div>
+      <figcaption><b>Split screen</b><span>No phone call needed. Uses the phone’s own mic and speaker.</span></figcaption>
+    </figure>
+    <div class="aside">
+      <div class="card"><h3>When to use it</h3><ul>
+        <li><b>In person:</b> pharmacy counter, doctor’s room, bank desk, auto-rickshaw.</li>
+        <li><b>WhatsApp or video calls</b> on a laptop or second phone: put that call on speaker, keep Awaaz open nearby.</li>
+        <li><b>Group conversations:</b> captions show who is speaking.</li>
+      </ul></div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ INTEGRATIONS ============ -->
+<main class="wrap view hidden" id="v-integrations">
+  <div class="head">
+    <h1>Every calling situation, and how Awaaz covers it.</h1>
+    <p>What works on day one, what needs Android, and what no app can do today, with the closest alternative.</p>
+  </div>
+  <div class="matrix"><table>
+    <thead><tr><th>Situation</th><th>How Awaaz handles it</th><th>What works</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>You call a shop, clinic or bank</td><td>Awaaz line: the call runs in the cloud</td><td>Every way of talking and hearing. They see your Awaaz number</td><td><span class="badge v1">Day one</span></td></tr>
+      <tr><td>Someone calls your Awaaz number</td><td>Rings the app with flash and vibration</td><td>Everything, plus messages taken</td><td><span class="badge v1">Day one</span></td></tr>
+      <tr><td>Normal calls on your own SIM</td><td>Awaaz joins as a third line and merges</td><td>Captions, typing, your voice. Clear-voice repeats are heard by both</td><td><span class="badge and">Android first</span></td></tr>
+      <tr><td>Missed calls on your SIM</td><td>Carrier call forwarding to your Awaaz number</td><td>Captioned message</td><td><span class="badge v1">Day one</span></td></tr>
+      <tr><td>WhatsApp messages and voice notes</td><td>Awaaz WhatsApp bot</td><td>Read voice notes, reply in your voice, start calls and tasks, live captions in chat</td><td><span class="badge v1">Day one</span></td></tr>
+      <tr><td>WhatsApp calls with Awaaz</td><td>WhatsApp Business Calling</td><td>Call Awaaz free on WhatsApp; it connects your call. Friends reach you via a link</td><td><span class="badge and">Next</span></td></tr>
+      <tr><td>Personal WhatsApp calls with friends</td><td>No app can access these calls</td><td>Use your Awaaz link instead, face to face mode on a second device, or your phone’s built-in captions</td><td><span class="badge no">Not possible</span></td></tr>
+      <tr><td>Talking in person</td><td>Face to face mode</td><td>Split screen captions and speech</td><td><span class="badge v1">Day one</span></td></tr>
+      <tr><td>Phone menus (IVR)</td><td>Keypad with spoken options listed</td><td>Tap an option, or let Call for me navigate</td><td><span class="badge v1">Day one</span></td></tr>
+      <tr><td>Video calls (Meet, Zoom)</td><td>Awaaz for desktop: captions from tab audio</td><td>Captions and typed replies</td><td><span class="badge later">Later</span></td></tr>
+      <tr><td>Emergency</td><td>SOS: alert family with location, full-screen help card</td><td>Automated 112 calls need a formal partnership</td><td><span class="badge v1">Card on day one</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="ints">
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-phone"/></svg></span><h4>Awaaz phone line</h4><span class="badge v1">Day one</span></div><p>Cloud calls with live two-way audio.</p><ul><li>Plivo: outbound calls with audio streams</li><li>Exotel: personal Indian numbers, incoming calls</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-mic"/></svg></span><h4>In-app calling</h4><span class="badge and">Next</span></div><p>Your side of the call runs through the app instead of a phone call.</p><ul><li>WebRTC audio, so clear voice goes straight to Bluetooth hearing aids and headphones</li><li>Falls back to a normal phone call on weak data</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-merge"/></svg></span><h4>Android phone app</h4><span class="badge and">Android</span></div><p>Awaaz as your default phone app.</p><ul><li>Adds Awaaz to calls and merges in one tap</li><li>Offers Awaaz on incoming calls</li><li>Needs carrier conference calling</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-phone"/></svg></span><h4>iPhone</h4><span class="badge later">Later</span></div><p>Awaaz calls appear like normal calls.</p><ul><li>CallKit for Awaaz line calls</li><li>Manual add-and-merge for SIM calls</li><li>Setup guide for Apple’s Live Speech and Personal Voice</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-chat"/></svg></span><h4>WhatsApp bot</h4><span class="badge v1">Day one</span></div><p>Through WhatsApp Business on Exotel.</p><ul><li>Start calls and tasks by message or voice note</li><li>Live captions as messages; replies spoken in your voice</li><li>Summaries, reminders, family sharing</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-video"/></svg></span><h4>WhatsApp calling</h4><span class="badge and">Next</span></div><p>WhatsApp Business Calling API.</p><ul><li>Users call Awaaz free on WhatsApp</li><li>“Call me via Awaaz” links for friends</li><li>Awaaz calling users back needs their permission</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-bot"/></svg></span><h4>Call for me agents</h4><span class="badge v1">Day one</span></div><p>Bolna agents run whole calls.</p><ul><li>Approval checkpoints, keypad navigation</li><li>Results back to app and WhatsApp</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-wave"/></svg></span><h4>Speech and voices</h4><span class="badge v1">Day one</span></div><p>Chosen per language.</p><ul><li>Deepgram Flux and Sarvam Saaras for captions</li><li>Cartesia, Kalpa and Sarvam Bulbul for voices, including cloned voices</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-cal"/></svg></span><h4>Calendar and contacts</h4><span class="badge v1">Day one</span></div><p>Turn chips into reminders.</p><ul><li>Google Calendar and phone calendar</li><li>Import contacts, add notes per contact</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-watch"/></svg></span><h4>Watches and hearing aids</h4><span class="badge later">Later</span></div><p>Feel and hear calls better.</p><ul><li>Wear OS and Apple Watch: buzz when they talk, glance at captions</li><li>Bluetooth hearing aids via in-app calling</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-hand"/></svg></span><h4>Human help</h4><span class="badge later">Later</span></div><p>When AI isn’t enough.</p><ul><li>ISL video interpreter partners</li><li>Family helper with permission</li></ul></div>
+    <div class="int"><div class="top"><span class="ic"><svg class="i"><use href="#i-bank"/></svg></span><h4>Accessible business lines</h4><span class="badge later">Later</span></div><p>For banks, hospitals and telecoms.</p><ul><li>An Awaaz-powered support number for deaf customers</li><li>SIP connection to existing call centres</li></ul></div>
+  </div>
+  <footer class="note">People, numbers and conversations are fictional. Hindi and Marathi lines need native-speaker review.</footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  "use strict";
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+  const root = document.documentElement;
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const icon = (id, cls='sm') => `<svg class="i ${cls}"><use href="#i-${id}"/></svg>`;
+
+  /* Theme and toast */
+  try { const t = localStorage.getItem('awaaz-v2-theme'); if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t); } catch(e) {}
+  $('#themebtn').addEventListener('click', () => {
+    const cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = cur === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', next);
+    try { localStorage.setItem('awaaz-v2-theme', next); } catch(e) {}
+  });
+  let tt; function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2300); }
+  document.addEventListener('click', e => { const b = e.target.closest('[data-toast]'); if (b) toast(b.getAttribute('data-toast')); });
+  document.addEventListener('click', e => { const s = e.target.closest('.sw'); if (s && !s.disabled) s.setAttribute('aria-checked', s.getAttribute('aria-checked') === 'true' ? 'false' : 'true'); });
+
+  /* Views */
+  const views = ['call','profile','clear','task','whatsapp','number','face','integrations'];
+  function show(v){ if (!views.includes(v)) v = 'call'; views.forEach(x => $('#v-' + x).classList.toggle('hidden', x !== v)); $$('.seg button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v ? 'true' : 'false')); window.scrollTo(0,0); }
+  $$('.seg button').forEach(b => b.addEventListener('click', () => { location.hash = b.dataset.view; show(b.dataset.view); }));
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  show(location.hash.slice(1));
+
+  /* ---------- Live call ---------- */
+  const PHARM = [
+    { hi:'हाँ जी, शर्मा मेडिकल। बोलिए?', en:'Yes, Sharma Medical. Go ahead?', sugg:['Mujhe BP ki goli chahiye, Telma 40','Kya aap khule hain?','Phir se boliye'],
+      voice:'Haan ji, mujhe BP ki goli chahiye, Telma 40.', help:'Namaste, mujhe Telma 40, BP ki goli chahiye.' },
+    { hi:'Telma 40, कितनी गोली चाहिए?', en:'Telma 40, how many tablets?', sugg:['30 goli','60 goli','Ek mahine ki'],
+      voice:'Tees goli.', help:'Mujhe 30 goliyan chahiye, ek mahine ki.' },
+    { hi:'हाँ, मिल जाएगी। [[₹420]] होंगे, [[शाम 6 बजे]] तक तैयार।', en:'Yes, available. It’ll be [[₹420]], ready by [[6 pm]].', sugg:['Theek hai, rakh dijiye','Ghar bhej sakte hain?','Phir se boliye'],
+      voice:'Kya aap ghar bhej sakte hain?', help:'Kya aap ise ghar par deliver kar sakte hain?' },
+    { hi:'होम डिलीवरी [[₹30]] एक्स्ट्रा। पता बताइए।', en:'Home delivery is [[₹30]] extra. Tell me the address.', sugg:['Mera pata hai: Flat 12, Shanti Nagar, Nagpur','Main khud aa jaunga'],
+      voice:'Flat 12, Shanti Nagar, Nagpur.', help:'Mera pata hai Flat 12, Shanti Nagar, Nagpur. Kripya bhej dijiye.' },
+    { hi:'ठीक है, [[7 बजे]] तक पहुँच जाएगा। कैश दे दीजिएगा।', en:'Okay, it’ll reach you by [[7 pm]]. Please pay cash.', sugg:['Dhanyavaad, namaste','Theek hai, cash dunga'],
+      voice:'Theek hai, dhanyavaad.', help:'Theek hai, main cash de dunga. Bahut dhanyavaad.' }
+  ];
+  const BANK = [
+    { hi:'नमस्ते, मैं SBI से बोल रहा हूँ। आपका कार्ड ब्लॉक होने वाला है।', en:'Hello, I’m calling from SBI. Your card is about to be blocked.', sugg:['Kyon?','Main branch aa jaunga'], voice:'Kyon?', help:'Kripya bataiye, card kyon block ho raha hai?' },
+    { hi:'ब्लॉक रोकने के लिए आपके फ़ोन पर आया [[OTP]] बताइए।', en:'To stop the block, tell me the [[OTP]] on your phone.', sugg:['Main OTP nahi dunga','Call kaat raha hoon'], scam:true, voice:'Main OTP nahi dunga.', help:'Main OTP nahi dunga. Main branch jaakar baat karunga.' }
+  ];
+  let script = PHARM, step = 0, live = false, timers = [], keeper = null, lastKeep = 0, scamOn = false, mode = 'type';
+  const hear = { cap:true, clear:false, en:false };
+  const feed = $('#feed'), replies = $('#replies'), msg = $('#msg');
+  const later = (f, ms) => timers.push(setTimeout(f, ms));
+  const chipify = s => esc(s).replace(/\[\[(.+?)\]\]/g, '<button type="button" class="chip" data-chip="$1">$1</button>');
+  const plain = s => s.replace(/\[\[(.+?)\]\]/g, '$1');
+  function push(html, cls){ const d = document.createElement('div'); d.className = cls; d.innerHTML = html; feed.appendChild(d); feed.scrollTop = feed.scrollHeight; return d; }
+  function themHTML(line, rep){
+    const main = hear.en ? line.en : line.hi, sub = hear.en ? line.hi : line.en;
+    let h = '';
+    if (hear.cap) h += `<span class="dv">${chipify(main)}</span>${rep ? ' <small style="opacity:.6">(again)</small>' : ''}<span class="sub">${esc(plain(sub))}</span>`;
+    if (hear.clear) h += `<span class="sub" style="display:flex;align-items:center;gap:.35rem;color:#FFAE3D;margin-top:${hear.cap ? '.4rem' : '0'}"><span class="eq on"><i></i><i></i><i></i><i></i></span>Repeated slowly in your ear</span>`;
+    if (!hear.cap && !hear.clear) h += `<span class="sub" style="margin:0">${icon('volume')} Heard normally</span>`;
+    return h;
+  }
+  function rerender(){ $$('.them', feed).forEach(el => { if (el.dataset.i) el.innerHTML = themHTML(script[+el.dataset.i], el.dataset.rep === '1'); }); }
+  function setReplies(list){ replies.innerHTML = (list || []).map(s => `<button type="button">${esc(s)}</button>`).join(''); $$('button', replies).forEach(b => b.addEventListener('click', () => say(b.textContent, 'reply'))); }
+  function them(i, rep){
+    const line = script[i];
+    const p = push(`<span class="dv">${esc(plain(line.hi).slice(0, Math.ceil(plain(line.hi).length * .4)))}…</span>`, 'them partial');
+    later(() => {
+      p.className = 'them'; p.dataset.i = i; p.dataset.rep = rep ? '1' : '0'; p.innerHTML = themHTML(line, rep);
+      feed.scrollTop = feed.scrollHeight; setReplies(mode === 'voice' ? [] : line.sugg);
+      if (line.scam && !scamOn){ scamOn = true; later(() => $('#scam').classList.remove('hidden'), 400); }
+    }, 650);
+  }
+  function start(which){
+    timers.forEach(clearTimeout); timers = []; clearTimeout(keeper);
+    script = which === 'bank' ? BANK : PHARM; step = 0; live = true; scamOn = false;
+    $('#scam').classList.add('hidden'); feed.innerHTML = ''; setReplies([]); closeSheets();
+    $('#cName').textContent = which === 'bank' ? 'Unknown number' : 'Sharma Medical';
+    $('#cAv').textContent = which === 'bank' ? '?' : 'SM';
+    $('#cState').textContent = 'Calling from your Awaaz number…';
+    later(() => {
+      $('#cState').textContent = 'On call, 00:04';
+      push('Awaaz told them: “Namaste, main Rafiq bol raha hoon. Main bol nahi sakta, ek assistant meri likhi baat padh raha hai.”', 'note');
+      later(() => them(0), 800);
+    }, 1200);
+  }
+  function say(text, src){
+    text = String(text).trim(); if (!text || !live) return;
+    clearTimeout(keeper);
+    if (scamOn && /\d{4,}/.test(text)){ push('Awaaz didn’t read out those digits. This caller asked for an OTP.', 'note'); msg.value = ''; return; }
+    const tag = { reply:[ 'chat','Smart reply, in your voice' ], typed:[ 'keyboard','Typed, in your voice' ], phrase:[ 'chat','Phrase, in your voice' ], voice:[ 'mic','Your own voice' ], help:[ 'spark','AI-phrased, you approved' ] }[src] || ['keyboard','In your voice'];
+    push(`${esc(text)}<small>${icon(tag[0])}${tag[1]}</small>`, 'you');
+    msg.value = ''; setReplies([]);
+    if (/phir se|repeat/i.test(text)){ later(() => them(step, true), 1100); return; }
+    if (script === BANK && /nahi dunga|kaat/i.test(text)){ later(() => end('You ended a suspicious call. Awaaz blocked this number.'), 900); return; }
+    step++;
+    if (step < script.length) later(() => them(step), 1400);
+    else later(() => end('Call ended. Saved: Telma 40, 30 tablets, ₹450 with delivery, by 7 pm, cash.'), 1100);
+  }
+  function end(note){ live = false; timers.forEach(clearTimeout); timers = []; clearTimeout(keeper); $('#cState').textContent = 'Call ended'; $('#scam').classList.add('hidden'); setReplies([]); push(esc(note), 'note'); }
+  $('#sendBtn').addEventListener('click', () => say(msg.value, 'typed'));
+  msg.addEventListener('keydown', e => { if (e.key === 'Enter') say(msg.value, 'typed'); });
+  msg.addEventListener('input', () => { clearTimeout(keeper); if (!live) return; keeper = setTimeout(() => { if (msg.value.trim() && Date.now() - lastKeep > 8000){ lastKeep = Date.now(); push('Awaaz told them: “Rafiq is typing, please hold.”', 'note'); } }, 5000); });
+
+  /* talk modes */
+  $$('[data-tm]').forEach(b => b.addEventListener('click', () => {
+    mode = b.dataset.tm;
+    $$('[data-tm]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    $('#cType').classList.toggle('hidden', mode !== 'type'); $('#cVoice').classList.toggle('hidden', mode !== 'voice'); $('#cHelp').classList.toggle('hidden', mode !== 'help');
+    if (live && script[step]) setReplies(mode === 'voice' ? [] : script[step].sugg);
+  }));
+  const mic = $('#micBtn');
+  mic.addEventListener('click', () => {
+    if (!live || mic.classList.contains('on')) return;
+    mic.classList.add('on'); mic.querySelector('span').textContent = 'Listening… talk now';
+    later(() => { mic.classList.remove('on'); mic.querySelector('span').textContent = 'Hold to talk'; say(script[step].voice, 'voice'); }, 1500);
+  });
+  $('#helpBtn').addEventListener('click', () => {
+    if (!live) return;
+    const few = $('#intent').value.trim() || 'ok';
+    const d = push(`<span class="h">${icon('spark')}Awaaz will say</span><p>${esc(script[step].help)}</p><div class="b"><button type="button" class="go">Say it</button><button type="button" class="no">Edit</button></div><small style="color:rgba(242,243,245,.5);font-size:.72rem">From your words: “${esc(few)}”</small>`, 'draft');
+    $('#intent').value = '';
+    $('.go', d).addEventListener('click', () => { d.remove(); say(script[step].help, 'help'); });
+    $('.no', d).addEventListener('click', () => { d.remove(); $$('[data-tm]')[0].click(); msg.value = script[step].help; msg.focus(); });
+  });
+  $('#intent').addEventListener('keydown', e => { if (e.key === 'Enter') $('#helpBtn').click(); });
+
+  /* hearing toggles */
+  [['#hCap','cap'],['#hClear','clear'],['#hLang','en']].forEach(([id, k]) => $(id).addEventListener('click', () => {
+    hear[k] = !hear[k]; $(id).setAttribute('aria-pressed', hear[k]); rerender();
+    toast({ cap: hear.cap ? 'Captions on' : 'Captions off', clear: hear.clear ? 'Clear voice on: each sentence repeated slowly' : 'Clear voice off', en: hear.en ? 'Reading in English' : 'Reading in Hindi' }[k]);
+  }));
+
+  /* sheets and tools */
+  function closeSheets(){ $$('#callScr .sheet').forEach(s => s.classList.remove('open')); }
+  $('#tPhr').addEventListener('click', () => { closeSheets(); $('#sPhr').classList.add('open'); });
+  $('#tKey').addEventListener('click', () => { closeSheets(); $('#sKey').classList.add('open'); });
+  $$('#callScr [data-close]').forEach(b => b.addEventListener('click', closeSheets));
+  $$('#sPhr [data-say]').forEach(b => b.addEventListener('click', () => { closeSheets(); say(b.dataset.say, 'phrase'); }));
+  $$('#sKey [data-dtmf]').forEach(b => b.addEventListener('click', () => { if (live) push(`Sent tone ${esc(b.dataset.dtmf)}`, 'note'); else toast('Start a call to use the keypad'); }));
+  $('#tRep').addEventListener('click', () => { if (!live) return; push('Awaaz asked them: “Sorry, could you say that again?”', 'note'); later(() => them(step, true), 1100); });
+  $('#tEnd').addEventListener('click', () => { if (live) end('You ended the call.'); });
+  $('#scamEnd').addEventListener('click', () => end('You ended a suspicious call. Awaaz blocked this number.'));
+  $('#scamOk').addEventListener('click', () => $('#scam').classList.add('hidden'));
+  feed.addEventListener('click', e => { const c = e.target.closest('[data-chip]'); if (c) toast(`Saved “${c.dataset.chip}” to this call`); });
+  $('#rePharm').addEventListener('click', () => start('pharm'));
+  $('#reBank').addEventListener('click', () => start('bank'));
+  start('pharm');
+
+  /* ---------- Profile builder ---------- */
+  const PRESETS = {
+    mute:{ talk:['type','replies','help'], hear:['audio','summary'] },
+    deafspeak:{ talk:['voice','help','type'], hear:['captions','vibe','summary'] },
+    deaftype:{ talk:['type','replies','help'], hear:['captions','vibe','translate'] },
+    hoh:{ talk:['voice'], hear:['clear','audio','summary'] },
+    speech:{ talk:['clarity','voice','replies'], hear:['audio','summary'] },
+    lowread:{ talk:['voice','replies'], hear:['clear','summary'] }
+  };
+  const NAMES = { voice:'My voice', type:'Type', replies:'Phrases', help:'Help me say', clarity:'Speak clearly', sign:'Sign language', captions:'live captions', clear:'clear voice', audio:'normal audio', summary:'spoken summary', vibe:'vibration cues', translate:'translation' };
+  const ICONS = { voice:'mic', type:'keyboard', replies:'chat', help:'spark', clarity:'wave', sign:'hand' };
+  let talk = [], hearSel = [];
+  function applyPreset(p){
+    talk = PRESETS[p].talk.slice(); hearSel = PRESETS[p].hear.slice();
+    $$('#presets button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === p ? 'true' : 'false'));
+    paint();
+  }
+  function paint(){
+    $$('#talkOpts .opt').forEach(o => o.setAttribute('aria-pressed', talk.includes(o.dataset.o)));
+    $$('#hearOpts .opt').forEach(o => o.setAttribute('aria-pressed', hearSel.includes(o.dataset.o)));
+    const def = talk[0];
+    $('#profSum').innerHTML = talk.length ? `<b>Default:</b> ${NAMES[def]}${talk.length > 1 ? `, with ${talk.slice(1).map(t => NAMES[t]).join(', ')} one tap away` : ''}. <b>You hear:</b> ${hearSel.length ? hearSel.map(h => NAMES[h]).join(', ') : 'nothing selected yet'}.` : 'Choose at least one way to talk.';
+    const pv = $('#pvFeed'); let h = '';
+    if (hearSel.includes('vibe')) h += `<div class="note">${icon('watch')} Buzz: they started talking</div>`;
+    let t = '';
+    const showEn = hearSel.includes('translate');
+    if (hearSel.includes('captions')) t += `<span class="dv">${showEn ? 'Your appointment is on <span class="chip">Friday</span> at <span class="chip">4 pm</span>.' : 'तुमची अपॉइंटमेंट <span class="chip">शुक्रवारी</span> <span class="chip">4 वाजता</span> आहे.'}</span><span class="sub">${showEn ? 'Translated from Marathi' : 'Your appointment is on Friday at 4 pm.'}</span>`;
+    if (hearSel.includes('clear')) t += `<span class="sub" style="display:flex;gap:.35rem;align-items:center;color:#FFAE3D;margin-top:.35rem"><span class="eq on"><i></i><i></i><i></i><i></i></span>Repeated slowly in your ear</span>`;
+    if (!t) t = `<span class="sub" style="margin:0">${icon('volume')} Heard normally</span>`;
+    h += `<div class="them">${t}</div>`;
+    const youMap = {
+      voice:`<div class="you">Friday works. Is there parking?<small>${icon('mic')}Your own voice</small></div>`,
+      type:`<div class="you">Friday works. Is there parking?<small>${icon('keyboard')}Typed, in your voice</small></div>`,
+      replies:`<div class="you">Yes, that works<small>${icon('chat')}One-tap reply</small></div>`,
+      help:`<div class="draft"><span class="h">${icon('spark')}Awaaz will say</span><p>Friday at 4 works for me. Is there parking near the clinic?</p><div class="b"><button type="button" class="go">Say it</button><button type="button" class="no">Edit</button></div></div>`,
+      clarity:`<div class="you">Friday works, is there parking?<small>${icon('wave')}You spoke, Awaaz said it clearly</small></div>`,
+      sign:`<div class="note">${icon('hand')} ISL interpreter joined by video</div>`
+    };
+    if (talk[0]) h += youMap[talk[0]];
+    if (hearSel.includes('summary')) h += `<div class="note">${icon('bell')} After the call: spoken summary and reminders</div>`;
+    pv.innerHTML = h;
+    $('#pvDock').innerHTML = talk.length ? `<div class="talkmode">${talk.slice(0,3).map((k,i) => `<button type="button" aria-pressed="${i === 0}">${icon(ICONS[k])}${NAMES[k]}</button>`).join('')}</div>` +
+      (talk[0] === 'voice' || talk[0] === 'clarity' ? `<div class="compose"><button class="micbig" type="button">${icon('mic','')}<span>Hold to talk</span></button></div>` : talk[0] === 'sign' ? `<div class="compose"><button class="micbig" type="button">${icon('video','')}<span>Open interpreter video</span></button></div>` : `<div class="compose"><input type="text" placeholder="${talk[0] === 'help' ? 'Say or type a few words' : 'Type, they hear it'}" aria-label="Preview input"><button class="round send" type="button" aria-label="Send">${icon(talk[0] === 'help' ? 'spark' : 'send','')}</button></div>`) : '';
+  }
+  $$('#presets button').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.p)));
+  $$('#talkOpts .opt').forEach(o => o.addEventListener('click', () => { const k = o.dataset.o; talk = talk.includes(k) ? talk.filter(x => x !== k) : talk.concat(k); $$('#presets button').forEach(b => b.setAttribute('aria-pressed','false')); paint(); }));
+  $$('#hearOpts .opt').forEach(o => o.addEventListener('click', () => { const k = o.dataset.o; hearSel = hearSel.includes(k) ? hearSel.filter(x => x !== k) : hearSel.concat(k); $$('#presets button').forEach(b => b.setAttribute('aria-pressed','false')); paint(); }));
+  $('#readSw').addEventListener('click', () => setTimeout(() => document.body.classList.toggle('readable', $('#readSw').getAttribute('aria-checked') === 'true'), 0));
+  applyPreset('mute');
+
+  /* ---------- Clear voice ---------- */
+  const CV = [
+    { mr:'तुमच्या ऑपरेशनची तारीख [[बारा]] आहे, सकाळी [[नऊ वाजता]].', en:'Your operation is on the 12th, at 9 in the morning.' },
+    { mr:'आदल्या रात्री [[दहा]] नंतर काही खाऊ नका.', en:'Don’t eat anything after 10 the night before.' },
+    { mr:'जुने रिपोर्ट घेऊन या.', en:'Bring your old reports.' },
+    { mr:'काही प्रश्न आहे का?', en:'Any questions?' }
+  ];
+  let ci = 0, speed = 0.75, vol = 'high', cvT;
+  function cv(label){
+    $('#cvTxt').innerHTML = esc(CV[ci].mr).replace(/\[\[(.+?)\]\]/g, '<span class="chip">$1</span>');
+    $('#cvEn').textContent = CV[ci].en; $('#cvLab').textContent = label; $('#cvEq').classList.add('on');
+    clearTimeout(cvT); cvT = setTimeout(() => { $('#cvEq').classList.remove('on'); $('#cvLab').textContent = 'Clinic is talking. Tap Repeat any time.'; }, 3000 / speed);
+    $('#cvMeta').textContent = `Speed ${speed.toFixed(2)}×, volume ${vol}`;
+  }
+  $('#cvRep').addEventListener('click', () => cv('You said “phir se”. Repeating'));
+  $('#cvSlow').addEventListener('click', () => { speed = Math.max(0.55, +(speed - 0.1).toFixed(2)); cv('Repeating slower'); });
+  $('#cvLoud').addEventListener('click', () => { vol = 'very high'; cv('Repeating louder'); });
+  $('#cvNext').addEventListener('click', () => { ci = (ci + 1) % CV.length; cv('Repeating slowly'); });
+  cv('Repeating slowly');
+
+  /* ---------- Call for me ---------- */
+  const TILES = [['flame','Gas cylinder'],['pill','Medicine refill'],['steth','Doctor appointment'],['help','Ask a question'],['phone','Call back a missed call'],['mic','Say what you need']];
+  let ts = 0, tT = [];
+  const tb = $('#tBody');
+  function tr(){
+    tT.forEach(clearTimeout); tT = [];
+    $('#tBack').classList.toggle('hidden', ts === 0 || ts >= 2);
+    if (ts === 0){
+      $('#tTitle').textContent = 'Call for me';
+      tb.innerHTML = `<div class="tiles">${TILES.map(([i,t],n) => `<button class="tile" type="button" data-t="${n}"><span class="ic">${icon(i,'')}</span><b>${t}</b></button>`).join('')}</div>
+        <div class="label">In progress</div><div class="group"><div class="rowi"><span class="av acc">${icon('steth')}</span><span class="tx"><b>Dr. Joshi</b><small>Waiting for your OK on a time</small></span>${icon('chev')}</div></div>`;
+      $$('[data-t]', tb).forEach(b => b.addEventListener('click', () => { if (b.dataset.t === '0'){ ts = 1; tr(); } else toast('This demo walks through the gas cylinder task'); }));
+    } else if (ts === 1){
+      $('#tTitle').textContent = 'Gas cylinder';
+      tb.innerHTML = `<div class="group">
+          <div class="rowi"><span class="av">${icon('flame')}</span><span class="tx"><small>Call</small><b>Bharat Gas, Satara</b></span></div>
+          <div class="rowi"><span class="av">${icon('user')}</span><span class="tx"><small>Consumer number</small><b>On file, ending 4471</b></span></div>
+          <div class="rowi"><span class="av">${icon('home')}</span><span class="tx"><small>Deliver to</small><b>Home, Shivaji Nagar</b></span></div></div>
+        <div class="label">Awaaz can agree without asking if</div>
+        <div class="group"><div class="rowi"><span class="tx"><b>Price up to ₹900</b><small>Anything above, it asks you</small></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="Price limit"></button></div>
+          <div class="rowi"><span class="tx"><b>Any day this week</b></span><button class="sw" type="button" role="switch" aria-checked="true" aria-label="Day limit"></button></div></div>
+        <button class="cta" type="button" id="tGo">${icon('phone')}Start the call</button>`;
+      $('#tGo').addEventListener('click', () => { ts = 2; tr(); });
+    } else if (ts === 2){
+      $('#tTitle').textContent = 'Calling Bharat Gas';
+      const st = ['Calling Bharat Gas','Talking to the agency','Shared your consumer number','They offered a date and price'];
+      tb.innerHTML = `<div class="cardx"><div class="prog">${st.map(s => `<div class="step"><span class="b">${icon('check')}</span><span>${s}</span></div>`).join('')}</div></div><div id="tAp"></div>`;
+      st.forEach((_, i) => tT.push(setTimeout(() => {
+        $$('.step', tb).forEach((e, j) => { e.classList.toggle('done', j < i); e.classList.toggle('now', j === i); });
+        if (i === st.length - 1) tT.push(setTimeout(() => {
+          $('#tAp').innerHTML = `<div class="approval"><div style="display:flex;gap:.4rem;align-items:center;font-weight:600;font-size:.85rem">${icon('alert')}Needs your OK</div>
+            <div class="amt" style="margin-top:.4rem">₹950</div><div style="color:var(--ink-2);font-size:.9rem">Delivery Thursday. Above your ₹900 limit.</div>
+            <div class="two"><button class="cta" type="button" id="tOk">${icon('check')}Approve</button><button class="cta soft" type="button" id="tNo">${icon('x')}Decline</button></div></div>`;
+          $('#tOk').addEventListener('click', () => { ts = 3; tr(); });
+          $('#tNo').addEventListener('click', () => toast('Awaaz will decline and ask for another option'));
+        }, 800));
+      }, 850 * (i + 1))));
+    } else if (ts === 3){
+      $('#tTitle').textContent = 'Finishing';
+      tb.innerHTML = `<div class="cardx"><div class="prog"><div class="step done"><span class="b">${icon('check')}</span><span>You approved ₹950</span></div><div class="step now"><span class="b">${icon('check')}</span><span>Confirming the booking</span></div></div></div>`;
+      tT.push(setTimeout(() => { ts = 4; tr(); }, 1500));
+    } else {
+      $('#tTitle').textContent = 'Done';
+      tb.innerHTML = `<div class="cardx"><div style="width:48px;height:48px;border-radius:16px;background:var(--live-soft);color:var(--live);display:grid;place-items:center">${icon('check','lg')}</div>
+        <h5 style="margin-top:.7rem;font-size:1.2rem">Gas cylinder booked</h5>
+        <dl class="kv"><dt>Delivery</dt><dd>Thursday, 30 Oct</dd><dt>Price</dt><dd>₹950, cash</dd><dt>Booking</dt><dd>4471-22</dd></dl>
+        <div class="vnote"><button class="pl" type="button" aria-label="Play" data-toast="Playing result as a voice note">${icon('play')}</button><span class="wf"></span><span>0:15</span></div></div>
+        <button class="cta soft" type="button" data-toast="Reminder set for Thursday, 9 am">${icon('bell')}Remind me Thursday</button>
+        <button class="cta" type="button" id="tDone">Back to tasks</button>`;
+      $('#tDone').addEventListener('click', () => { ts = 0; tr(); });
+    }
+  }
+  $('#tBack').addEventListener('click', () => { ts = Math.max(0, ts - 1); tr(); });
+  tr();
+})();
+</script>
+</body>
+</html>

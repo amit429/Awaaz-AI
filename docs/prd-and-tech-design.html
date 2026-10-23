@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Awaaz — PRD and technical design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Lexend:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F6F7; --surface:#FFFFFF; --sunk:#E9EEF0; --ink:#15202B; --ink-soft:#4E5B67; --line:#D5DDE1;
+  --teal:#0B6E63; --teal-strong:#085A51; --teal-tint:#DDF1EE; --on-teal:#FFFFFF;
+  --saffron:#B97800; --saffron-strong:#F2A007; --saffron-tint:#FFF1D2;
+  --red:#C4302B; --red-tint:#FBE5E4; --violet:#5B4BB7; --violet-tint:#ECE9FA;
+  --code-bg:#EBF0F2;
+  --shadow:0 1px 0 rgba(21,32,43,.05), 0 12px 30px -20px rgba(21,32,43,.45);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1418; --surface:#162027; --sunk:#111A20; --ink:#E5ECEF; --ink-soft:#9FB0BA; --line:#283841;
+    --teal:#4FD1BD; --teal-strong:#7BE0D0; --teal-tint:#123430; --on-teal:#0B1A17;
+    --saffron:#FFC24A; --saffron-strong:#FFC24A; --saffron-tint:#3A2C0A;
+    --red:#FF7C76; --red-tint:#3A1A19; --violet:#B6A9FF; --violet-tint:#241E40;
+    --code-bg:#0C1215; --shadow:0 1px 0 rgba(0,0,0,.4), 0 14px 30px -18px rgba(0,0,0,.85);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1418; --surface:#162027; --sunk:#111A20; --ink:#E5ECEF; --ink-soft:#9FB0BA; --line:#283841;
+  --teal:#4FD1BD; --teal-strong:#7BE0D0; --teal-tint:#123430; --on-teal:#0B1A17;
+  --saffron:#FFC24A; --saffron-strong:#FFC24A; --saffron-tint:#3A2C0A;
+  --red:#FF7C76; --red-tint:#3A1A19; --violet:#B6A9FF; --violet-tint:#241E40;
+  --code-bg:#0C1215; --shadow:0 1px 0 rgba(0,0,0,.4), 0 14px 30px -18px rgba(0,0,0,.85);
+  color-scheme: dark;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ scroll-padding-top:calc(env(safe-area-inset-top,0px) + 16px); scroll-behavior:smooth; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } *,*::before,*::after{ animation:none !important; transition:none !important; } }
+body{ margin:0; background:var(--paper); color:var(--ink); font-family:"Atkinson Hyperlegible","Noto Sans Devanagari",system-ui,sans-serif; font-size:17px; line-height:1.6; }
+h1,h2,h3,h4{ font-family:"Lexend",system-ui,sans-serif; line-height:1.18; letter-spacing:-0.012em; margin:0; font-weight:600; }
+h2{ font-size:clamp(1.65rem,3vw,2.2rem); margin-bottom:.6rem; }
+h3{ font-size:1.25rem; margin:2rem 0 .5rem; }
+h4{ font-size:1.02rem; margin:1.3rem 0 .4rem; }
+p{ margin:.6rem 0; max-width:72ch; }
+ul,ol{ max-width:72ch; padding-left:1.3rem; }
+li{ margin:.25rem 0; }
+a{ color:var(--teal); text-underline-offset:3px; }
+:focus-visible{ outline:3px solid var(--saffron-strong); outline-offset:2px; border-radius:4px; }
+code{ font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.84em; background:var(--code-bg); padding:.1em .35em; border-radius:4px; }
+pre.code{ font-family:"JetBrains Mono",ui-monospace,monospace; font-size:.8rem; line-height:1.55; background:var(--code-bg); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem; overflow-x:auto; }
+.muted{ color:var(--ink-soft); }
+.shell{ display:grid; grid-template-columns:250px minmax(0,1fr); max-width:1320px; margin:0 auto; }
+nav.toc{ position:sticky; top:env(safe-area-inset-top,0px); align-self:start; height:100vh; overflow-y:auto; padding:2rem 1.1rem 2rem 1.5rem; border-right:1px solid var(--line); font-size:.92rem; }
+nav.toc .brand{ display:flex; align-items:center; gap:.55rem; font-family:"Lexend"; font-weight:700; font-size:1.2rem; color:var(--ink); text-decoration:none; margin-bottom:1.1rem; }
+.mark{ width:26px; height:18px; display:inline-flex; gap:3px; align-items:center; }
+.mark i{ display:block; width:4px; border-radius:3px; background:var(--teal); }
+.mark i:nth-child(1){ height:8px; } .mark i:nth-child(2){ height:16px; } .mark i:nth-child(3){ height:11px; background:var(--saffron-strong); } .mark i:nth-child(4){ height:6px; background:var(--saffron-strong); }
+nav.toc p.group{ color:var(--ink-soft); font-size:.8rem; margin:1.1rem 0 .3rem; font-weight:700; }
+nav.toc a{ display:block; color:var(--ink); text-decoration:none; padding:.22rem .5rem; border-radius:6px; }
+nav.toc a:hover{ background:var(--teal-tint); color:var(--teal-strong); }
+.themebtn{ margin-top:1.4rem; font:inherit; font-size:.85rem; background:transparent; color:var(--ink-soft); border:1px solid var(--line); padding:.35rem .75rem; border-radius:999px; cursor:pointer; }
+main{ padding:0 clamp(1rem,4vw,3.2rem) 5rem; min-width:0; }
+section.block{ padding:3.3rem 0 1rem; border-bottom:1px solid var(--line); }
+section.block:last-of-type{ border-bottom:0; }
+.lede{ font-size:1.15rem; color:var(--ink-soft); max-width:64ch; }
+@media (max-width:960px){ .shell{ grid-template-columns:1fr; } nav.toc{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); padding:1rem; } nav.toc .links{ display:flex; flex-wrap:wrap; gap:.2rem; } nav.toc p.group{ width:100%; } }
+
+/* Hero relay strip: the one memorable object */
+.hero{ padding:3.6rem 0 3rem; border-bottom:1px solid var(--line); }
+.hero h1{ font-size:clamp(2.2rem,5vw,3.8rem); font-weight:700; letter-spacing:-0.03em; max-width:18ch; }
+.hero .sub{ font-size:1.2rem; color:var(--ink-soft); margin-top:1rem; max-width:58ch; }
+.relay{ margin-top:2.2rem; display:grid; grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr); align-items:center; gap:0; }
+@media (max-width:820px){ .relay{ grid-template-columns:1fr; } .relay .wire{ transform:rotate(90deg); height:70px; } }
+.side{ background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:1.1rem 1.2rem; box-shadow:var(--shadow); }
+.side .who{ font-size:.85rem; color:var(--ink-soft); display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem; }
+.side .who b{ color:var(--ink); }
+.typed{ font-family:"Lexend"; font-size:1.25rem; line-height:1.35; padding:.8rem 1rem; background:var(--teal-tint); border-radius:16px 16px 16px 4px; }
+.typed .caret{ display:inline-block; width:2px; height:1.1em; background:var(--teal); vertical-align:-0.15em; margin-left:2px; animation:blink 1s steps(1) infinite; }
+@keyframes blink{ 50%{ opacity:0; } }
+.heard{ font-family:"Lexend"; font-size:1.25rem; line-height:1.35; padding:.8rem 1rem; background:var(--sunk); border-radius:16px 16px 4px 16px; }
+.caption{ margin-top:.8rem; font-family:"Lexend"; font-size:1.15rem; line-height:1.45; padding:.7rem .9rem; border-left:4px solid var(--saffron-strong); background:var(--saffron-tint); border-radius:4px 12px 12px 4px; }
+.chip{ display:inline-block; font-family:"Lexend"; font-weight:600; background:var(--saffron-strong); color:#2A1C00; padding:0 .4rem; border-radius:6px; }
+.wire{ display:flex; align-items:center; justify-content:center; gap:4px; height:70px; }
+.wire i{ display:block; width:5px; border-radius:4px; background:var(--teal); animation:wave 1.4s ease-in-out infinite; }
+.wire i:nth-child(odd){ background:var(--saffron-strong); }
+@keyframes wave{ 0%,100%{ height:10px; } 50%{ height:52px; } }
+.pitch{ margin-top:2rem; border-left:4px solid var(--teal); padding:.6rem 1rem; background:var(--surface); border-radius:0 10px 10px 0; max-width:62ch; box-shadow:var(--shadow); }
+.pitch b{ display:block; font-size:.85rem; color:var(--ink-soft); }
+
+/* Panels */
+.grid2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.3rem; }
+.grid3{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1.1rem; }
+.grid4{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
+@media (max-width:1000px){ .grid4{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:860px){ .grid2,.grid3,.grid4{ grid-template-columns:1fr; } }
+.panel{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:1.1rem 1.25rem; }
+.panel h4{ margin-top:0; }
+.stat b{ font-family:"Lexend"; font-size:2rem; font-weight:700; display:block; line-height:1.1; color:var(--teal-strong); }
+.stat span{ display:block; margin-top:.35rem; font-size:.92rem; }
+.stat em{ display:block; margin-top:.5rem; font-size:.78rem; color:var(--ink-soft); font-style:normal; }
+.evidence{ border-left:3px solid var(--teal); padding:.2rem 0 .2rem 1rem; margin:1rem 0; max-width:70ch; }
+.evidence .src{ font-size:.8rem; color:var(--ink-soft); }
+.callout{ background:var(--saffron-tint); border-radius:12px; padding:1rem 1.2rem; max-width:74ch; margin:1.2rem 0; }
+.callout.red{ background:var(--red-tint); }
+.callout.teal{ background:var(--teal-tint); }
+.persona .name{ font-family:"Lexend"; font-weight:600; font-size:1.1rem; }
+.persona .role{ color:var(--ink-soft); font-size:.88rem; }
+.mode{ border-top:5px solid var(--teal); }
+.mode.cv{ border-top-color:var(--saffron-strong); }
+.mode.task{ border-top-color:var(--violet); }
+.mode .for{ font-size:.85rem; color:var(--ink-soft); }
+.tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--surface); margin:1rem 0; }
+table{ border-collapse:collapse; width:100%; font-size:.92rem; min-width:660px; }
+th,td{ text-align:left; padding:.6rem .8rem; border-bottom:1px solid var(--line); vertical-align:top; }
+th{ font-family:"Lexend"; font-weight:600; background:var(--code-bg); font-size:.86rem; }
+tr:last-child td{ border-bottom:0; }
+.pill{ display:inline-block; font-size:.74rem; font-weight:700; padding:.1rem .5rem; border-radius:999px; white-space:nowrap; }
+.p0{ background:var(--red-tint); color:var(--red); } .p1{ background:var(--saffron-tint); color:var(--ink); } .p2{ background:var(--teal-tint); color:var(--teal-strong); }
+.sheet{ background:#FFFFFF; color:#15202B; border:1px solid var(--line); border-radius:14px; padding:1.2rem; overflow-x:auto; margin:1.2rem 0; }
+.sheet pre.mermaid{ margin:0; background:transparent; font-family:"Atkinson Hyperlegible",sans-serif; }
+.sheet .cap{ font-size:.85rem; color:#4E5B67; margin:.6rem 0 0; }
+.steps{ counter-reset:s; list-style:none; padding:0; max-width:none; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:0; border:1px solid var(--line); border-radius:14px; background:var(--surface); overflow:hidden; }
+.steps li{ counter-increment:s; padding:1rem; border-right:1px dashed var(--line); margin:0; }
+.steps li:last-child{ border-right:0; }
+.steps li::before{ content:counter(s); font-family:"Lexend"; font-weight:700; font-size:1.5rem; color:var(--teal); display:block; }
+.steps b{ display:block; }
+.steps span{ font-size:.85rem; color:var(--ink-soft); }
+@media (max-width:900px){ .steps{ grid-template-columns:1fr 1fr; } .steps li{ border-bottom:1px dashed var(--line); } }
+.days{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
+@media (max-width:900px){ .days{ grid-template-columns:1fr 1fr; } }
+@media (max-width:520px){ .days{ grid-template-columns:1fr; } }
+.day .date{ font-family:"Lexend"; font-weight:700; }
+.day .when{ font-size:.8rem; color:var(--ink-soft); }
+.vs td:nth-child(2), .vs td:nth-child(3){ width:36%; }
+.win{ font-weight:700; color:var(--teal-strong); }
+footer{ padding:2rem 0; color:var(--ink-soft); font-size:.85rem; }
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <a class="brand" href="#top"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Awaaz</a>
+  <div class="links">
+    <p class="group">Product</p>
+    <a href="#problem">Problem and evidence</a>
+    <a href="#users">Who it serves</a>
+    <a href="#modes">Four ways to call</a>
+    <a href="#features">Features</a>
+    <p class="group">Flows</p>
+    <a href="#f-type">Type to speak</a>
+    <a href="#f-clear">Clear voice</a>
+    <a href="#f-task">Call for me</a>
+    <a href="#f-incoming">Incoming calls</a>
+    <a href="#f-voice">My own voice</a>
+    <p class="group">Specification</p>
+    <a href="#requirements">Requirements</a>
+    <a href="#safety">Safety and trust</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#realtime">Real-time relay</a>
+    <a href="#voice">Voice stack</a>
+    <a href="#bolna">Bolna agents</a>
+    <a href="#data">Data model</a>
+    <a href="#api">API and events</a>
+    <a href="#metrics">Metrics</a>
+    <p class="group">Shipping</p>
+    <a href="#business">Business model</a>
+    <a href="#plan">8-day plan</a>
+    <a href="#demo">Demo script</a>
+    <a href="#risks">Risks</a>
+    <a href="#compare">Awaaz or Bhasha OPD?</a>
+    <a href="#sources">Sources</a>
+  </div>
+  <button class="themebtn" id="themebtn" type="button">Switch theme</button>
+</nav>
+
+<main id="top">
+<header class="hero">
+  <h1>Phone calls for people who can’t hear or speak.</h1>
+  <p class="sub">Awaaz sits on the line. It speaks what you type, in your own voice. It shows you what the other person said, with the numbers picked out. It repeats things slowly for people who can’t hear well. And it can make the whole call for you.</p>
+
+  <div class="relay" aria-label="Example: a typed message becomes speech, and the reply becomes a caption">
+    <div class="side">
+      <div class="who"><b>Rafiq types</b> in Hindi, with English letters</div>
+      <div class="typed">Namaste, mujhe BP ki goli chahiye, Telma 40, 30 goli<span class="caret"></span></div>
+      <div class="caption" lang="hi">हाँ, मिल जाएगी। <span class="chip">₹420</span> होंगे, <span class="chip">शाम 6 बजे</span> तक तैयार।</div>
+    </div>
+    <div class="wire" aria-hidden="true"><i></i><i style="animation-delay:.15s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.45s"></i><i style="animation-delay:.6s"></i><i style="animation-delay:.75s"></i><i style="animation-delay:.9s"></i></div>
+    <div class="side">
+      <div class="who"><b>Sharma Medical hears</b> in Rafiq’s own voice, in Hindi</div>
+      <div class="heard" lang="hi">नमस्ते, मुझे BP की गोली चाहिए, Telma 40, 30 गोली।</div>
+      <p class="muted" style="font-size:.85rem;margin-top:.7rem">The pharmacist answers normally. Rafiq sees the reply as a caption a moment later.</p>
+    </div>
+  </div>
+
+  <div class="pitch">
+    <b>Submission line (183 characters)</b>
+    Awaaz makes phone calls possible for people who can’t hear or speak: it speaks what you type in your own voice, captions replies, repeats clearly, and can make the whole call for you.
+  </div>
+  <p class="muted" style="font-size:.9rem;margin-top:1rem">PRD and technical design, v0.1, 23 October 2026. An alternative to Bhasha OPD for the Bolna Buildathon (due 31 October).</p>
+</header>
+
+<section class="block" id="problem">
+  <h2>Problem and evidence</h2>
+  <p class="lede">Most of India still runs on phone calls: the pharmacy, the clinic, the bank, the gas agency, the delivery driver. For millions of people a phone call is either silent or unintelligible, and India has no relay service to help.</p>
+
+  <div class="grid4" style="margin:1.4rem 0">
+    <div class="panel stat"><b>18M</b><span>deaf people, by the National Association of the Deaf’s estimate</span><em>The 2011 Census counted about 5 million</em></div>
+    <div class="panel stat"><b>~15M</b><span>older adults with hearing loss who can still speak</span><em>1 in 10 of 149M people aged 60+</em></div>
+    <div class="panel stat"><b>4.3%</b><span>of older adults with hearing loss use a hearing aid</span><em>LASI wave 1</em></div>
+    <div class="panel stat"><b>0</b><span>national telecom relay services in India</span><em>A long-standing ask from disability groups</em></div>
+  </div>
+
+  <div class="evidence">India has around 18 million deaf people and only about 250 to 350 certified sign language interpreters.
+    <div class="src">GSMA; National Association of the Deaf</div></div>
+  <div class="evidence">In the national ageing survey, about one in ten adults aged 60+ reported hearing loss, and only 4.3% of them used hearing aids.
+    <div class="src">LASI wave 1, 2017–18</div></div>
+  <div class="evidence">Hearing loss acquired after birth starts at a median age of 56, so most people with hearing loss learned to speak first.
+    <div class="src">NSS 76th round, 2018</div></div>
+  <div class="evidence">Disability groups have long flagged the lack of a national relay service as a gap in telecom access. TRAI recommended a relay centre for emergency calls in 2018; it has not been built.
+    <div class="src">CIS India; TRAI recommendations on ICT accessibility, 2018</div></div>
+
+  <h3>The literacy reality, and why it shapes the product</h3>
+  <p>Text relay (type and read) is how most countries serve deaf callers. In India it reaches only part of the need:</p>
+  <ul>
+    <li>Census 2011 recorded 56.9% of people with a hearing disability and 58.3% with a speech disability as literate, and about one in five of those literates had not finished primary school.</li>
+    <li>There is no national data on how well deaf Indians actually read; researchers note many take years to reach a respectable level. Most of the 387 schools for deaf children still teach by lip-reading and speech rather than sign language.</li>
+    <li>56.5% of Indians aged 60+ never went to school (72.7% of women), so captions alone fail most older people with hearing loss.</li>
+  </ul>
+  <div class="callout teal">
+    <b>So Awaaz is voice-first, not text-first.</b> The largest group (older adults with hearing loss) can speak and needs <i>clear audio</i>, not captions. Literate deaf and speech-impaired users get type-to-speak with heavy shortcuts. People who can’t do a live call at all can hand the whole call to Awaaz. Sign language is served by handing off to human interpreters, not by pretending AI can do it today.
+  </div>
+  <p>Rough reachable users from Census figures: about 2.3 million people with hearing disability and 0.9 million with speech disability at primary-level literacy or above, plus about 15 million older adults with hearing loss for clear voice, regardless of literacy.</p>
+</section>
+
+<section class="block" id="users">
+  <h2>Who it serves</h2>
+  <div class="grid3">
+    <div class="panel persona"><div class="name">Kamla Deshmukh, 72</div><div class="role">Pune. Marathi. Hard of hearing since her sixties. Never went to school. Speaks clearly.</div>
+      <p><b>Today:</b> lets calls ring out, or hands the phone to a neighbour. Missed her eye surgery date because she misheard “twelfth” as “twentieth”.</p>
+      <p><b>Needs:</b> to hear the other person slowly and clearly, and to have dates and numbers repeated.</p><p class="muted">Uses: Clear voice</p></div>
+    <div class="panel persona"><div class="name">Rafiq Shaikh, 54</div><div class="role">Nagpur. Hindi and Urdu. Auto-rickshaw owner. Lost his voice box to throat cancer two years ago. Hears fine, reads Hindi.</div>
+      <p><b>Today:</b> his teenage son makes every call for him: the bank, the RTO, customers.</p>
+      <p><b>Needs:</b> to make his own calls, fast, in a voice that sounds like him.</p><p class="muted">Uses: Type to speak, My own voice</p></div>
+    <div class="panel persona"><div class="name">Priya Nair, 27</div><div class="role">Mumbai. Deaf from birth. Uses Indian Sign Language. Reads English well, Hindi less. Graphic designer.</div>
+      <p><b>Today:</b> WhatsApps everyone, but clinics, landlords and delivery drivers call. She can’t take those calls.</p>
+      <p><b>Needs:</b> to type in English while the other person hears Hindi or Marathi.</p><p class="muted">Uses: Type to speak, Call for me</p></div>
+    <div class="panel persona"><div class="name">Shankar More, 66</div><div class="role">Satara. Deaf since childhood, reads very little. Signs a village sign variety.</div>
+      <p><b>Needs:</b> things done by phone without reading long text: a gas cylinder booked, a pension query answered.</p><p class="muted">Uses: Call for me with picture tasks; human interpreter handoff later</p></div>
+    <div class="panel persona"><div class="name">The other person on the call</div><div class="role">Pharmacist, clinic receptionist, bank agent, delivery driver.</div>
+      <p><b>Needs:</b> to understand within five seconds that this is a real person using an assistant, and not hang up.</p></div>
+    <div class="panel persona"><div class="name">Neha, Kamla’s daughter</div><div class="role">Bengaluru. Sets things up for her mother.</div>
+      <p><b>Needs:</b> to add contacts and phrases, and get a short summary of important calls, with her mother’s permission.</p><p class="muted">Uses: Family helper</p></div>
+  </div>
+</section>
+
+<section class="block" id="modes">
+  <h2>Four ways to call</h2>
+  <p class="lede">One app, four modes. Awaaz suggests a mode during setup from one question (“How do you use the phone?”), and the user can switch any time.</p>
+  <div class="grid2">
+    <div class="panel mode"><h4>Type to speak</h4><p class="for">For people who can’t speak or can’t hear, and can read.</p>
+      <p>Awaaz calls the number. You type or tap a phrase; the other person hears it spoken, in your chosen voice and language. Their reply appears as large captions with numbers, dates and names highlighted. Smart replies cut typing to a tap.</p></div>
+    <div class="panel mode cv"><h4>Clear voice</h4><p class="for">For people who can speak but can’t hear well, whether or not they read.</p>
+      <p>You talk normally. After the other person speaks, Awaaz says it again in your ear: slower, louder and clearer, in your language. Say “repeat”, “slower” or “what was the number?” any time. Big captions are optional.</p></div>
+    <div class="panel mode task"><h4>Call for me</h4><p class="for">For anyone who can’t or doesn’t want to do the call live.</p>
+      <p>Pick a task with pictures or a sentence: refill medicine, book a doctor, book gas, ask a question. Awaaz makes the call itself, checks with you before agreeing to anything that matters, and sends back the result as a picture card and a voice note.</p></div>
+    <div class="panel mode"><h4>Incoming calls</h4><p class="for">For every mode.</p>
+      <p>Each user gets a personal Awaaz number to give to clinics, banks and contacts. Calls to it ring the Awaaz app with a flashing screen and vibration, and connect in the user’s mode.</p></div>
+  </div>
+</section>
+
+<section class="block" id="features">
+  <h2>Features</h2>
+  <p class="lede">Relay calls fail for predictable reasons: typing is slow, the other person hangs up, numbers get misheard, IVR menus can’t be navigated, and scammers target people who can’t hear well. Each feature below answers one of those failures.</p>
+
+  <h3>During a call</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Feature</th><th>What it does</th><th>Failure it prevents</th><th>Mode</th></tr></thead>
+    <tbody>
+      <tr><td><b>Smart replies</b></td><td>After the other person speaks, three suggested replies appear (“Yes, please keep it ready”, “Can you deliver?”, “Please repeat”). One tap speaks it.</td><td>Typing is too slow for a live call</td><td>Type to speak</td></tr>
+      <tr><td><b>Phrase board</b></td><td>Saved phrases grouped by place: pharmacy, clinic, bank, home address, “I can’t speak, I’m typing”.</td><td>Re-typing the same things</td><td>Type to speak</td></tr>
+      <tr><td><b>“Please hold” keeper</b></td><td>When the user is typing for more than 5 seconds, Awaaz tells the other person “Rafiq is typing, please hold” so they don’t hang up.</td><td>Hang-ups during silence</td><td>Type to speak</td></tr>
+      <tr><td><b>Honest opening line</b></td><td>“Hello, this is Rafiq. He can’t speak, so an assistant is reading out what he types. Please talk normally.”</td><td>The other person thinks it’s a robocall</td><td>All</td></tr>
+      <tr><td><b>Number and date chips</b></td><td>Prices, dates, times, phone numbers, OTP requests and names are highlighted in captions. Tap a chip to save it or add a reminder.</td><td>Misheard numbers</td><td>Type to speak, Clear voice</td></tr>
+      <tr><td><b>Repeat, slower, louder</b></td><td>Re-speak the last thing the other person said, at 0.7× speed and higher volume. Voice commands work too: “phir se bolo”, “dheere”.</td><td>Missing what was said</td><td>Clear voice</td></tr>
+      <tr><td><b>Ask them to repeat</b></td><td>One tap makes Awaaz say “Sorry, could you please say that again?” to the other person.</td><td>Low-confidence captions</td><td>Type to speak, Clear voice</td></tr>
+      <tr><td><b>Language bridge</b></td><td>Type in English or romanised Hindi; the other person hears Hindi, Marathi, Tamil or English. Captions come back in the user’s reading language, with the original one tap away.</td><td>Deaf users who read English calling Marathi-speaking shops</td><td>Type to speak</td></tr>
+      <tr><td><b>Keypad for menus</b></td><td>IVR prompts appear as a list (“Press 1 for balance”); tapping an option sends the tone.</td><td>Getting stuck in phone menus</td><td>Type to speak</td></tr>
+      <tr><td><b>Scam shield</b></td><td>If the other person asks for an OTP, PIN, CVV or remote-access app, a red warning appears and Awaaz refuses to speak those digits.</td><td>Fraud targeting people who can’t hear well</td><td>All</td></tr>
+      <tr><td><b>Confidence shading</b></td><td>Words the system is unsure about are shown lighter, so the user knows when to ask again.</td><td>Trusting a wrong caption</td><td>Type to speak, Clear voice</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Before and after a call</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Feature</th><th>What it does</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr><td><b>Call for me</b></td><td>Task templates with pictures (medicine refill, doctor appointment, gas booking, ask a question, call back a missed call). Awaaz makes the call, pauses for the user’s approval on prices or times, and reports back.</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td><b>Call summary card</b></td><td>After every call: what was agreed, chips for dates, amounts and numbers, a 20-second voice note in the user’s language, and “add reminder” buttons.</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td><b>Personal Awaaz number</b></td><td>A number the user gives to clinics and contacts. Incoming calls ring the app with flashing light and vibration.</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td><b>My own voice</b></td><td>Record 1 minute, or upload old WhatsApp voice notes, to create a voice that sounds like the user. Only the user’s own voice, with a spoken consent sentence.</td><td><span class="pill p1">P1</span> (P0 if time allows; strongest demo moment)</td></tr>
+      <tr><td><b>Contact notes</b></td><td>“Sharma Medical: my BP medicine is Telma 40.” Awaaz uses these to pre-fill tasks and smart replies.</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td><b>Family helper</b></td><td>A trusted family member can add contacts and phrases and, if the user allows it, receive call summaries on WhatsApp.</td><td><span class="pill p1">P1</span></td></tr>
+      <tr><td><b>SOS card</b></td><td>One tap: alerts family with location, and shows a full-screen card to show someone nearby (“I am deaf. Please call my son: …”). Does not auto-call 112 in v1.</td><td><span class="pill p1">P1</span></td></tr>
+      <tr><td><b>Sign language handoff</b></td><td>For ISL users who prefer it, a link to a human video interpreter service.</td><td><span class="pill p2">P2</span></td></tr>
+      <tr><td><b>Accessible business line</b></td><td>Banks, hospitals and telecom companies give deaf customers an Awaaz-powered support number.</td><td><span class="pill p2">P2</span> (business model)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="f-type">
+  <h2>Flow: type to speak</h2>
+  <ol class="steps">
+    <li><b>Pick a contact</b><span>Or type a number. Contact notes load.</span></li>
+    <li><b>Awaaz dials</b><span>From a regular Indian number. App shows ringing.</span></li>
+    <li><b>Opening line</b><span>Awaaz introduces the user and how the call works.</span></li>
+    <li><b>Talk</b><span>Captions in, typed or tapped replies out, keeper fills silences.</span></li>
+    <li><b>Summary</b><span>Card with agreed items, chips and reminders.</span></li>
+  </ol>
+  <div class="sheet">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as User app
+  participant API as Awaaz relay server
+  participant TEL as Plivo call leg
+  participant O as Other person
+  participant STT as Speech to text
+  participant TTS as Voice
+  participant LLM as Reply suggester
+  U->>API: start call to Sharma Medical, mode type, lang hi
+  API->>TEL: outbound call with two-way audio stream
+  TEL->>O: phone rings
+  O-->>TEL: Hello?
+  API->>TTS: opening line in user voice
+  TTS-->>TEL: audio
+  TEL-->>API: other person audio frames
+  API->>STT: stream audio
+  STT-->>API: partial and final captions, end of turn
+  API-->>U: caption events with chips and confidence
+  API->>LLM: last turns plus contact notes
+  LLM-->>U: three smart replies
+  U->>API: user.say text or phrase
+  API->>TTS: synthesize in user voice and call language
+  TTS-->>TEL: audio into call
+  Note over U,API: if typing over 5 s, keeper line plays
+  U->>API: end call
+  API->>LLM: summarise turns, extract entities
+  API-->>U: summary card
+</pre>
+    <p class="cap">The user never joins the phone audio in this mode. The app is a live text console; the server owns the call.</p>
+  </div>
+</section>
+
+<section class="block" id="f-clear">
+  <h2>Flow: clear voice</h2>
+  <p>Here the user does talk on the phone. Awaaz calls the user first, then the other person, and bridges them through the server so it can add a clear, slowed re-speak that only the user hears.</p>
+  <div class="sheet">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant K as Kamla phone
+  participant API as Awaaz bridge
+  participant O as Clinic phone
+  participant STT as Speech to text
+  participant TTS as Clear voice
+  API->>K: call Kamla first, two-way stream
+  K-->>API: picks up
+  API->>O: call clinic, two-way stream
+  API->>O: opening line, Kamla hears poorly and an assistant repeats for her
+  O-->>API: Your surgery is on the twelfth at 9 am
+  API->>K: original audio, slightly delayed and boosted
+  API->>STT: clinic audio
+  STT-->>API: final text, end of turn
+  API->>TTS: same words, Marathi if needed, 0.75 speed, numbers stressed
+  TTS-->>K: re-spoken sentence, only Kamla hears it
+  K-->>API: Kamla speaks, phir se bolo
+  API->>TTS: repeat last sentence slower
+  K-->>API: normal speech to clinic
+  API->>O: Kamla voice passed through
+  API-->>K: end of call summary voice note on WhatsApp
+</pre>
+    <p class="cap">Voice commands are recognised only when they are short and match a known list, so normal conversation is never swallowed.</p>
+  </div>
+  <ul>
+    <li><b>Re-speak, don’t rewrite.</b> By default Awaaz repeats the exact words, translated only if the user chose a different language. A “simpler words” option exists but always keeps numbers, dates, names and medicines exactly.</li>
+    <li><b>Numbers twice.</b> Dates, times and amounts are spoken twice and digit by digit for phone numbers (“nine, eight, two…”).</li>
+    <li><b>No reading needed.</b> The phone screen shows only three huge buttons: Repeat, Slower, End. Captions are optional.</li>
+  </ul>
+</section>
+
+<section class="block" id="f-task">
+  <h2>Flow: call for me</h2>
+  <ol class="steps">
+    <li><b>Choose a task</b><span>Picture tiles, or say it in one sentence.</span></li>
+    <li><b>Fill the gaps</b><span>Contact, item, preferred time. Contact notes pre-fill.</span></li>
+    <li><b>Set limits</b><span>“Approve if under ₹500”, “mornings only”.</span></li>
+    <li><b>Awaaz calls</b><span>Live progress; asks you before agreeing outside limits.</span></li>
+    <li><b>Result</b><span>Picture card, voice note, reminder set.</span></li>
+  </ol>
+  <div class="sheet">
+<pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant U as User app
+  participant API as Awaaz server
+  participant BO as Bolna task agent
+  participant O as Gas agency
+  U->>API: task book gas cylinder, consumer no on file
+  API->>BO: start call with goal, facts, limits, user name
+  BO->>O: Hello, I am calling on behalf of Shankar More, he is deaf
+  O-->>BO: Next delivery Thursday, 950 rupees
+  BO->>API: needs_approval function, Thursday and 950
+  API-->>U: approval card, picture and amount
+  U->>API: approve
+  API-->>BO: approved
+  BO->>O: Yes please book it
+  BO->>API: extraction result booked, Thursday, ref 4471
+  API-->>U: result card and voice note
+</pre>
+    <p class="cap">The task agent may never share OTPs, PINs or card numbers, never agree to payments, and must hand back to the user on anything outside the stated goal.</p>
+  </div>
+</section>
+
+<section class="block" id="f-incoming">
+  <h2>Flow: incoming calls</h2>
+  <ul>
+    <li>Each user gets a <b>personal Awaaz number</b> (an Exotel virtual number) to share with clinics, banks and contacts.</li>
+    <li>A call to that number reaches the Awaaz server. The caller hears: “You’ve reached Priya. She is deaf and uses Awaaz; please hold while she answers.”</li>
+    <li>The app gets a push notification with a flashing full screen and strong vibration. If the app doesn’t answer in 30 seconds, Awaaz takes a message: it records the caller, transcribes, and shows it as a caption card.</li>
+    <li>Clear voice users get a normal phone call from Awaaz on their own number, already bridged to the caller.</li>
+    <li>Optionally, the user can forward unanswered calls on their own SIM to their Awaaz number with the carrier’s call-forwarding code (⚠️ verify per carrier).</li>
+  </ul>
+</section>
+
+<section class="block" id="f-voice">
+  <h2>Flow: my own voice</h2>
+  <p>For people who lost their voice, hearing it again is the most emotional moment Awaaz can offer, and the strongest demo.</p>
+  <ol>
+    <li>The user (or family) uploads old voice notes or videos with the user speaking, or records 60 seconds if they still can.</li>
+    <li>The user confirms by typing a consent sentence; if they can speak, they read it aloud.</li>
+    <li>Awaaz creates a cloned voice with the voice provider and plays three samples. The user picks one or keeps a stock voice.</li>
+    <li>The voice is locked to that account. Cloning anyone else’s voice is not allowed and not offered.</li>
+  </ol>
+  <div class="callout">If no recordings exist, the user chooses a stock voice by age, gender and region, and can adjust pitch and speed.</div>
+</section>
+
+<section class="block" id="requirements">
+  <h2>Requirements</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>ID</th><th>Requirement</th><th>Acceptance criteria</th><th>Priority</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td>Onboarding with one question and mode suggestion; language, caption size, voice choice</td><td>New user reaches the home screen in under 90 seconds</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R2</td><td>Type-to-speak outbound call to any Indian number</td><td>Typed text heard by the other person within 1.2 s (p50) of tapping speak</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R3</td><td>Live captions with chips for numbers, dates, times, money, names, OTP requests</td><td>Caption appears within 1 s of the other person finishing a sentence (p50)</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R4</td><td>Smart replies and phrase board</td><td>Three suggestions shown within 1.5 s of end of turn; one tap speaks</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R5</td><td>Opening disclosure and “please hold” keeper</td><td>Every relay call opens with the disclosure; keeper plays after 5 s of silence while typing, at most every 8 s</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R6</td><td>Clear voice bridged call</td><td>Re-speak of each other-party turn reaches the user within 2 s of end of turn; Repeat and Slower work by button and voice</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R7</td><td>Call for me with templates, limits and approval checkpoints</td><td>Gas booking and medicine refill templates complete end to end; any value outside limits waits for user approval</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R8</td><td>Scam shield</td><td>OTP/PIN/CVV requests trigger a warning; Awaaz never speaks digit strings matching those patterns after such a request</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R9</td><td>Summary card after every call</td><td>Summary, chips, voice note and reminders within 10 s of hang-up</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R10</td><td>Language bridge (type English, they hear Hindi or Marathi)</td><td>Translation shown to the user before speaking when languages differ; original captions one tap away</td><td><span class="pill p0">P0</span></td></tr>
+      <tr><td>R11</td><td>Personal Awaaz number and incoming calls</td><td>Incoming call rings the app; message taken after 30 s</td><td><span class="pill p1">P1</span></td></tr>
+      <tr><td>R12</td><td>My own voice (cloning from recordings)</td><td>Consent captured; cloned voice used in calls</td><td><span class="pill p1">P1</span></td></tr>
+      <tr><td>R13</td><td>IVR keypad with spoken menu options as a list</td><td>Tapping an option sends the right DTMF tone</td><td><span class="pill p1">P1</span></td></tr>
+      <tr><td>R14</td><td>Family helper and SOS card</td><td>Family can add contacts; summaries shared only with consent</td><td><span class="pill p1">P1</span></td></tr>
+      <tr><td>R15</td><td>Sign language interpreter handoff; business lines</td><td>Partner integration</td><td><span class="pill p2">P2</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="safety">
+  <h2>Safety and trust</h2>
+  <div class="grid2">
+    <div class="panel"><h4>The user’s words are the user’s</h4>
+      <ul>
+        <li>Type to speak says exactly what the user typed. If translation or tidy-up is on, the final sentence is shown to the user before it is spoken.</li>
+        <li>Smart replies are suggestions; nothing is spoken without a tap.</li>
+        <li>Clear voice repeats the other person’s exact words by default. “Simpler words” never changes numbers, dates, names or medicines.</li>
+      </ul></div>
+    <div class="panel"><h4>Honesty with the other person</h4>
+      <ul>
+        <li>Every relay and task call opens by saying an assistant is involved and on whose behalf.</li>
+        <li>Task calls never pretend to be the user. They say “calling on behalf of”.</li>
+        <li>Calls are transcribed for the user; the opening line says so.</li>
+      </ul></div>
+    <div class="panel"><h4>Fraud and impersonation</h4>
+      <ul>
+        <li>Scam shield blocks speaking OTPs, PINs, CVVs and card numbers after the other party asks for them, and warns the user.</li>
+        <li>Task agent: no payments, no sharing of credentials, no agreeing to anything outside the user’s limits.</li>
+        <li>Voice cloning only of the account holder’s own voice, with a consent sentence; voices are never exportable.</li>
+      </ul></div>
+    <div class="panel"><h4>Emergencies and privacy</h4>
+      <ul>
+        <li>v1 does not place automated 112 calls. SOS alerts family with location and shows a full-screen card to show people nearby.</li>
+        <li>Audio is not stored by default. Transcripts and summaries are kept for 30 days unless the user saves them.</li>
+        <li>Family sees only what the user allows, and the user can revoke access any time.</li>
+      </ul></div>
+  </div>
+</section>
+
+<section class="block" id="architecture">
+  <h2>Architecture</h2>
+  <p class="lede">The live relay needs full control over two audio streams, so Awaaz runs its own small media bridge on Plivo two-way audio streams. Fully automated task calls run on Bolna agents. Everything else is the same stack as Bhasha OPD: React, FastAPI and Supabase.</p>
+  <div class="sheet">
+<pre class="mermaid">
+flowchart TB
+  APP["Awaaz PWA on the user phone: captions, typing, buttons"]
+  FAM["Family helper on WhatsApp"]
+  API["FastAPI on Render: REST, app WebSocket, relay sessions, job poller"]
+  BR["Media bridge inside the API: audio frames in and out"]
+  SB["Supabase: Postgres, Realtime, Storage, Auth"]
+  STT["Deepgram Flux for Hindi and English, Sarvam Saaras for other languages"]
+  TTS["Cartesia Sonic-3, Kalpa, Sarvam Bulbul, cloned voices"]
+  LLM["LLM: smart replies, summaries, entities, translation fallback"]
+  PL["Plivo: outbound legs with two-way audio streams"]
+  EX["Exotel: personal Awaaz numbers, WhatsApp"]
+  BO["Bolna: call-for-me task agents"]
+  O["Other person phone"]
+  U["Clear voice user phone"]
+  APP <-->|"WebSocket events"| API
+  API --> SB
+  SB -->|"history, realtime"| APP
+  API --- BR
+  BR <--> STT
+  BR <--> TTS
+  API --> LLM
+  BR <-->|"audio stream"| PL
+  PL <--> O
+  PL <--> U
+  EX -->|"incoming calls"| API
+  API -->|"start task calls"| BO
+  BO <--> O
+  BO -->|"webhooks, approvals"| API
+  API -->|"summaries"| EX
+  EX --> FAM
+</pre>
+    <p class="cap">Two call paths: the live bridge (type to speak, clear voice) and Bolna task agents (call for me).</p>
+  </div>
+  <div class="grid2">
+    <div class="panel"><h4>Frontend</h4><ul>
+      <li>React + TypeScript + Vite, installable PWA, works on cheap Android phones.</li>
+      <li>One WebSocket per live call for captions and actions; Supabase for history, contacts, phrases.</li>
+      <li>Web Push for incoming calls and approvals; Vibration API and a flashing full-screen alert.</li>
+      <li>Huge type scale (captions 24–40 px, user adjustable), 56 px minimum touch targets, high-contrast theme.</li>
+    </ul></div>
+    <div class="panel"><h4>Backend</h4><ul>
+      <li>Python 3.12, FastAPI, Pydantic v2, asyncio. Relay sessions are in-memory objects per call, checkpointed to Postgres.</li>
+      <li>Media bridge handles Plivo audio-stream WebSockets (μ-law 8 kHz) and resamples for STT and TTS.</li>
+      <li>Job poller on a Postgres <code>jobs</code> table for summaries, voice notes and task follow-ups.</li>
+      <li>Render paid Starter instance recommended for the bridge: it holds long WebSockets and must not sleep.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="block" id="realtime">
+  <h2>Real-time relay design</h2>
+  <h3>Why not run the live relay on Bolna?</h3>
+  <p>A Bolna agent decides what to say with an LLM after each turn. In a relay, a person decides, sometimes 10 seconds later, and sometimes without the other person having spoken. Bolna does support a custom LLM endpoint, so the “return the user’s typed text as the LLM reply” trick may work, but it fights the agent’s turn-taking and timeouts (⚠️ spike on day 1). Clear voice is impossible on a single agent leg because the re-speak must reach only the user. So the live relay uses a purpose-built bridge, and Bolna does what it is best at: fully automated calls.</p>
+
+  <h3>Session lifecycle</h3>
+  <ol>
+    <li>App opens <code>WS /v1/relay/{session_id}</code> and sends <code>call.start</code>.</li>
+    <li>API creates the Plivo call with an XML answer URL containing a bidirectional audio stream to <code>WS /v1/media/plivo/{leg_id}</code> (⚠️ verify Plivo bidirectional stream syntax and codec).</li>
+    <li>Media frames from the other person go to the STT stream. Flux gives end-of-turn events; Saaras streaming is used for Marathi and other languages.</li>
+    <li>On a final transcript: run entity tagging (regex + small LLM), push <code>caption.final</code>, then request smart replies.</li>
+    <li>On <code>user.say</code>: optional translation → TTS streaming → frames sent back on the leg. Outgoing audio is cancelled if the other person starts speaking (barge-in).</li>
+    <li>Keeper timer: if <code>user.typing</code> events continue for 5 s with nothing said, speak the keeper line once, then at most every 8 s.</li>
+    <li>On hang-up: flush, enqueue <code>summarise_call</code>, close WebSockets.</li>
+  </ol>
+
+  <h3>Latency budget (p50 targets)</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Path</th><th>Steps</th><th>Target</th></tr></thead>
+    <tbody>
+      <tr><td>Other person → caption</td><td>end-of-turn detection 300–500 ms, final transcript 100–200 ms, push to app 50–100 ms</td><td>under 1 s</td></tr>
+      <tr><td>Tap → heard</td><td>WS 50 ms, translation 0–400 ms (only if needed), TTS first audio ~100 ms, telephony 150 ms</td><td>under 1.2 s</td></tr>
+      <tr><td>Other person → clear re-speak</td><td>end of turn 400 ms, transcript 200 ms, TTS first audio 100–300 ms</td><td>under 2 s</td></tr>
+      <tr><td>End of turn → smart replies</td><td>LLM with short context, 3 replies, max 12 words each</td><td>under 1.5 s</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Clear voice audio mixing</h3>
+  <ul>
+    <li>Two legs (user and other person), both streamed to the bridge. The bridge forwards each side’s audio to the other in real time.</li>
+    <li>Toward the user only: the original audio is boosted and band-limited for speech clarity, then the re-spoken sentence plays after each turn. While a re-speak plays, the other person hears a soft tone so they know to wait.</li>
+    <li>User voice commands (“repeat”, “slower”, “phir se”, “dheere”, “number kya tha”) are matched on short utterances only and are not forwarded to the other person.</li>
+  </ul>
+</section>
+
+<section class="block" id="voice">
+  <h2>Voice stack and sponsor fit</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Need</th><th>Choice</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Live captions, Hindi and English</td><td>Deepgram Flux</td><td>Built-in end-of-turn detection drives when to show captions, suggest replies and start a re-speak; handles Hindi-English switching</td></tr>
+      <tr><td>Live captions, other Indian languages</td><td>Sarvam Saaras v3</td><td>Indian-language accuracy; speech-to-English mode for the language bridge</td></tr>
+      <tr><td>Speaking typed text fast</td><td>Cartesia Sonic-3</td><td>Very low time to first audio; speed and emotion controls; voice cloning for “my own voice”</td></tr>
+      <tr><td>Clear voice re-speak</td><td>Kalpa</td><td>Instruction-following delivery: “slow, clear, stress the numbers”; Hinglish</td></tr>
+      <tr><td>Odia, Bengali and other voices</td><td>Sarvam Bulbul</td><td>Indian-language voices where others are missing</td></tr>
+      <tr><td>Live call legs</td><td>Plivo</td><td>Programmable outbound calls with two-way audio streams and DTMF</td></tr>
+      <tr><td>Personal numbers, WhatsApp</td><td>Exotel</td><td>Indian virtual numbers, incoming call webhooks, WhatsApp Business for summaries and family</td></tr>
+      <tr><td>Call for me</td><td>Bolna</td><td>Autonomous agents with functions, extraction and transfer</td></tr>
+      <tr><td>Smart replies, summaries, entities</td><td>Fast LLM with JSON output</td><td>Short prompts, strict schemas</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="bolna">
+  <h2>Bolna task agents</h2>
+  <p>One generic task agent per language, driven by variables. Templates only change the goal, the facts and the limits.</p>
+<pre class="code">ROLE
+You are Awaaz, calling on behalf of {user_name}, who is {disability_phrase} and cannot take this call.
+Speak {call_language}. First sentence: "Hello, I'm an assistant calling on behalf of {user_name}."
+
+GOAL: {goal}
+FACTS YOU MAY SHARE: {facts}            # e.g. consumer number, medicine name, address
+LIMITS: {limits}                        # e.g. "approve if price under 500 rupees", "weekday mornings only"
+
+RULES
+- Stay on the goal. If asked anything outside FACTS, say you'll check with {user_name}.
+- Before agreeing to any price, date, time or change outside LIMITS, call needs_approval and wait.
+- Never share OTPs, PINs, passwords, card or bank numbers. Never agree to pay.
+- If transferred to an IVR, use the keypad function with the option that matches the goal.
+- End politely once the goal is done or clearly impossible.</pre>
+<pre class="code">functions:
+  needs_approval(session_id, question, options[])   -> waits up to 90 s for the user's answer (⚠️ verify Bolna function timeout)
+  press_keys(digits)                                 -> DTMF (⚠️ verify Bolna support)
+extraction (post-call):
+  { "outcome": "done|partial|failed", "agreed": [{"what":"","value":""}],
+    "reference_numbers": [], "next_steps": "", "summary_user_language": "" }</pre>
+  <p>Templates at launch: medicine refill, doctor appointment, LPG cylinder booking, ask a question, call back a missed number.</p>
+</section>
+
+<section class="block" id="data">
+  <h2>Data model</h2>
+  <div class="sheet">
+<pre class="mermaid">
+erDiagram
+  USERS ||--|| PROFILES : has
+  USERS ||--o{ CONTACTS : saves
+  USERS ||--o{ PHRASES : saves
+  USERS ||--o{ CALLS : makes
+  CALLS ||--o{ TURNS : contains
+  CALLS ||--o{ ENTITIES : yields
+  CALLS ||--o| SUMMARIES : produces
+  USERS ||--o{ TASKS : creates
+  TASKS ||--o{ APPROVALS : asks
+  TASKS ||--o| CALLS : runs_as
+  USERS ||--o{ FAMILY_LINKS : grants
+  USERS ||--o| VOICES : owns
+  USERS ||--o{ CONSENTS : gives
+  PROFILES {
+    text mode
+    text read_language
+    text call_language
+    int caption_size
+    text voice_id
+    numeric speech_rate
+  }
+  CALLS {
+    uuid id PK
+    text kind
+    text direction
+    text other_number
+    text status
+    int duration_s
+  }
+  TURNS {
+    uuid id PK
+    text speaker
+    text text
+    text text_translated
+    numeric confidence
+    int t_ms
+  }
+  TASKS {
+    uuid id PK
+    text template
+    jsonb facts
+    jsonb limits
+    text status
+  }
+</pre>
+    <p class="cap">Row-level security: each user reads only their own rows; family links grant read access to summaries only.</p>
+  </div>
+</section>
+
+<section class="block" id="api">
+  <h2>API and live events</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST /v1/calls</code></td><td>Create a relay session (mode, number, languages); returns session id and WebSocket URL</td></tr>
+      <tr><td><code>WS /v1/relay/{session}</code></td><td>App ↔ server live events</td></tr>
+      <tr><td><code>WS /v1/media/plivo/{leg}</code></td><td>Plivo two-way audio stream</td></tr>
+      <tr><td><code>POST /v1/plivo/answer/{leg}</code></td><td>Answer XML with the stream instruction</td></tr>
+      <tr><td><code>POST /v1/tasks</code>, <code>POST /v1/tasks/{id}/approve</code></td><td>Call for me</td></tr>
+      <tr><td><code>POST /v1/webhooks/bolna</code>, <code>POST /v1/tools/needs-approval</code></td><td>Task agent events and approval checkpoint</td></tr>
+      <tr><td><code>POST /v1/webhooks/exotel/incoming</code></td><td>Personal number inbound calls</td></tr>
+      <tr><td><code>POST /v1/voices</code></td><td>Upload samples and consent for my own voice</td></tr>
+      <tr><td><code>GET /v1/calls/{id}/summary</code></td><td>Summary card</td></tr>
+    </tbody>
+  </table></div>
+<pre class="code">// server → app
+{ "t": "call.state", "state": "ringing|connected|ended", "since_ms": 0 }
+{ "t": "caption.partial", "turn": 7, "text": "haan mil jaayegi..." }
+{ "t": "caption.final", "turn": 7, "text": "हाँ, मिल जाएगी। ₹420 होंगे…", "translated": "Yes, available. It’s ₹420…",
+  "confidence": 0.91, "entities": [{"type":"money","text":"₹420"},{"type":"time","text":"शाम 6 बजे","iso":"18:00"}] }
+{ "t": "suggestions", "turn": 7, "items": ["Theek hai, rakh dijiye", "Ghar par bhej sakte hain?", "Phir se boliye"] }
+{ "t": "scam.warning", "reason": "otp_request", "turn": 9 }
+{ "t": "keeper.spoken" }
+
+// app → server
+{ "t": "user.typing" }
+{ "t": "user.say", "text": "Theek hai, rakh dijiye", "source": "suggestion|typed|phrase" }
+{ "t": "user.ask_repeat" }        // asks the other person to repeat
+{ "t": "user.respeak", "speed": 0.7 }   // clear voice: repeat to me
+{ "t": "user.dtmf", "digits": "2" }
+{ "t": "call.end" }</pre>
+</section>
+
+<section class="block" id="metrics">
+  <h2>Metrics</h2>
+  <div class="grid4">
+    <div class="panel stat"><b>&lt;10%</b><span>calls where the other person hangs up in the first 30 s</span></div>
+    <div class="panel stat"><b>60%+</b><span>user turns sent with a smart reply or phrase</span></div>
+    <div class="panel stat"><b>&lt;1.2 s</b><span>tap to heard, median</span></div>
+    <div class="panel stat"><b>80%+</b><span>call-for-me tasks completed without a human</span></div>
+  </div>
+  <p class="muted" style="margin-top:1rem">Also track caption word error rate by language on consented test calls, re-speak requests per call (a proxy for clarity), and how many summaries lead to a saved reminder.</p>
+</section>
+
+<section class="block" id="business">
+  <h2>Business model</h2>
+  <div class="grid3">
+    <div class="panel"><h4>Free for individuals</h4><p>Users never pay to make a call. A daily fair-use limit keeps costs predictable. Funded by the two channels on the right, CSR and grants.</p></div>
+    <div class="panel"><h4>Accessible business lines</h4><p>Banks, hospitals, insurers and telecom companies pay per minute for an Awaaz-powered support number for deaf and hard-of-hearing customers. The Department of Telecom’s 2025 accessibility instructions and the Rights of Persons with Disabilities Act make accessible customer service a compliance topic.</p></div>
+    <div class="panel"><h4>Government and NGOs</h4><p>State disability departments, deaf associations and hearing-aid programmes distribute Awaaz numbers. A natural partner for the long-recommended national relay service.</p></div>
+  </div>
+  <p class="muted">Unit cost per relay minute is roughly telephony + speech-to-text + voice + a small LLM share. Use sponsor credits for the build and measure the real per-minute cost on the first 100 calls.</p>
+</section>
+
+<section class="block" id="plan">
+  <h2>8-day build plan</h2>
+  <p>Day 1 has one job: prove the hardest piece, two-way audio through the bridge.</p>
+  <div class="days">
+    <div class="panel day"><div class="date">Sat 24 Oct</div><div class="when">Full day</div><ul><li>Plivo outbound call with two-way audio stream to FastAPI.</li><li>Echo test, then TTS into the call, then Flux captions out.</li><li>Spike: Bolna custom LLM relay (keep as plan B).</li></ul></div>
+    <div class="panel day"><div class="date">Sun 25 Oct</div><div class="when">Full day</div><ul><li>App: home, contacts, live call screen with captions and typing.</li><li>User.say → Cartesia → call. Opening line, keeper.</li><li>Supabase schema, auth.</li></ul></div>
+    <div class="panel day"><div class="date">Mon 26 Oct</div><div class="when">Evening</div><ul><li>Smart replies, phrase board, entity chips.</li><li>Summary card after hang-up.</li></ul></div>
+    <div class="panel day"><div class="date">Tue 27 Oct</div><div class="when">Evening</div><ul><li>Clear voice: two-leg bridge, re-speak with Kalpa, Repeat and Slower.</li></ul></div>
+    <div class="panel day"><div class="date">Wed 28 Oct</div><div class="when">Evening</div><ul><li>Call for me on Bolna: gas and medicine templates, approval card.</li><li>Scam shield.</li></ul></div>
+    <div class="panel day"><div class="date">Thu 29 Oct</div><div class="when">Evening</div><ul><li>Language bridge (Saaras, translation).</li><li>Real users: 3–5 deaf, hard-of-hearing or speech-impaired testers via a local deaf association or laryngectomee club, plus older relatives.</li></ul></div>
+    <div class="panel day"><div class="date">Fri 30 Oct</div><div class="when">Evening</div><ul><li>My own voice (if a tester has old voice notes and consents).</li><li>Demo page, video, deck.</li></ul></div>
+    <div class="panel day"><div class="date">Sat 31 Oct</div><div class="when">Morning</div><ul><li>Fixes and submit before noon.</li></ul></div>
+  </div>
+  <div class="callout red"><b>Kill switch.</b> If two-way audio isn’t working by Sunday night, drop clear voice, build type to speak on the Bolna custom-LLM path, and make call for me the hero. If neither works by Monday, switch back to Bhasha OPD, which is fully specified and lower risk.</div>
+</section>
+
+<section class="block" id="demo">
+  <h2>Demo script, about 2 minutes</h2>
+  <ol>
+    <li><b>0:00–0:15.</b> “India has no relay service. For 18 million deaf people and 15 million older adults who can’t hear well, a phone call is a wall.”</li>
+    <li><b>0:15–0:50.</b> Rafiq’s phone: he taps Sharma Medical, types in romanised Hindi, taps smart replies. The pharmacist (on speaker) hears Hindi in Rafiq’s own voice. Captions show ₹420 and 6 pm as chips.</li>
+    <li><b>0:50–1:15.</b> Kamla on clear voice: the clinic says “twelfth at 9 am”; Awaaz repeats it slowly in Marathi; she says “phir se bolo” and it repeats again.</li>
+    <li><b>1:15–1:40.</b> Shankar taps the gas cylinder picture. Awaaz calls, asks him to approve ₹950, and returns a picture card with the date.</li>
+    <li><b>1:40–1:55.</b> Scam shield: a fake “bank” asks for an OTP; a red warning, and Awaaz refuses.</li>
+    <li><b>1:55–2:10.</b> Sponsor stack, real testers, and a live number a judge can call right now.</li>
+  </ol>
+</section>
+
+<section class="block" id="risks">
+  <h2>Risks</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Risk</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>Two-way audio streaming is harder than expected (codecs, timing, barge-in)</td><td>No live relay</td><td>Day-1 spike; kill switch to Bolna custom-LLM path; simplest codec (μ-law 8 kHz) end to end</td></tr>
+      <tr><td>Other people hang up on relay calls</td><td>Calls fail</td><td>Opening line tested with real shopkeepers; keeper; smart replies to cut silence</td></tr>
+      <tr><td>Caption errors on noisy shop calls</td><td>Wrong understanding</td><td>Confidence shading, “ask to repeat”, number chips double-checked by re-asking</td></tr>
+      <tr><td>Can’t recruit deaf testers in 8 days</td><td>Weak pitch</td><td>Contact a Pune deaf association, laryngectomee clubs and audiology clinics on day 1; older relatives for clear voice</td></tr>
+      <tr><td>Indian number KYC for personal numbers</td><td>No incoming calls</td><td>Incoming is P1; demo outbound only</td></tr>
+      <tr><td>Judges at a Bolna event see Bolna used only for tasks</td><td>Weaker sponsor story</td><td>Make call for me prominent; show the custom-LLM relay spike; explain why the live bridge is separate</td></tr>
+      <tr><td>Voice cloning misuse</td><td>Harm, trust</td><td>Own voice only, consent sentence, no export</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="block" id="compare">
+  <h2>Awaaz or Bhasha OPD?</h2>
+  <div class="tablewrap vs"><table>
+    <thead><tr><th>Question</th><th>Awaaz</th><th>Bhasha OPD</th></tr></thead>
+    <tbody>
+      <tr><td>Originality</td><td class="win">Very high. No relay service exists in India.</td><td>High, but AI scribes exist nearby.</td></tr>
+      <tr><td>Demo moment</td><td class="win">A man who lost his voice speaks again in his own voice.</td><td>A doctor’s brief writes itself from a call in Odia.</td></tr>
+      <tr><td>Build risk in 8 days</td><td>High. Custom real-time audio bridge.</td><td class="win">Medium. Mostly Bolna agents plus a web app.</td></tr>
+      <tr><td>Use of Bolna</td><td>Task mode only (plus a spike).</td><td class="win">Central to every call.</td></tr>
+      <tr><td>Use of other sponsors</td><td>All six, naturally.</td><td>All six, naturally.</td></tr>
+      <tr><td>Real users this week</td><td>Possible via deaf associations and older relatives; harder to schedule.</td><td class="win">Easy for the prescription explainer; clinic needed for intake.</td></tr>
+      <tr><td>Who pays (YC question)</td><td>Businesses needing accessible support lines; grants.</td><td class="win">Hospitals, clearly.</td></tr>
+      <tr><td>Social impact story</td><td class="win">Very strong.</td><td>Strong.</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Rule of thumb:</b> if you’re confident with real-time audio over WebSockets and can line up three real testers by Wednesday, Awaaz has the higher ceiling. If you want the safer, more Bolna-native build with a clear buyer, Bhasha OPD.</p>
+</section>
+
+<section class="block" id="sources">
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://www.punekarnews.in/out-of-2-68-crore-total-disabled-population-in-india-54-5-are-literates/">Census 2011 disability literacy by type (RGI release, via Punekar News)</a></li>
+    <li><a href="https://factly.in/data-literacy-among-disabled-persons-just-over-50-far-below-national-average-as-per-76th-round-of-nss-report/">NSS 76th round literacy among persons with disabilities, Factly</a></li>
+    <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8061006/">Economic gradient of onset of disability in India (NSS 76th round)</a></li>
+    <li><a href="https://repository.li.mahidol.ac.th/handle/123456789/86318">Self-reported hearing loss among older adults in India, LASI wave 1</a></li>
+    <li><a href="https://www.iipsindia.ac.in/sites/default/files/other_files/LASI_W1_Elderly_India.pdf">LASI wave 1 factsheet: elderly in India</a></li>
+    <li><a href="https://www.thenationalnews.com/world/asia/2023/09/28/india-un-elderly-population/">India Ageing Report 2023 coverage, The National</a></li>
+    <li><a href="https://www.researchgate.net/publication/331931105_Deaf_Education_in_India">Deaf Education in India</a></li>
+    <li><a href="https://codeblue.galencentre.org/2025/05/how-india-can-evolve-an-inclusive-policy-for-the-deaf-and-hard-of-hearing/">How India can evolve an inclusive policy for the deaf and hard of hearing, CodeBlue</a></li>
+    <li><a href="https://news.careers360.com/recognise-indian-sign-language-official-language-cambridge-study-advises-indian-government">Cambridge study on deaf children out of school, Careers360</a></li>
+    <li><a href="https://www.gsma.com/solutions-and-impact/connectivity-for-good/mobile-for-development/blog/making-sign-language-interpretation-accessible-for-all-through-mobile-assistive-technology/">On-demand sign language interpretation apps, GSMA</a></li>
+    <li><a href="https://cis-india.org/accessibility/accessibility-in-new-telecom.pdf/at_download/file">Accessibility in the New Telecom Policy, CIS India</a></li>
+    <li><a href="https://www.medianama.com/2018/07/223-trai-accessibility/">TRAI recommendations on ICT accessibility, MediaNama</a></li>
+    <li><a href="https://www.azbpartners.com/bank/dot-releases-instructions-for-providing-telecom-services-to-persons-with-disabilities/">DoT accessibility instructions 2025, AZB &amp; Partners</a></li>
+    <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6472241">Expert group meeting on aphasia, Annals of Indian Academy of Neurology</a></li>
+    <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4743184">Epidemiological review of laryngeal cancer in India</a></li>
+  </ul>
+</section>
+
+<footer>Awaaz is a working name. People in this document are fictional composites. Hindi and Marathi lines need native-speaker review. Items marked ⚠️ need checking against provider documentation.</footer>
+</main>
+</div>
+<script>
+(function(){
+  var root = document.documentElement;
+  try { var t = localStorage.getItem('awaaz-theme'); if (t === 'light' || t === 'dark') root.setAttribute('data-theme', t); } catch(e) {}
+  document.getElementById('themebtn').addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('awaaz-theme', next); } catch(e) {}
+  });
+})();
+</script>
+</body>
+</html>

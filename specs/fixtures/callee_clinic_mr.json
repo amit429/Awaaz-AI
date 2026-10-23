@@ -1,0 +1,7 @@
+{ "id": "clinic_clear_voice", "contact": "Netra Clinic", "call_lang": "mr", "profile_preset": "hoh",
+  "repeat_on": ["phir se", "परत सांगा", "पुन्हा"],
+  "lines": [
+    { "text": "नमस्कार, नेत्र क्लिनिक. तुमच्या ऑपरेशनची तारीख बारा आहे, सकाळी नऊ वाजता.", "en": "Hello, Netra Clinic. Your operation is on the 12th at 9 in the morning." },
+    { "text": "आदल्या रात्री दहा नंतर काही खाऊ नका.", "en": "Don’t eat anything after 10 the night before." },
+    { "text": "जुने रिपोर्ट घेऊन या. काही प्रश्न आहे का?", "en": "Bring your old reports. Any questions?" }
+  ] }

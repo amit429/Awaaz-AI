@@ -1,0 +1,10 @@
+{ "$schema":"https://json-schema.org/draft/2020-12/schema", "$id":"wa_intent", "type":"object", "additionalProperties":false,
+  "required":["intent","slots"],
+  "properties":{
+    "intent":{"enum":["start_call","start_task","transcribe","voice_reply","reply_in_call","approve","decline","help","other"]},
+    "slots":{"type":"object","additionalProperties":false,"properties":{
+      "contact_name":{"type":["string","null"]},
+      "number":{"type":["string","null"]},
+      "template":{"enum":["medicine_refill","doctor_appointment","lpg_booking","ask_question","call_back_missed",null]},
+      "facts":{"type":"object"},
+      "text":{"type":["string","null"],"description":"Text to speak or to turn into a voice note"} } } } }

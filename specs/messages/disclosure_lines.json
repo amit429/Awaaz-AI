@@ -1,0 +1,43 @@
+{
+  "_note": "Spoken at the start of every relay call in the call language. {name} = user's display name. Hindi and Marathi verb forms are gendered: these lines mix forms as examples; store a 'grammatical_gender' preference in profiles (masc/fem) and keep one variant per gender. Needs native-speaker review.",
+  "mute": {
+    "hi": "Namaste, main {name} bol raha hoon. Main bol nahi sakta, isliye ek assistant meri likhi baat padh raha hai. Aap normal baat kijiye.",
+    "mr": "नमस्कार, मी {name} बोलतोय. मला बोलता येत नाही, म्हणून एक सहाय्यक मी लिहिलेलं वाचून दाखवत आहे. तुम्ही नेहमीसारखं बोला.",
+    "en": "Hello, this is {name}. I can’t speak, so an assistant is reading out what I type. Please talk normally."
+  },
+  "deafspeak": {
+    "hi": "Namaste, main {name}. Main sun nahi sakti, aapki baat mujhe likhkar dikh rahi hai. Kripya saaf aur normal boliye.",
+    "mr": "नमस्कार, मी {name}. मला ऐकू येत नाही, तुमचं बोलणं मला लिहून दिसतंय. कृपया स्पष्ट बोला.",
+    "en": "Hello, this is {name}. I’m deaf; I’m reading what you say as text. Please speak clearly and normally."
+  },
+  "deaftype": {
+    "hi": "Namaste, main {name}. Main sun nahi sakti, isliye ek assistant meri likhi baat padh raha hai aur aapki baat mujhe likhkar dikhata hai.",
+    "mr": "नमस्कार, मी {name}. मला ऐकू येत नाही, एक सहाय्यक माझं लिहिलेलं वाचतो आणि तुमचं बोलणं मला लिहून दाखवतो.",
+    "en": "Hello, this is {name}. I’m deaf, so an assistant reads out what I type and shows me what you say."
+  },
+  "hoh": {
+    "hi": "Namaste, {name} ko kam sunai deta hai. Ek assistant aapki baat unhe dheere se dohrayega. Kripya thoda ruk-ruk kar boliye.",
+    "mr": "नमस्कार, {name} यांना कमी ऐकू येतं. एक सहाय्यक तुमचं बोलणं त्यांना हळू पुन्हा सांगेल. कृपया थांबून थांबून बोला.",
+    "en": "Hello, {name} doesn’t hear well. An assistant will repeat what you say to them slowly. Please pause between sentences."
+  },
+  "speech": {
+    "hi": "Namaste, {name} ko bolne mein dikkat hai. Ek assistant unki baat saaf karke bolega.",
+    "mr": "नमस्कार, {name} यांना बोलायला अडचण आहे. एक सहाय्यक त्यांचं बोलणं स्पष्ट करून सांगेल.",
+    "en": "Hello, {name} has difficulty speaking. An assistant will say their words clearly."
+  },
+  "lowread": {
+    "hi": "Namaste, {name} ko kam sunai deta hai. Ek assistant aapki baat unhe dheere se dohrayega.",
+    "mr": "नमस्कार, {name} यांना कमी ऐकू येतं. एक सहाय्यक तुमचं बोलणं त्यांना हळू पुन्हा सांगेल.",
+    "en": "Hello, {name} doesn’t hear well. An assistant will repeat what you say to them slowly."
+  },
+  "keeper": {
+    "hi": "{name} type kar rahe hain, kripya line par bane rahiye.",
+    "mr": "{name} टाइप करत आहेत, कृपया थांबा.",
+    "en": "{name} is typing, please hold."
+  },
+  "ask_repeat": {
+    "hi": "Maaf kijiye, kya aap phir se bol sakte hain?",
+    "mr": "माफ करा, पुन्हा सांगाल का?",
+    "en": "Sorry, could you please say that again?"
+  }
+}

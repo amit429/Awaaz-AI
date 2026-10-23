@@ -1,0 +1,6 @@
+{ "$schema":"https://json-schema.org/draft/2020-12/schema", "$id":"scam_check", "type":"object", "additionalProperties":false,
+  "required":["is_request","reason","confidence"],
+  "properties":{
+    "is_request":{"type":"boolean","description":"The other person is asking the user to share a secret code or install remote-access software"},
+    "reason":{"enum":["otp_request","pin_request","cvv_request","upi_pin","remote_app","none","other"]},
+    "confidence":{"type":"number","minimum":0,"maximum":1} } }

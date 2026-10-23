@@ -1,0 +1,6 @@
+{ "$schema":"https://json-schema.org/draft/2020-12/schema", "$id":"help_me_say", "type":"object", "additionalProperties":false,
+  "required":["text","lang","changed_meaning_risk"],
+  "properties":{
+    "text":{"type":"string","maxLength":240,"description":"One polite sentence to speak, in the call language and the user's script preference"},
+    "lang":{"type":"string"},
+    "changed_meaning_risk":{"type":"boolean","description":"true if the user's words were ambiguous and the draft may not match their intent"} } }

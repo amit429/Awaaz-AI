@@ -1,0 +1,16 @@
+{
+  "id": "exec_task_0001",
+  "agent_id": "task-hi",
+  "status": "completed",
+  "conversation_duration": 142,
+  "telephony_data": { "to_number": "+912162000000", "from_number": "+912000000000", "recording_url": null },
+  "context_details": { "recipient_data": { "task_id": "00000000-0000-0000-0000-0000000000t1" } },
+  "transcript": "…",
+  "extracted_data": {
+    "outcome": "done",
+    "agreed": [ { "what": "Delivery", "value": "Thursday 30 Oct" }, { "what": "Price", "value": "₹950, cash" } ],
+    "reference_numbers": ["4471-22"],
+    "next_steps": "Keep cash ready on Thursday.",
+    "summary_user_language": "Gas cylinder book ho gaya. Guruvaar, 30 October ko delivery. ₹950 cash dena hai. Booking number 4471-22."
+  }
+}

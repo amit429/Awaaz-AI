@@ -1,0 +1,10 @@
+{ "$schema":"https://json-schema.org/draft/2020-12/schema", "$id":"call_summary", "type":"object", "additionalProperties":false,
+  "required":["title","agreed","facts","next_steps","summary_read_lang","reminders"],
+  "properties":{
+    "title":{"type":"string","maxLength":60},
+    "agreed":{"type":"array","items":{"type":"string","maxLength":140},"maxItems":6},
+    "facts":{"type":"array","maxItems":8,"items":{"type":"object","additionalProperties":false,"required":["type","label","value"],
+      "properties":{"type":{"enum":["money","time","date","phone","address","reference","other"]},"label":{"type":"string"},"value":{"type":"string"},"iso":{"type":["string","null"]}}}},
+    "next_steps":{"type":"array","items":{"type":"string","maxLength":140},"maxItems":4},
+    "summary_read_lang":{"type":"string","maxLength":500,"description":"2-4 sentences in the user's read language, used for the voice note"},
+    "reminders":{"type":"array","maxItems":3,"items":{"type":"object","additionalProperties":false,"required":["label","at_iso"],"properties":{"label":{"type":"string"},"at_iso":{"type":"string"}}}} } }

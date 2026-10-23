@@ -1,0 +1,14 @@
+reason,lang,pattern,weight
+otp_request,en,\b(otp|one time password|verification code)\b,1
+otp_request,en,\b(tell|share|read|send|give)\b.{0,20}\b(otp|code)\b,2
+otp_request,hi,ओटीपी|OTP,1
+otp_request,hi,(बताइए|बताओ|बोलिए|दीजिए|शेयर).{0,20}(ओटीपी|OTP|कोड),2
+otp_request,hi-Latn,\b(otp|code)\b.{0,20}\b(batao|bataiye|boliye|dijiye|share)\b,2
+pin_request,en,\b(atm pin|card pin|pin number)\b,2
+upi_pin,en,\bupi pin\b,2
+upi_pin,hi,यूपीआई पिन|UPI पिन,2
+cvv_request,en,\b(cvv|card verification|3 digit at the back)\b,2
+remote_app,en,\b(anydesk|teamviewer|quicksupport|screen share|rustdesk)\b,2
+remote_app,hi,(एनीडेस्क|ऐप डाउनलोड करो|स्क्रीन शेयर),2
+other,en,\b(digital arrest|kyc expired|card will be blocked|account will be blocked)\b,1
+other,hi,(डिजिटल अरेस्ट|केवाईसी|कार्ड ब्लॉक|अकाउंट ब्लॉक),1

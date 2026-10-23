@@ -1,0 +1,8 @@
+{
+  "mute":      { "label": "I can’t speak",          "talk": ["type","replies","help"],      "hear": ["audio","summary"],              "disability_phrase": "cannot speak" },
+  "deafspeak": { "label": "Deaf, I can speak",      "talk": ["voice","help","type"],        "hear": ["captions","vibe","summary"],    "disability_phrase": "is deaf" },
+  "deaftype":  { "label": "Deaf, I prefer typing",  "talk": ["type","replies","help"],      "hear": ["captions","vibe","translate"],  "disability_phrase": "is deaf" },
+  "hoh":       { "label": "Hard of hearing",        "talk": ["voice"],                      "hear": ["clear","audio","summary"],      "disability_phrase": "does not hear well" },
+  "speech":    { "label": "My speech is unclear",   "talk": ["clarity","voice","replies"],  "hear": ["audio","summary"],              "disability_phrase": "has difficulty speaking" },
+  "lowread":   { "label": "I don’t read much",      "talk": ["voice","replies"],            "hear": ["clear","summary"],              "disability_phrase": "does not hear well" }
+}

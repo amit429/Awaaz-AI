@@ -1,0 +1,16 @@
+id,lang,caption,expected
+1,hi,ब्लॉक रोकने के लिए आपके फ़ोन पर आया OTP बताइए।,otp_request
+2,en,Please read out the six digit code you just received.,otp_request
+3,hi-Latn,Aapke phone pe jo code aaya hai woh batao jaldi,otp_request
+4,en,Install AnyDesk so I can fix your account.,remote_app
+5,en,What is your UPI PIN? I need it to send the refund.,upi_pin
+6,en,Tell me the CVV on the back of your card.,cvv_request
+7,hi,आपका ATM पिन क्या है?,pin_request
+8,en,Your KYC has expired and your account will be blocked today. Share the OTP to continue.,otp_request
+9,hi,हाँ, मिल जाएगी। ₹420 होंगे।,none
+10,en,Your appointment is on Friday at 4 pm.,none
+11,en,We will send an OTP to your phone for delivery confirmation; show it to the delivery person.,none
+12,hi,होम डिलीवरी ₹30 एक्स्ट्रा।,none
+13,en,Your new card has arrived; collect it from the branch.,none
+14,en,Press 2 to block your card.,none
+15,hi-Latn,Code bata do sir verification ke liye,otp_request

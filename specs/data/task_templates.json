@@ -1,0 +1,32 @@
+{
+  "lpg_booking": {
+    "label": "Gas cylinder", "icon": "flame",
+    "goal": "Book a refill LPG cylinder delivery for the user.",
+    "required_facts": ["consumer_number", "address"],
+    "default_limits": { "max_price_inr": 900, "days": "any day this week" }
+  },
+  "medicine_refill": {
+    "label": "Medicine refill", "icon": "pill",
+    "goal": "Order a refill of the user's medicine and arrange pickup or home delivery.",
+    "required_facts": ["medicine_name", "quantity", "address_or_pickup"],
+    "default_limits": { "max_price_inr": 600, "delivery": "today or tomorrow" }
+  },
+  "doctor_appointment": {
+    "label": "Doctor appointment", "icon": "steth",
+    "goal": "Book an appointment with the doctor at a suitable time.",
+    "required_facts": ["patient_name", "preferred_days"],
+    "default_limits": { "times": "weekday mornings", "max_fee_inr": 800 }
+  },
+  "ask_question": {
+    "label": "Ask a question", "icon": "help",
+    "goal": "Ask the question the user wrote and bring back the answer.",
+    "required_facts": ["question"],
+    "default_limits": {}
+  },
+  "call_back_missed": {
+    "label": "Call back a missed call", "icon": "phone",
+    "goal": "Call back the number, find out who called and why, and take a message.",
+    "required_facts": [],
+    "default_limits": {}
+  }
+}
