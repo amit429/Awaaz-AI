@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     sarvam_api_key: str = ""
     llm_api_key: str = ""
     llm_model: str = "gemini-3.5-flash-lite"
+    dev_jwt_secret: str = ""  # local dev only: lets /v1/dev/token mint tokens
     mock_providers: bool = True
     webhook_secret: str = "change-me-32-chars"
     max_call_minutes: int = 15

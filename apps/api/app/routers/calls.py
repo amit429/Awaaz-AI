@@ -8,10 +8,12 @@ from pydantic import BaseModel, Field
 
 from app.auth import _user_id, current_user
 from app.config import Settings, get_settings
+from app.providers.gemini import GeminiLlm
 from app.providers.mocks import FakeCallee
 from app.relay import registry
 from app.relay.session import RelaySession
 from app.services.profiles import resolve_modes
+from app.services.say_prep import make_preparer
 from app.store import Store, get_store
 
 router = APIRouter(tags=["calls"])
@@ -81,6 +83,7 @@ async def create_call(
             modes=modes,
             callee=callee,
             max_seconds=settings.max_call_minutes * 60,
+            prepare=make_preparer(settings, call_lang, GeminiLlm(settings)),
         )
     )
     return {"session_id": call_id, "ws_url": ws_url(settings, call_id)}

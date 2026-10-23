@@ -81,3 +81,14 @@ async def prepare_say(text: str, call_lang: str, settings: Settings, llm: Llm) -
         return Prepared(out["translation"], True, "translated", language)
     except Exception:  # noqa: BLE001 - provider failure must not speak anything unreviewed
         return Prepared(translit if translit_ok else text, True, "same_language", language)
+
+
+def make_preparer(settings: Settings, call_lang: str, llm: Llm):
+    """The session's preparer: conversion in live mode, pass-through in mock mode."""
+
+    async def prepare(text: str) -> Prepared:
+        if settings.mock_providers:
+            return Prepared(text, False, "as_is")
+        return await prepare_say(text, call_lang, settings, llm)
+
+    return prepare

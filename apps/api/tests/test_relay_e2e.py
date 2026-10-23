@@ -203,3 +203,55 @@ def test_call_request_validation_and_live_not_ready(monkeypatch):
         "/v1/calls", json={"to": "+919876543210"}, headers={"Authorization": f"Bearer {token()}"}
     )
     assert r.status_code == 501
+
+
+def _prepare_with(session, spoken, needs_confirm, kind="same_language"):
+    from app.services.say_prep import Prepared
+
+    async def fake(text: str):
+        return Prepared(spoken, needs_confirm, kind)
+
+    session.prepare = fake
+
+
+def test_same_language_text_is_converted_and_spoken_without_confirmation():
+    call = create()
+    session = registry.get(call["session_id"])
+    _prepare_with(session, "ठीक है, रख दीजिए।", False)
+    with connect(call["session_id"]) as ws:
+        recv(ws, is_("caption.final"))
+        ws.send_json({"t": "user.say", "text": "Theek hai, rakh dijiye.", "source": "typed"})
+        got = recv(ws, is_("caption.final"))
+        assert (
+            got[0]["text"] == "ठीक है, रख दीजिए।" and got[0]["original"] == "Theek hai, rakh dijiye."
+        )
+
+
+def test_translation_needs_one_confirmation_before_speaking():
+    call = create()
+    session = registry.get(call["session_id"])
+    _prepare_with(session, "कृपया सात बजे तक पहुँचाइए।", True, "translated")
+    with connect(call["session_id"]) as ws:
+        recv(ws, is_("caption.final"))
+        ws.send_json({"t": "user.say", "text": "Please deliver by seven", "source": "typed"})
+        preview = recv(ws, is_("say.preview"))[-1]
+        assert preview["text"] == "कृपया सात बजे तक पहुँचाइए।" and preview["original"].startswith(
+            "Please"
+        )
+        # nothing was spoken yet: no you.final in between
+        ws.send_json({"t": "say.confirm", "preview_id": preview["preview_id"]})
+        got = recv(ws, is_("caption.final"))
+        assert got[0]["t"] == "you.final" and got[0]["text"] == "कृपया सात बजे तक पहुँचाइए।"
+        ws.send_json({"t": "say.confirm", "preview_id": preview["preview_id"]})
+        assert recv(ws, is_("error"))[-1]["code"] == "unknown_preview"
+
+
+def test_digit_block_checks_what_was_typed_not_the_converted_text():
+    call = create()
+    session = registry.get(call["session_id"])
+    _prepare_with(session, "मेरा ओटीपी चार आठ दो नौ एक तीन है", False)  # digits spelled out
+    session.scam = True
+    with connect(call["session_id"]) as ws:
+        recv(ws, is_("caption.final"))
+        ws.send_json({"t": "user.say", "text": "mera OTP 482913 hai", "source": "typed"})
+        assert recv(ws, is_("say.blocked"))[-1]["reason"] == "scam_digits"

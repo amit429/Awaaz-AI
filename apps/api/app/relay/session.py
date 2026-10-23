@@ -11,7 +11,9 @@ import json
 import logging
 import re
 import time
+import uuid
 from collections import deque
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from pydantic import ValidationError
@@ -21,6 +23,7 @@ from app.models.events import (
     CallEnd,
     ModeSet,
     Ping,
+    SayConfirm,
     UserSay,
     UserTyping,
     client_event,
@@ -30,11 +33,19 @@ from app.relay.disclosure import ask_repeat_line, disclosure_line, keeper_line, 
 from app.relay.entities import extract_entities
 from app.relay.keeper import Keeper
 from app.services.profiles import Modes
+from app.services.say_prep import Prepared
 from app.store import Store
 
 log = logging.getLogger("awaaz.relay")
 
 DIGIT_RUN = re.compile(r"(?<!\d)\d{4,8}(?!\d)")
+Preparer = Callable[[str], Awaitable[Prepared]]
+
+
+async def as_is(text: str) -> Prepared:
+    return Prepared(text, False, "as_is")
+
+
 MAX_TEXT = 500
 REPLAY = 20
 
@@ -53,6 +64,7 @@ class RelaySession:
         callee: FakeCallee | None = None,
         reply_delay: float = 0.05,
         keeper: Keeper | None = None,
+        prepare: Preparer = as_is,
         max_seconds: float = 15 * 60,
         idle_seconds: float = 60.0,
     ) -> None:
@@ -62,6 +74,8 @@ class RelaySession:
         self.callee = callee
         self.reply_delay = reply_delay
         self.keeper = keeper or Keeper()
+        self.prepare = prepare
+        self._pending: dict[str, tuple[str, str, str]] = {}  # preview_id -> (spoken, source, typed)
         self.max_seconds, self.idle_seconds = max_seconds, idle_seconds
         self.seq = 0
         self.scam = False  # set by the scam shield (M5); digit runs are blocked once true
@@ -128,9 +142,14 @@ class RelaySession:
         )
         return self.seq
 
-    async def _you(self, text: str, source: str, speaker: str = "user") -> int:
+    async def _you(
+        self, text: str, source: str, speaker: str = "user", original: str | None = None
+    ) -> int:
         turn = await self._turn(speaker, source, text)
-        self.emit({"t": "you.final", "turn": turn, "text": text, "source": source})
+        event: dict[str, Any] = {"t": "you.final", "turn": turn, "text": text, "source": source}
+        if original and original != text:
+            event["original"] = original  # what the user typed, when it was converted
+        self.emit(event)
         return turn
 
     async def _other_says(self, text: str, lang: str | None = None) -> int:
@@ -229,6 +248,8 @@ class RelaySession:
                 self.keeper.typing()
             case UserSay():
                 await self._user_say(ev)
+            case SayConfirm():
+                await self._say_confirm(ev)
             case AskRepeat():
                 line = ask_repeat_line(self.call_lang)
                 await self._you(line, "ask_repeat")
@@ -253,11 +274,41 @@ class RelaySession:
                 self._error("not_implemented", f"{ev.t} is not available yet")
 
     async def _user_say(self, ev: UserSay) -> None:
+        # Digit runs are checked on what the user typed: conversion may spell numbers out.
         if self.scam and DIGIT_RUN.search(ev.text):
             return self.emit({"t": "say.blocked", "reason": "scam_digits"})
+        if ev.preview_id and ev.preview_id in self._pending:
+            return await self._say_confirm(SayConfirm(t="say.confirm", preview_id=ev.preview_id))
+        try:
+            prepared = await self.prepare(ev.text)
+        except Exception:
+            log.exception("say preparation failed")
+            prepared = Prepared(ev.text, True, "same_language")
+        if prepared.needs_confirm:
+            preview_id = uuid.uuid4().hex[:12]
+            self._pending[preview_id] = (prepared.spoken, ev.source, ev.text)
+            self.emit(
+                {
+                    "t": "say.preview",
+                    "preview_id": preview_id,
+                    "text": prepared.spoken,
+                    "original": ev.text,
+                }
+            )
+            return
+        await self._speak(prepared.spoken, ev.source, ev.text)
+
+    async def _say_confirm(self, ev: SayConfirm) -> None:
+        pending = self._pending.pop(ev.preview_id, None)
+        if pending is None:
+            return self._error("unknown_preview", "nothing to confirm")
+        spoken, source, typed = pending
+        await self._speak(spoken, source, typed)
+
+    async def _speak(self, text: str, source: str, original: str | None = None) -> None:
         self.keeper.reset()
-        await self._you(ev.text, ev.source)
-        self._spawn(self._callee_reply(ev.text))
+        await self._you(text, source, original=original)
+        self._spawn(self._callee_reply(text))
 
     async def handle_text(self, data: str) -> None:
         try:

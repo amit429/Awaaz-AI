@@ -16,7 +16,7 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 | `call.state` | `state` (`ringing`, `connected`, `ended`, `failed`), `reason?`, `elapsed_ms` | Call progress |
 | `caption.partial` | `turn`, `text` | Interim transcript (≤ 5/s) |
 | `caption.final` | `turn`, `text`, `lang`, `translated?`, `confidence`, `entities[]` | End of the other person’s turn |
-| `you.final` | `turn`, `text`, `source` | A user turn was spoken or transcribed (typed, reply, phrase, draft, voice, clarity) |
+| `you.final` | `turn`, `text`, `source`, `original?` | A user turn was spoken or transcribed (typed, reply, phrase, draft, voice, clarity). `original` is what the user typed when it was converted (Hinglish to native script) |
 | `suggestions` | `turn`, `items[3]` | Smart replies for the latest turn |
 | `draft.ready` | `draft_id`, `text`, `from_words` | Help me say result |
 | `say.preview` | `preview_id`, `text`, `original` | Translation shown before speaking |

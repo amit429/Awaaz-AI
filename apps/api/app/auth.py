@@ -21,11 +21,12 @@ def verify_token(token: str, settings: Settings) -> dict:
     header = jwt.get_unverified_header(token)
     alg = header.get("alg", "")
     if alg == "HS256":
-        if not settings.supabase_jwt_secret:
-            raise jwt.InvalidAlgorithmError("HS256 tokens are not accepted without a secret")
-        return jwt.decode(
-            token, settings.supabase_jwt_secret, algorithms=["HS256"], audience="authenticated"
+        secret = settings.supabase_jwt_secret or (
+            settings.dev_jwt_secret if settings.app_env == "local" else ""
         )
+        if not secret:
+            raise jwt.InvalidAlgorithmError("HS256 tokens are not accepted without a secret")
+        return jwt.decode(token, secret, algorithms=["HS256"], audience="authenticated")
     if not settings.supabase_jwks_url:
         raise jwt.InvalidTokenError("SUPABASE_JWKS_URL is not set")
     key = _jwks(settings.supabase_jwks_url).get_signing_key_from_jwt(token).key
