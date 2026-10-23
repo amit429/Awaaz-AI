@@ -18,7 +18,7 @@ form{display:flex;gap:8px;padding:12px;border-top:1px solid #8884}
 input{flex:1;font:inherit;padding:12px;border-radius:10px;border:1px solid #8886;background:transparent;color:inherit}
 button{font:inherit;padding:0 18px;border-radius:10px;border:0;background:#2563eb;color:#fff}
 #s{padding:6px 16px;font-size:13px;opacity:.7}
-</style></head><body><div id="s">Waiting for the call...</div><div style="padding:0 16px">Read as <select id="m"><option value="original">Original (Hindi)</option><option value="hinglish">Hinglish (Latin letters)</option><option value="english">English (translated)</option><option value="marathi">Marathi (translated)</option></select></div><div id="feed"></div>
+</style></head><body><div id="s">Waiting for the call...</div><div style="padding:0 16px"><label style="margin-right:16px"><input type="checkbox" id="auto"> Test mode: auto-acknowledge (replies "ji, theek hai" only)</label>Read as <select id="m"><option value="original">Original (Hindi)</option><option value="hinglish">Hinglish (Latin letters)</option><option value="english">English (translated)</option><option value="marathi">Marathi (translated)</option></select></div><div id="feed"></div>
 <form id="f"><input id="t" autocomplete="off" placeholder="Type what you want to say, press Enter" autofocus>
 <button>Say</button></form>
 <script>
@@ -54,6 +54,7 @@ const t=document.createElement('strong');t.textContent=p.spoken;n.append(t,docum
 const ed=document.createElement('button');ed.type='button';ed.textContent='Edit';ed.onclick=()=>{input.value=v;clearPending();input.focus()};n.append(ed);
 const x=document.createElement('button');x.type='button';x.textContent='Cancel';x.onclick=clearPending;n.append(x);
 feed.appendChild(n);feed.scrollTop=feed.scrollHeight;pending={node:n,spoken:p.spoken,original:v}});
+document.getElementById('auto').addEventListener('change',async e=>{const acks=Array.from({length:40},(_,i)=>['जी।','ठीक है।','हाँ जी।'][i%3]);await post('/v1/dev/autoreply',{replies:e.target.checked?acks:[]})});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')clearPending()});
 </script></body></html>"""
 

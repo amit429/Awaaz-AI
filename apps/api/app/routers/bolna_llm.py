@@ -119,6 +119,7 @@ async def dev_autoreply(payload: dict, settings: Settings = Depends(get_settings
     llm = GeminiLlm(settings)
     prepared = [await prepare_say(t, "hi-IN", settings, llm) for t in texts]
     bridge.auto_replies = [p.spoken for p in prepared]
+    bridge._auto_turn = None
     return {"loaded": len(bridge.auto_replies), "first": bridge.auto_replies[:2]}
 
 
