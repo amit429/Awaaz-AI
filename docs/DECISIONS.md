@@ -16,3 +16,9 @@
 - Dev tunnel: ngrok static domain ruby-doorway-numbness.ngrok-free.dev (run: ngrok http --url=ruby-doorway-numbness.ngrok-free.dev 8000). Webhook URLs in Twilio point here for local dev.
 - Twilio trial uses a shared US number (+1 737 xxx 8034). Unverified: voice webhook and Media Streams on a shared number; trial preamble ("press a key") for the callee; whether Indian phones answer a US caller ID. Test in M0-01, then decide on upgrading.
 - WhatsApp sandbox: Twilio shared trial number +1 737 250 8034, join code `twilio-trial`. `TWILIO_WA_FROM=whatsapp:+17372508034`. Voice and WhatsApp share this one number. Each tester must send the join message (72-hour join window).
+
+## 2026-10-24: Models (benchmarked)
+- LLM: `gemini-3.5-flash-lite` (smart-replies JSON task, p50 1.04 s; `gemini-3.1-flash-lite` p50 1.15 s is the fallback; full Flash models 2.3-2.6 s, too slow; `gemini-2.5-flash-lite` unavailable to new accounts).
+- Captions hi/en: Deepgram `flux-general-multi` (connects on /v2/listen). `flux-general-hi` does not exist. Marathi: Deepgram `nova-3` (lists `mr`) or Sarvam Saaras; decide after a Marathi test.
+- TTS: Cartesia `sonic-3`. Sarvam credits: ~$100; Bolna wallet ~471 (about $5).
+- Telephony: Bolna as the phone line first (custom LLM endpoint spike). Twilio media-stream path kept as full-feature fallback; Twilio voice from the shared trial number is blocked by the trial (see above).
