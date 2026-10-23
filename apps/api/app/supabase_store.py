@@ -82,6 +82,11 @@ class SupabaseStore:
             p.display_name = prof[0]["display_name"]
         if comm:
             c = comm[0]
+            p.onboarded = True
+            p.easy_font, p.speech_rate = (
+                c.get("easy_font", False),
+                float(c.get("speech_rate", 0.75)),
+            )
             p.preset, p.talk_modes, p.hear_modes = (
                 c.get("preset"),
                 c.get("talk_modes"),
@@ -117,6 +122,59 @@ class SupabaseStore:
             params={"on_conflict": "user_id"},
             json=comm,
             prefer="resolution=merge-duplicates",
+        )
+
+    async def list_contacts(self, user_id: str) -> list[dict[str, Any]]:
+        return await self._rest(
+            "GET",
+            "contacts",
+            params={"user_id": f"eq.{user_id}", "select": "*", "order": "favourite.desc,name.asc"},
+        )
+
+    async def save_contact(
+        self, user_id: str, data: dict[str, Any], contact_id: str | None = None
+    ) -> dict[str, Any]:
+        if contact_id:
+            rows = await self._rest(
+                "PATCH",
+                "contacts",
+                params={"id": f"eq.{contact_id}", "user_id": f"eq.{user_id}"},
+                json=data,
+                prefer="return=representation",
+            )
+            if not rows:
+                raise KeyError(contact_id)
+            return rows[0]
+        rows = await self._rest(
+            "POST",
+            "contacts",
+            params={"on_conflict": "user_id,phone_e164"},
+            json={**data, "user_id": user_id},
+            prefer="resolution=merge-duplicates,return=representation",
+        )
+        return rows[0]
+
+    async def delete_contact(self, user_id: str, contact_id: str) -> None:
+        await self._rest(
+            "DELETE", "contacts", params={"id": f"eq.{contact_id}", "user_id": f"eq.{user_id}"}
+        )
+
+    async def list_phrases(self, user_id: str) -> list[dict[str, Any]]:
+        return await self._rest(
+            "GET",
+            "phrases",
+            params={"user_id": f"eq.{user_id}", "select": "*", "order": "created_at.asc"},
+        )
+
+    async def save_phrase(self, user_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        rows = await self._rest(
+            "POST", "phrases", json={**data, "user_id": user_id}, prefer="return=representation"
+        )
+        return rows[0]
+
+    async def delete_phrase(self, user_id: str, phrase_id: str) -> None:
+        await self._rest(
+            "DELETE", "phrases", params={"id": f"eq.{phrase_id}", "user_id": f"eq.{user_id}"}
         )
 
     async def dev_user(self, email: str = "dev@awaaz.local") -> str:

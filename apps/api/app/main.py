@@ -11,6 +11,7 @@ from app.routers import (
     webhooks_bolna,
     webhooks_wa,
 )
+from app.routers import settings as settings_router
 
 
 def create_app() -> FastAPI:
@@ -27,6 +28,7 @@ def create_app() -> FastAPI:
 
     app.include_router(twilio_voice.router)
     app.include_router(calls.router)
+    app.include_router(settings_router.router)
     app.include_router(dev_auth.router)
     app.include_router(webhooks_bolna.router)
     app.include_router(webhooks_wa.router)
