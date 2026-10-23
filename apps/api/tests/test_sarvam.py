@@ -20,3 +20,9 @@ async def test_unchanged_in_mock_mode_without_key_or_when_native():
         await sarvam.transliterate("ठीक है", Settings(mock_providers=False, sarvam_api_key="k"))
         == "ठीक है"
     )
+
+
+async def test_for_reading_original_is_untouched():
+    s = Settings(mock_providers=False, sarvam_api_key="k")
+    assert await sarvam.for_reading("तेलमा चालीस", "original", s) == "तेलमा चालीस"
+    assert await sarvam.for_reading("तेलमा", "hinglish", Settings(mock_providers=True)) == "तेलमा"

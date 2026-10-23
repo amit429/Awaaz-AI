@@ -104,6 +104,22 @@ async def dev_typing() -> dict:
     return {"ok": True}
 
 
+_read_cache: dict[tuple[str, str], str] = {}
+
+
 @router.get("/v1/dev/captions", dependencies=[Depends(require_bearer)])
-async def dev_captions() -> dict:
-    return {"captions": bridge.captions}
+async def dev_captions(mode: str = "original", settings: Settings = Depends(get_settings)) -> dict:
+    """Captions with a `read` field in the chosen reading mode (original text always included)."""
+    if mode not in sarvam.READ_MODES:
+        raise HTTPException(status_code=400, detail="bad mode")
+    out = []
+    for c in list(bridge.captions):
+        key = (c["text"], mode)
+        if key not in _read_cache:
+            try:
+                _read_cache[key] = await sarvam.for_reading(c["text"], mode, settings)
+            except Exception:  # provider hiccup: fall back to the original rather than hide it
+                log.exception("caption conversion failed")
+                _read_cache[key] = c["text"]
+        out.append({**c, "read": _read_cache[key]})
+    return {"captions": out, "mode": mode}

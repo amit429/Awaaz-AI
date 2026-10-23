@@ -59,3 +59,15 @@ def test_preview_transliterates_romanised_text(monkeypatch):
     monkeypatch.setattr("app.routers.bolna_llm.sarvam.transliterate", fake)
     r = client.post("/v1/dev/preview", json={"text": "Theek hai, rakh dijiye."}, headers=AUTH)
     assert r.json() == {"original": "Theek hai, rakh dijiye.", "hindi": "ठीक है, रख दीजिए।"}
+
+
+def test_captions_in_reading_modes(monkeypatch):
+    async def fake(text, mode, settings, source="hi-IN"):
+        return {"hinglish": "Telma chalis", "original": text}[mode]
+
+    monkeypatch.setattr("app.routers.bolna_llm.sarvam.for_reading", fake)
+    bridge.captions.clear()
+    bridge.hear(1, "तेलमा चालीस")
+    h = client.get("/v1/dev/captions?mode=hinglish", headers=AUTH).json()
+    assert h["captions"][0]["read"] == "Telma chalis" and h["captions"][0]["text"] == "तेलमा चालीस"
+    assert client.get("/v1/dev/captions?mode=nope", headers=AUTH).status_code == 400

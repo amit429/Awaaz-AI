@@ -18,16 +18,18 @@ form{display:flex;gap:8px;padding:12px;border-top:1px solid #8884}
 input{flex:1;font:inherit;padding:12px;border-radius:10px;border:1px solid #8886;background:transparent;color:inherit}
 button{font:inherit;padding:0 18px;border-radius:10px;border:0;background:#2563eb;color:#fff}
 #s{padding:6px 16px;font-size:13px;opacity:.7}
-</style></head><body><div id="s">Waiting for the call...</div><div id="feed"></div>
+</style></head><body><div id="s">Waiting for the call...</div><div style="padding:0 16px">Read as <select id="m"><option value="original">Original (Hindi)</option><option value="hinglish">Hinglish (Latin letters)</option><option value="english">English (translated)</option><option value="marathi">Marathi (translated)</option></select></div><div id="feed"></div>
 <form id="f"><input id="t" autocomplete="off" placeholder="Type what you want to say, press Enter" autofocus>
 <button>Say</button></form>
 <script>
 const S=new URLSearchParams(location.search).get('s'),H={Authorization:'Bearer '+S,'Content-Type':'application/json'};
 const feed=document.getElementById('feed'),st=document.getElementById('s');let shown=0,nodes={},typed=0;
-function put(turn,text){let n=nodes[turn];if(!n){n=document.createElement('div');n.className='b them';feed.appendChild(n);nodes[turn]=n}
-n.textContent=text;feed.scrollTop=feed.scrollHeight}
-async function poll(){try{const r=await fetch('/v1/dev/captions',{headers:H});const d=await r.json();
-d.captions.forEach(c=>put(c.turn,c.text));st.textContent='Live. Captions: '+d.captions.length}catch(e){st.textContent='Disconnected'}setTimeout(poll,600)}
+function put(c,mode){let n=nodes[c.turn];if(!n){n=document.createElement('div');n.className='b them';feed.appendChild(n);nodes[c.turn]=n}
+n.textContent='';const m=document.createElement('div');m.textContent=c.read;n.append(m);
+if(mode==='english'||mode==='marathi'){const o=document.createElement('small');o.style.opacity='.65';o.textContent='Translated. Heard: '+c.text;n.append(o)}
+feed.scrollTop=feed.scrollHeight}
+async function poll(){try{const mode=document.getElementById('m').value;const r=await fetch('/v1/dev/captions?mode='+mode,{headers:H});const d=await r.json();
+if(d.mode===mode)d.captions.forEach(c=>put(c,mode));st.textContent='Live. Captions: '+d.captions.length}catch(e){st.textContent='Disconnected'}setTimeout(poll,600)}
 poll();
 document.getElementById('t').addEventListener('input',()=>{if(Date.now()-typed>1500){typed=Date.now();fetch('/v1/dev/typing',{method:'POST',headers:H})}});
 const post=(u,b)=>fetch(u,{method:'POST',headers:H,body:b?JSON.stringify(b):undefined});
