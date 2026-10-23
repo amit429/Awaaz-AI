@@ -5,8 +5,7 @@ finished a turn". Rules that keep the conversation clean:
 - Only the newest request waits for the user's reply; older ones end silently (Bolna splits one
   sentence into several fragments, each opening a request).
 - Fragments of one utterance are merged into one caption turn.
-- The keeper line is spoken only after the user has been typing for KEEPER_AFTER seconds, and at
-  most every KEEPER_EVERY seconds. A timeout never speaks.
+- The keeper line is spoken only after the user has been typing for a while (see relay/keeper.py). A timeout never speaks.
 - A reply typed while no request is waiting is held for the next one.
 """
 
@@ -15,10 +14,9 @@ import time
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 
+from app.relay.keeper import Keeper
+
 KEEPER_LINE = "Ek minute, please hold."
-KEEPER_AFTER = 5.0
-TYPING_STALE = 4.0  # typing events stop arriving: the user paused or left
-KEEPER_EVERY = 8.0
 MAX_WAIT = 60.0
 TICK = 0.4
 
@@ -29,12 +27,7 @@ class DevBridge:
     events: list[dict] = field(default_factory=list)  # timing log: {"t", "type", ...}
     replies: asyncio.Queue[str] = field(default_factory=asyncio.Queue)
     generation: int = 0
-    typing_since: float | None = None
-    last_typing: float | None = None
-    typing_stale: float = TYPING_STALE
-    last_keeper: float = float("-inf")
-    keeper_after: float = KEEPER_AFTER
-    keeper_every: float = KEEPER_EVERY
+    keeper: Keeper = field(default_factory=Keeper)
     max_wait: float = MAX_WAIT
     auto_replies: list[str] = field(default_factory=list)  # scripted test replies, spoken in order
     auto_settle: float = 1.8  # wait for fragments to stop before replying
@@ -57,26 +50,12 @@ class DevBridge:
         self.log("heard", turn=turn, text=text)
 
     def typing(self) -> None:
-        """A typing event. Each burst of events (gaps under typing_stale) is one stretch of typing."""
-        now = time.monotonic()
-        if self.last_typing is None or now - self.last_typing > self.typing_stale:
-            self.typing_since = now
-        self.last_typing = now
+        self.keeper.typing()
 
     def say(self, text: str) -> None:
-        self.typing_since = None
-        self.last_typing = None
+        self.keeper.reset()
         self.log("say", text=text)
         self.replies.put_nowait(text)
-
-    def _keeper_due(self, now: float) -> bool:
-        return (
-            self.typing_since is not None
-            and self.last_typing is not None
-            and now - self.last_typing <= self.typing_stale
-            and now - self.typing_since >= self.keeper_after
-            and now - self.last_keeper >= self.keeper_every
-        )
 
     async def respond(self, turn: int | None = None) -> AsyncIterator[str]:
         """Pieces of speech for one request; empty if superseded or nothing is said in time."""
@@ -104,8 +83,8 @@ class DevBridge:
                     self.log("spoken", text=text, auto=True)
                     yield text
                     return
-                if self._keeper_due(now):
-                    self.last_keeper = now
+                if self.keeper.due():
+                    self.keeper.mark_spoken()
                     self.log("keeper")
                     yield KEEPER_LINE
                 continue

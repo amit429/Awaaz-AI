@@ -7,6 +7,7 @@
 - M1-02 Supabase project `awaaz` created, schema migrated (17 tables, RLS, realtime, buckets)
 - M1-04 provider interfaces + scripted fake callee, TTS/LLM/telephony mocks (tests)
 - Speech bake-off done: Sarvam alone meets latency and language needs (docs/DECISIONS.md)
+- M2-05 keeper timer (relay/keeper.py, shared with the dev bridge), M2-03 disclosure lines, M2-01 profile resolution, M2-04 entities, all with tests
 - M1-03 JWT auth (JWKS, optional HS256 fallback) with tests
 
 ## Doing

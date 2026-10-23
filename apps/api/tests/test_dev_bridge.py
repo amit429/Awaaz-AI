@@ -1,10 +1,12 @@
 import asyncio
 
 from app.relay.dev_bridge import KEEPER_LINE, DevBridge
+from app.relay.keeper import Keeper
 
 
-def fast(**kw) -> DevBridge:
-    return DevBridge(tick=0.02, max_wait=0.5, keeper_after=0.1, keeper_every=0.3, **kw)
+def fast(typing_stale: float = 4.0, **kw) -> DevBridge:
+    keeper = Keeper(after=0.1, every=0.3, stale=typing_stale)
+    return DevBridge(tick=0.02, max_wait=0.5, keeper=keeper, **kw)
 
 
 async def collect(b: DevBridge) -> list[str]:

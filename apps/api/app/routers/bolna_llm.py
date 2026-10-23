@@ -129,8 +129,7 @@ async def dev_reset() -> dict:
     bridge.events.clear()
     bridge.auto_replies = []
     bridge._auto_turn = None
-    bridge.typing_since = None
-    bridge.last_typing = None
+    bridge.keeper.reset()
     return {"reset": True}
 
 
