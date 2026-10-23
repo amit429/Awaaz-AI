@@ -78,7 +78,7 @@ async def chat(request: Request) -> StreamingResponse:
         log.info("CAPTION turn=%d: %s", turn, heard)
 
     async def stream() -> AsyncIterator[str]:
-        async for piece in bridge.respond():
+        async for piece in bridge.respond(turn):
             yield sse_chunk(piece + " ")
         yield sse_chunk(None, finish=True)
         yield "data: [DONE]\n\n"
@@ -110,6 +110,25 @@ async def dev_prepare(payload: dict, settings: Settings = Depends(get_settings))
         "kind": p.kind,
         "detected": p.detected,
     }
+
+
+@router.post("/v1/dev/autoreply", dependencies=[Depends(require_bearer)])
+async def dev_autoreply(payload: dict, settings: Settings = Depends(get_settings)) -> dict:
+    """Scripted test mode: reply automatically (in order) to each turn. Texts are prepared first."""
+    texts = [str(t).strip() for t in payload.get("replies", []) if str(t).strip()]
+    llm = GeminiLlm(settings)
+    prepared = [await prepare_say(t, "hi-IN", settings, llm) for t in texts]
+    bridge.auto_replies = [p.spoken for p in prepared]
+    return {"loaded": len(bridge.auto_replies), "first": bridge.auto_replies[:2]}
+
+
+@router.post("/v1/dev/reset", dependencies=[Depends(require_bearer)])
+async def dev_reset() -> dict:
+    bridge.captions.clear()
+    bridge.events.clear()
+    bridge.auto_replies = []
+    bridge._auto_turn = None
+    return {"reset": True}
 
 
 @router.post("/v1/dev/typing", dependencies=[Depends(require_bearer)])

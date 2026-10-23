@@ -29,7 +29,7 @@ def match_lines(lines: list[dict], captions: list[dict], threshold: float = 0.3)
         for i, c in enumerate(captions):
             if i in used:
                 continue
-            s = similarity(line["say_hi"], c["text"])
+            s = similarity(line.get("match_text", line["say_hi"]), c["text"])
             if s > best:
                 best, best_i = s, i
         if best_i >= 0 and best >= threshold:

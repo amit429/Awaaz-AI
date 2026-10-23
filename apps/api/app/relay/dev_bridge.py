@@ -33,6 +33,9 @@ class DevBridge:
     keeper_after: float = KEEPER_AFTER
     keeper_every: float = KEEPER_EVERY
     max_wait: float = MAX_WAIT
+    auto_replies: list[str] = field(default_factory=list)  # scripted test replies, spoken in order
+    auto_settle: float = 1.8  # wait for fragments to stop before replying
+    _auto_turn: int | None = None
     tick: float = TICK
 
     def log(self, kind: str, **info: object) -> None:
@@ -66,12 +69,13 @@ class DevBridge:
             and now - self.last_keeper >= self.keeper_every
         )
 
-    async def respond(self) -> AsyncIterator[str]:
+    async def respond(self, turn: int | None = None) -> AsyncIterator[str]:
         """Pieces of speech for one request; empty if superseded or nothing is said in time."""
         self.generation += 1
         mine = self.generation
         self.log("request", generation=mine)
-        deadline = time.monotonic() + self.max_wait
+        started = time.monotonic()
+        deadline = started + self.max_wait
         while time.monotonic() < deadline:
             if self.generation != mine:
                 self.log("superseded", generation=mine)
@@ -80,6 +84,17 @@ class DevBridge:
                 reply = await asyncio.wait_for(self.replies.get(), self.tick)
             except TimeoutError:
                 now = time.monotonic()
+                if (
+                    self.auto_replies
+                    and turn is not None
+                    and turn != self._auto_turn
+                    and now - started >= self.auto_settle
+                ):
+                    self._auto_turn = turn
+                    text = self.auto_replies.pop(0)
+                    self.log("spoken", text=text, auto=True)
+                    yield text
+                    return
                 if self._keeper_due(now):
                     self.last_keeper = now
                     self.log("keeper")

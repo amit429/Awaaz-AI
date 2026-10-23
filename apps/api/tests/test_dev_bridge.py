@@ -64,3 +64,16 @@ def test_fragments_of_one_turn_merge_into_one_caption():
     b.hear(1, "तेलमा चालीस मिल जाएगा। चार सौ बीस।")
     b.hear(2, "ठीक है।")
     assert [c["text"] for c in b.captions] == ["तेलमा चालीस मिल जाएगा। चार सौ बीस।", "ठीक है।"]
+
+
+async def test_auto_reply_once_per_turn_after_settle():
+    b = fast(auto_replies=["Pehla", "Doosra"], auto_settle=0.1)
+    assert [p async for p in b.respond(turn=1)] == ["Pehla"]
+    assert [p async for p in b.respond(turn=1)] == []  # same turn: no second reply
+    assert [p async for p in b.respond(turn=2)] == ["Doosra"]
+
+
+async def test_typed_reply_beats_auto_reply():
+    b = fast(auto_replies=["Auto"], auto_settle=0.2)
+    b.say("Typed")
+    assert [p async for p in b.respond(turn=1)] == ["Typed"]

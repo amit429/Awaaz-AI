@@ -1,8 +1,8 @@
 """Bolna-as-phone-line spike. Usage (from apps/api): uv run python ../../scripts/bolna_spike.py <cmd>
 
   register        register our /v1/llm endpoint as a Bolna custom LLM
-  agent           create the relay agent (Sarvam STT and TTS, our LLM, Bolna default number)
-  call <number>   place a call to <number> (E.164)
+  agent [sarvam|deepgram]  create the relay agent (Sarvam STT and TTS, our LLM, Bolna default number)
+  call <number> [sarvam|deepgram]  place a call to <number> (E.164)
 Reads keys from .env in the current directory; saves ids to ../../.spike-state.json (gitignored).
 """
 
@@ -52,10 +52,28 @@ def register() -> None:
     show(httpx.post(f"{BASE}/user/model/custom", headers=HEAD, json=body, timeout=60))
 
 
-def agent() -> None:
+TRANSCRIBERS = {
+    "sarvam": {
+        "provider": "sarvam",
+        "model": "saaras:v4",
+        "language": "hi",
+        "stream": True,
+        "endpointing": 1200,
+    },
+    "deepgram": {
+        "provider": "deepgram",
+        "model": "nova-3",
+        "language": "hi",
+        "stream": True,
+        "endpointing": 1200,
+    },
+}
+
+
+def agent(stt: str = "sarvam") -> None:
     cfg = {
         "agent_config": {
-            "agent_name": "Awaaz relay spike",
+            "agent_name": f"Awaaz relay spike ({stt})",
             "agent_welcome_message": DISCLOSURE,
             "tasks": [
                 {
@@ -89,18 +107,12 @@ def agent() -> None:
                             "stream": True,
                             "buffer_size": 100,
                         },
-                        "transcriber": {
-                            "provider": "sarvam",
-                            "model": "saaras:v4",
-                            "language": "hi",
-                            "stream": True,
-                            "endpointing": 1200,
-                        },
+                        "transcriber": TRANSCRIBERS[stt],
                         "input": {"provider": "plivo", "format": "wav"},
                         "output": {"provider": "plivo", "format": "wav"},
                     },
                     "task_config": {
-                        "call_terminate": 300,
+                        "call_terminate": 420,
                         "hangup_after_silence": 120,
                         "check_if_user_online": False,
                         "number_of_words_for_interruption": 3,
@@ -114,14 +126,23 @@ def agent() -> None:
         },
     }
     out = show(httpx.post(f"{BASE}/v2/agent", headers=HEAD, json=cfg, timeout=60))
-    save({**load(), "agent_id": out["agent_id"]})
+    save({**load(), "agent_id": out["agent_id"], f"agent_{stt}": out["agent_id"]})
 
 
-def call(number: str) -> None:
-    body = {"agent_id": load()["agent_id"], "recipient_phone_number": number}
+def call(number: str, stt: str | None = None) -> None:
+    state = load()
+    body = {
+        "agent_id": state[f"agent_{stt}"] if stt else state["agent_id"],
+        "recipient_phone_number": number,
+    }
     show(httpx.post(f"{BASE}/call", headers=HEAD, json=body, timeout=60))
 
 
 if __name__ == "__main__":
     cmd = sys.argv[1]
-    {"register": register, "agent": agent, "call": lambda: call(sys.argv[2])}[cmd]()
+    arg = sys.argv[3] if len(sys.argv) > 3 else None
+    {
+        "register": register,
+        "agent": lambda: agent(sys.argv[2] if len(sys.argv) > 2 else "sarvam"),
+        "call": lambda: call(sys.argv[2], arg),
+    }[cmd]()
