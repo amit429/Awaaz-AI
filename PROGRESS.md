@@ -4,6 +4,7 @@
 - M1-01 repo created from handover; provider decision recorded in `docs/DECISIONS.md`
 - M1-03 API skeleton (settings, CORS, health)
 - M0-02 mu-law and resampling with tests (relay/audio.py)
+- M1-02 Supabase project `awaaz` created, schema migrated (17 tables, RLS, realtime, buckets)
 
 ## Doing
 - M1-01 monorepo layout
