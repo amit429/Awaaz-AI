@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     web_base_url: str = "http://localhost:5173"
     cors_origins: str = "http://localhost:5173"
     cors_origin_regex: str = r"https://awaaz-.*\.vercel\.app"
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
+    supabase_jwks_url: str = ""
+    supabase_jwt_secret: str = ""
     mock_providers: bool = True
     webhook_secret: str = "change-me-32-chars"
     max_call_minutes: int = 15
