@@ -14,6 +14,7 @@ from fastapi.responses import StreamingResponse
 from app.config import Settings, get_settings
 from app.providers import sarvam
 from app.providers.gemini import GeminiLlm
+from app.relay import bolna_registry
 from app.relay.dev_bridge import bridge
 from app.services.say_prep import prepare_say
 
@@ -72,13 +73,16 @@ async def models() -> dict:
 @router.post("/v1/llm/chat/completions", dependencies=[Depends(require_bearer)])
 async def chat(request: Request) -> StreamingResponse:
     body = await request.json()
-    turn, heard = current_turn(body.get("messages", []))
-    if heard:
+    messages = body.get("messages", [])
+    turn, heard = current_turn(messages)
+    leg = bolna_registry.for_messages(messages)
+    if leg is None and heard:  # no relay call matches: the spike console bridge
         bridge.hear(turn, heard)
         log.info("CAPTION turn=%d: %s", turn, heard)
 
     async def stream() -> AsyncIterator[str]:
-        async for piece in bridge.respond(turn):
+        pieces = leg.on_request(turn, heard) if leg else bridge.respond(turn)
+        async for piece in pieces:
             yield sse_chunk(piece + " ")
         yield sse_chunk(None, finish=True)
         yield "data: [DONE]\n\n"

@@ -64,6 +64,7 @@ class RelaySession:
         leg: OtherLeg,
         keeper: Keeper | None = None,
         prepare: Preparer = as_is,
+        on_end: Callable[[], None] | None = None,
         max_seconds: float = 15 * 60,
         idle_seconds: float = 60.0,
     ) -> None:
@@ -73,6 +74,7 @@ class RelaySession:
         self.leg = leg
         self.keeper = keeper or Keeper()
         self.prepare = prepare
+        self.on_end = on_end
         self._pending: dict[str, tuple[str, str, str]] = {}  # preview_id -> (spoken, source, typed)
         self.max_seconds, self.idle_seconds = max_seconds, idle_seconds
         self.seq = 0
@@ -180,7 +182,23 @@ class RelaySession:
         line = disclosure_line(self.preset, self.call_lang, self.name)
         await self._you(line, "disclosure", speaker="system")
         self._spawn(self._watchdog())
-        await self.leg.start(self._heard, self._leg_hangup)
+        try:
+            await self.leg.start(self._heard, self._leg_hangup)
+        except Exception as exc:  # noqa: BLE001 - show the user why the call could not start
+            log.warning("leg failed to start: %s", exc)
+            await self.fail(getattr(exc, "message", None) or "Could not start the call")
+
+    async def fail(self, reason: str) -> None:
+        if self.ended:
+            return
+        self.ended = True
+        for t in list(self._tasks):
+            if t is not asyncio.current_task():
+                t.cancel()
+        self._set_state("failed", reason)
+        await self.store.update_call(self.call_id, status="failed")
+        if self.on_end:
+            self.on_end()
 
     async def end(self, reason: str | None = None) -> None:
         if self.ended:
@@ -193,6 +211,8 @@ class RelaySession:
         with contextlib.suppress(Exception):
             await self.leg.hangup()
         await self.store.update_call(self.call_id, status="ended")
+        if self.on_end:
+            self.on_end()
 
     def _spawn(self, coro: Any) -> None:
         task = asyncio.create_task(coro)

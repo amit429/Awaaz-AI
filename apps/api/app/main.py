@@ -2,7 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import bolna_llm, calls, dev_auth, dev_console, twilio_voice
+from app.routers import (
+    bolna_llm,
+    calls,
+    dev_auth,
+    dev_console,
+    twilio_voice,
+    webhooks_bolna,
+)
 
 
 def create_app() -> FastAPI:
@@ -20,6 +27,7 @@ def create_app() -> FastAPI:
     app.include_router(twilio_voice.router)
     app.include_router(calls.router)
     app.include_router(dev_auth.router)
+    app.include_router(webhooks_bolna.router)
     app.include_router(bolna_llm.router)
     app.include_router(dev_console.router)
 

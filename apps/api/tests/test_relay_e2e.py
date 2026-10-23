@@ -198,6 +198,8 @@ def test_call_request_validation_and_live_not_ready(monkeypatch):
     )
     assert r.status_code == 422
     monkeypatch.setenv("MOCK_PROVIDERS", "false")
+    monkeypatch.setenv("BOLNA_API_KEY", "")
+    monkeypatch.setenv("BOLNA_RELAY_AGENT_ID", "")
     get_settings.cache_clear()
     r = client.post(
         "/v1/calls", json={"to": "+919876543210"}, headers={"Authorization": f"Bearer {token()}"}
