@@ -1,23 +1,14 @@
 """POST /v1/calls (create a relay session) and WS /v1/relay/{id} (the app's live channel)."""
 
 import asyncio
-import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from app.auth import _user_id, current_user
 from app.config import Settings, get_settings
-from app.providers.bolna import BolnaClient
-from app.providers.gemini import GeminiLlm
-from app.providers.mocks import FakeCallee
-from app.relay import bolna_registry, registry
-from app.relay.bolna_leg import BolnaLeg
-from app.relay.disclosure import disclosure_line
-from app.relay.legs import MockLeg
-from app.relay.session import RelaySession
-from app.services.profiles import resolve_modes
-from app.services.say_prep import make_preparer
+from app.relay import registry
+from app.services.calls import CallError, create_relay_call
 from app.store import Store, get_store
 
 router = APIRouter(tags=["calls"])
@@ -44,70 +35,20 @@ async def create_call(
     settings: Settings = Depends(get_settings),
     store: Store = Depends(get_store),
 ) -> dict[str, str]:
-    use_mock = bool(settings.mock_providers or body.callee)
-    if not use_mock and not (settings.bolna_api_key and settings.bolna_relay_agent_id):
-        raise HTTPException(status_code=501, detail="live telephony is not configured")
-    profile = await store.get_profile(user_id)
-    modes = resolve_modes(
-        request_talk=body.talk_modes,
-        request_hear=body.hear_modes,
-        profile_talk=profile.talk_modes,
-        profile_hear=profile.hear_modes,
-        preset=profile.preset,
-    )
-    call_lang = body.call_language or "hi-IN"
-    call_id = str(uuid.uuid4())
-    await store.create_call(
-        {
-            "id": call_id,
-            "user_id": user_id,
-            "kind": "relay",
-            "direction": "outbound",
-            "other_number": body.to,
-            "call_lang": call_lang,
-            "talk_modes": modes.talk,
-            "hear_modes": modes.hear,
-            "status": "created",
-            "provider": "mock" if use_mock else "bolna",
-        }
-    )
-    if use_mock:
-        try:
-            leg = MockLeg(FakeCallee.from_fixture(body.callee or "pharmacy"))
-        except FileNotFoundError as exc:
-            raise HTTPException(status_code=422, detail="unknown callee fixture") from exc
-        bolna_leg = None
-    else:
-        bolna_leg = BolnaLeg(
-            BolnaClient(settings),
-            agent_id=settings.bolna_relay_agent_id,
-            to=body.to,
-            call_id=call_id,
-            disclosure=disclosure_line(profile.preset, call_lang, profile.display_name),
-        )
-        bolna_registry.add(bolna_leg)
-        leg = bolna_leg
-
-    def cleanup() -> None:
-        registry.remove(call_id)
-        bolna_registry.remove(call_id)
-
-    registry.add(
-        RelaySession(
-            call_id=call_id,
+    try:
+        session = await create_relay_call(
             user_id=user_id,
+            to=body.to,
+            settings=settings,
             store=store,
-            name=profile.display_name,
-            preset=profile.preset,
-            call_lang=call_lang,
-            modes=modes,
-            leg=leg,
-            max_seconds=settings.max_call_minutes * 60,
-            prepare=make_preparer(settings, call_lang, GeminiLlm(settings)),
-            on_end=cleanup,
+            call_language=body.call_language,
+            talk_modes=body.talk_modes,
+            hear_modes=body.hear_modes,
+            callee=body.callee,
         )
-    )
-    return {"session_id": call_id, "ws_url": ws_url(settings, call_id)}
+    except CallError as exc:
+        raise HTTPException(status_code=exc.status, detail=exc.detail) from exc
+    return {"session_id": session.call_id, "ws_url": ws_url(settings, session.call_id)}
 
 
 @router.get("/v1/calls/{call_id}")

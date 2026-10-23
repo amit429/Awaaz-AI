@@ -70,7 +70,7 @@ TRANSCRIBERS = {
 }
 
 
-def agent(stt: str = "sarvam") -> None:
+def agent(stt: str = "sarvam", live: bool = False) -> None:
     cfg = {
         "agent_config": {
             "agent_name": f"Awaaz relay spike ({stt})",
@@ -125,8 +125,27 @@ def agent(stt: str = "sarvam") -> None:
             "task_1": {"system_prompt": "Relay agent. Replies come from the user's typed text."}
         },
     }
+    if live:  # the product relay agent: per-call disclosure and call id via /call user_data
+        webhook = f"{ENV['PUBLIC_BASE_URL']}/v1/webhooks/bolna?s={ENV['WEBHOOK_SECRET']}"
+        cfg["agent_config"]["agent_name"] = "Awaaz relay (live)"
+        cfg["agent_config"]["agent_welcome_message"] = "{disclosure}"
+        cfg["agent_config"]["webhook_url"] = webhook
+        cfg["agent_prompts"] = {
+            "task_1": {"system_prompt": "[[awaaz:call={call_id}]] Relay agent."}
+        }
     out = show(httpx.post(f"{BASE}/v2/agent", headers=HEAD, json=cfg, timeout=60))
-    save({**load(), "agent_id": out["agent_id"], f"agent_{stt}": out["agent_id"]})
+    if live:
+        env_path = Path(".env")
+        lines = [
+            f"BOLNA_RELAY_AGENT_ID={out['agent_id']}"
+            if x.startswith("BOLNA_RELAY_AGENT_ID=")
+            else x
+            for x in env_path.read_text().splitlines()
+        ]
+        env_path.write_text("\n".join(lines) + "\n")
+        print("BOLNA_RELAY_AGENT_ID updated in .env")
+    else:
+        save({**load(), "agent_id": out["agent_id"], f"agent_{stt}": out["agent_id"]})
 
 
 def call(number: str, stt: str | None = None) -> None:
@@ -144,5 +163,6 @@ if __name__ == "__main__":
     {
         "register": register,
         "agent": lambda: agent(sys.argv[2] if len(sys.argv) > 2 else "sarvam"),
+        "relay-agent": lambda: agent("sarvam", live=True),
         "call": lambda: call(sys.argv[2], arg),
     }[cmd]()

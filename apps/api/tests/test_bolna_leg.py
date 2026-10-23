@@ -180,7 +180,7 @@ async def _drain_until(q, pred, timeout=2.0):
 
 async def test_live_call_flow_captions_reply_and_hangup(env, monkeypatch):
     fake = FakeBolna()
-    monkeypatch.setattr("app.routers.calls.BolnaClient", lambda settings: fake)
+    monkeypatch.setattr("app.services.calls.BolnaClient", lambda settings: fake)
     secret = get_settings().webhook_secret
     async with async_client() as ac:
         r = await ac.post(
@@ -228,7 +228,7 @@ async def test_live_call_flow_captions_reply_and_hangup(env, monkeypatch):
 
 async def test_live_call_failure_is_reported_to_the_user(env, monkeypatch):
     message = "Trial accounts can only make calls to verified phone numbers."
-    monkeypatch.setattr("app.routers.calls.BolnaClient", lambda settings: FakeBolna(fail=message))
+    monkeypatch.setattr("app.services.calls.BolnaClient", lambda settings: FakeBolna(fail=message))
     async with async_client() as ac:
         r = await ac.post(
             "/v1/calls",

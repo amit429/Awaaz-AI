@@ -19,6 +19,8 @@ class Profile:
 
 class Store(Protocol):
     async def get_profile(self, user_id: str) -> Profile: ...
+    async def put_profile(self, profile: Profile) -> None: ...
+    async def wa_user(self, wa_id: str, name: str | None) -> str: ...
     async def create_call(self, call: dict[str, Any]) -> None: ...
     async def update_call(self, call_id: str, **fields: Any) -> None: ...
     async def add_turn(self, call_id: str, turn: dict[str, Any]) -> None: ...
@@ -34,6 +36,18 @@ class InMemoryStore:
 
     async def get_profile(self, user_id: str) -> Profile:
         return self.profiles.get(user_id) or Profile(user_id=user_id)
+
+    async def put_profile(self, profile: Profile) -> None:
+        self.profiles[profile.user_id] = profile
+
+    async def wa_user(self, wa_id: str, name: str | None) -> str:
+        """The user for a WhatsApp number (created on first contact, WhatsApp-only)."""
+        user_id = f"wa-{wa_id}"
+        if user_id not in self.profiles:
+            self.profiles[user_id] = Profile(user_id=user_id, display_name=name or "Friend")
+        elif name and self.profiles[user_id].display_name == "Friend":
+            self.profiles[user_id].display_name = name
+        return user_id
 
     async def create_call(self, call: dict[str, Any]) -> None:
         self.calls[call["id"]] = {**call, "created_at": datetime.now(UTC).isoformat()}
