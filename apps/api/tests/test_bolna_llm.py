@@ -50,3 +50,12 @@ def test_console_page_is_gated():
     assert client.get("/dev/console").status_code == 404
     page = client.get(f"/dev/console?s={get_settings().webhook_secret}")
     assert page.status_code == 200 and "Awaaz dev console" in page.text
+
+
+def test_preview_transliterates_romanised_text(monkeypatch):
+    async def fake(text, settings, target="hi-IN"):
+        return "ठीक है, रख दीजिए।"
+
+    monkeypatch.setattr("app.routers.bolna_llm.sarvam.transliterate", fake)
+    r = client.post("/v1/dev/preview", json={"text": "Theek hai, rakh dijiye."}, headers=AUTH)
+    assert r.json() == {"original": "Theek hai, rakh dijiye.", "hindi": "ठीक है, रख दीजिए।"}

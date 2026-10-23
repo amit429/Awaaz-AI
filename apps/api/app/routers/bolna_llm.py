@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from app.config import Settings, get_settings
+from app.providers import sarvam
 from app.relay.dev_bridge import bridge
 
 log = logging.getLogger("awaaz.bolna_llm")
@@ -87,6 +88,14 @@ async def chat(request: Request) -> StreamingResponse:
 async def dev_say(payload: dict) -> dict:
     bridge.say(str(payload["text"]))
     return {"queued": True}
+
+
+@router.post("/v1/dev/preview", dependencies=[Depends(require_bearer)])
+async def dev_preview(payload: dict, settings: Settings = Depends(get_settings)) -> dict:
+    """Show-before-speak: romanised input and its native-script version."""
+    original = str(payload["text"]).strip()
+    hindi = await sarvam.transliterate(original, settings)
+    return {"original": original, "hindi": hindi}
 
 
 @router.post("/v1/dev/typing", dependencies=[Depends(require_bearer)])

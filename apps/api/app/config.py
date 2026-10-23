@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
     supabase_jwks_url: str = ""
     supabase_jwt_secret: str = ""
+    sarvam_api_key: str = ""
     mock_providers: bool = True
     webhook_secret: str = "change-me-32-chars"
     max_call_minutes: int = 15
