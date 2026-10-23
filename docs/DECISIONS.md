@@ -38,3 +38,10 @@ Method: 11 phone-quality clips (Gemini TTS voices, downsampled to 8 kHz mu-law w
 Decision: **Sarvam for STT, TTS and translation.** Deepgram and Cartesia are not used (keys stay in `.env`, unused). Revisit only if real phone audio shows Sarvam failing a requirement.
 Implementation notes: STT `wss://api.sarvam.ai/speech-to-text/ws` (`saaras:v3`, `vad_signals=true`, base64 JSON audio, `flush`); TTS `wss://api.sarvam.ai/text-to-speech/ws?model=bulbul:v3` (config then text then flush; `output_audio_codec=mulaw`).
 Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice cloning (P1): check Sarvam's cloning API before touching Cartesia.
+
+## 2026-10-24: Caption translation (bake-off)
+8 call lines (6 Hindi, 2 Marathi to English): prices, times, dates, medicines, an OTP request; 27 entities. Engines: Sarvam `sarvam-translate:v1`, `gemini-3.5-flash-lite` plain, and the same with call context (contact notes plus "keep numbers as digits, keep medicine names in Latin").
+- Entities kept: Sarvam 25/27, Gemini plain 26/27, Gemini with context 26/27 (two of the misses are scorer artefacts, "10 AM" vs "morning"). Median latency 0.72 / 0.84 / 0.84 s.
+- The only real failure: Sarvam turned "तेलमा चालीस" into "Forty will be available in oil". Gemini kept "Telma 40" (with notes).
+- Decision: translate captions with **Gemini plus call context** (contact notes, call type), Sarvam translate as fallback on error or quota. Original text is always shown with a translation. Hinglish is a display transliteration only, never a pivot for translation.
+- Caveats: n=8, one entity trap; watch Gemini free-tier quota during live calls. The upstream error is speech recognition ("तेलमा"): mitigate with original text, low-confidence shading and ask-to-repeat.
