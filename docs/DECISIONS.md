@@ -51,3 +51,9 @@ Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice clonin
 - Different language (English, Marathi in Latin letters, ...): translated (Gemini) and shown; one Enter sends. Keeps the rule that translated or drafted text is spoken only after the user confirms. Relaxing that rule is a product decision for Amit.
 - Language detection: Gemini (`hindi_roman`/`marathi_roman`/`english`/`other`). Sarvam text-lid was unusable ("Theek hai" as Punjabi, "Thank you" as Tamil).
 - Latency: prepare is about 1.4 s from a laptop (Sarvam transliterate 1.3 s, Gemini 1.0 s, in parallel). Over the 1.2 s budget, so the console prepares while the user types (700 ms pause) and caches by text. Re-measure on Render.
+
+## 2026-10-24: Twilio upgrade skipped; Bolna is the live phone leg
+- No Twilio voice upgrade. Live calls go through a Bolna agent whose custom LLM is our server (the spike path), so a call supports typed speech and captions. Own-voice, clear-voice and normal-audio modes are demonstrated in the browser callee simulator (Sarvam streaming), not on a phone line.
+- The relay session talks to an `OtherLeg` (mock script, Bolna phone leg, browser simulator). Twilio Media Streams stays a documented future leg.
+- WhatsApp (Twilio sandbox) gets a live-relay mode: "call <number>" starts a call; captions arrive as messages; text typed in the chat is spoken (same conversion and confirmation rules); "end" hangs up.
+- Limits: Bolna trial only calls verified numbers; Twilio trial WhatsApp sandbox (join code per tester, daily message cap).

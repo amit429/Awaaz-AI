@@ -11,6 +11,7 @@ from app.config import Settings, get_settings
 from app.providers.gemini import GeminiLlm
 from app.providers.mocks import FakeCallee
 from app.relay import registry
+from app.relay.legs import MockLeg
 from app.relay.session import RelaySession
 from app.services.profiles import resolve_modes
 from app.services.say_prep import make_preparer
@@ -81,7 +82,7 @@ async def create_call(
             preset=profile.preset,
             call_lang=call_lang,
             modes=modes,
-            callee=callee,
+            leg=MockLeg(callee),
             max_seconds=settings.max_call_minutes * 60,
             prepare=make_preparer(settings, call_lang, GeminiLlm(settings)),
         )

@@ -28,10 +28,10 @@ from app.models.events import (
     UserTyping,
     client_event,
 )
-from app.providers.mocks import FakeCallee
 from app.relay.disclosure import ask_repeat_line, disclosure_line, keeper_line, short_lang
 from app.relay.entities import extract_entities
 from app.relay.keeper import Keeper
+from app.relay.legs import OtherLeg
 from app.services.profiles import Modes
 from app.services.say_prep import Prepared
 from app.store import Store
@@ -61,8 +61,7 @@ class RelaySession:
         preset: str | None,
         call_lang: str,
         modes: Modes,
-        callee: FakeCallee | None = None,
-        reply_delay: float = 0.05,
+        leg: OtherLeg,
         keeper: Keeper | None = None,
         prepare: Preparer = as_is,
         max_seconds: float = 15 * 60,
@@ -71,8 +70,7 @@ class RelaySession:
         self.call_id, self.user_id, self.store = call_id, user_id, store
         self.name, self.preset, self.call_lang = name, preset, call_lang
         self.modes = modes
-        self.callee = callee
-        self.reply_delay = reply_delay
+        self.leg = leg
         self.keeper = keeper or Keeper()
         self.prepare = prepare
         self._pending: dict[str, tuple[str, str, str]] = {}  # preview_id -> (spoken, source, typed)
@@ -93,7 +91,7 @@ class RelaySession:
         return int((time.monotonic() - self._t0) * 1000)
 
     def emit(self, event: dict[str, Any]) -> None:
-        if "turn" in event:
+        if "turn" in event and event["t"] != "caption.partial":
             self._buffer.append(event)
         for q in self._subs:
             q.put_nowait(event)
@@ -181,9 +179,8 @@ class RelaySession:
         await self.store.update_call(self.call_id, status="connected")
         line = disclosure_line(self.preset, self.call_lang, self.name)
         await self._you(line, "disclosure", speaker="system")
-        if self.callee:
-            self._spawn(self._callee_reply(None))
         self._spawn(self._watchdog())
+        await self.leg.start(self._heard, self._leg_hangup)
 
     async def end(self, reason: str | None = None) -> None:
         if self.ended:
@@ -193,6 +190,8 @@ class RelaySession:
             if t is not asyncio.current_task():
                 t.cancel()
         self._set_state("ended", reason)
+        with contextlib.suppress(Exception):
+            await self.leg.hangup()
         await self.store.update_call(self.call_id, status="ended")
 
     def _spawn(self, coro: Any) -> None:
@@ -200,13 +199,17 @@ class RelaySession:
         self._tasks.add(task)
         task.add_done_callback(self._tasks.discard)
 
-    async def _callee_reply(self, user_text: str | None) -> None:
-        await asyncio.sleep(self.reply_delay)
-        if self.ended or not self.callee:
+    async def _heard(self, text: str, final: bool) -> None:
+        """The other person said something (partial transcripts update the live caption)."""
+        if self.ended:
             return
-        line = self.callee.opening() if user_text is None else self.callee.reply_to(user_text)
-        if line:
-            await self._other_says(line["text"])
+        if final:
+            await self._other_says(text)
+        else:
+            self.emit({"t": "caption.partial", "turn": self.seq + 1, "text": text})
+
+    async def _leg_hangup(self, reason: str) -> None:
+        await self.end(reason)
 
     async def _watchdog(self) -> None:
         """Keeper line while the user types; cost guard (max call length); idle cleanup."""
@@ -214,8 +217,10 @@ class RelaySession:
             await asyncio.sleep(0.25)
             if self.keeper.due():
                 self.keeper.mark_spoken()
-                await self._you(keeper_line(self.call_lang, self.name), "keeper", speaker="system")
+                line = keeper_line(self.call_lang, self.name)
+                await self._you(line, "keeper", speaker="system")
                 self.emit({"t": "keeper.spoken"})
+                await self.leg.speak(line, final=False)
             if time.monotonic() - self._t0 > self.max_seconds:
                 await self.end("max_call_minutes")
             elif (
@@ -253,7 +258,7 @@ class RelaySession:
             case AskRepeat():
                 line = ask_repeat_line(self.call_lang)
                 await self._you(line, "ask_repeat")
-                self._spawn(self._callee_reply(line))
+                await self.leg.speak(line)
             case ModeSet():
                 if ev.talk_modes:
                     self.modes = Modes(list(ev.talk_modes), self.modes.hear)
@@ -308,7 +313,7 @@ class RelaySession:
     async def _speak(self, text: str, source: str, original: str | None = None) -> None:
         self.keeper.reset()
         await self._you(text, source, original=original)
-        self._spawn(self._callee_reply(text))
+        await self.leg.speak(text)
 
     async def handle_text(self, data: str) -> None:
         try:
