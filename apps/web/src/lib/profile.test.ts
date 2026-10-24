@@ -27,6 +27,6 @@ describe('profile helpers', () => {
     const p = applyPreset(emptyProfile(), 'mute', { ...mute, talk: [...mute.talk], hear: [...mute.hear] });
     const t = i18n.t.bind(i18n) as (k: string, o?: Record<string, string>) => string;
     expect(summary(p, t)).toContain('You talk with: type, awaaz speaks');
-    expect(summary(p, t)).toContain('You hear with: normal audio, spoken summary after');
+    expect(summary(p, t)).toContain('You hear with: summary after the call');
   });
 });

@@ -238,6 +238,21 @@ class SupabaseStore:
         self._call_owner[call["id"]] = call["user_id"]
         await self._rest("POST", "calls", json=call)
 
+    async def get_summary(self, call_id: str) -> dict[str, Any] | None:
+        rows = await self._rest(
+            "GET", "summaries", params={"call_id": f"eq.{call_id}", "select": "summary"}
+        )
+        return rows[0]["summary"] if rows else None
+
+    async def save_summary(self, call_id: str, user_id: str, summary: dict[str, Any]) -> None:
+        await self._rest(
+            "POST",
+            "summaries",
+            params={"on_conflict": "call_id"},
+            json={"call_id": call_id, "user_id": user_id, "summary": summary},
+            prefer="resolution=merge-duplicates",
+        )
+
     async def update_call(self, call_id: str, **fields: Any) -> None:
         await self._rest("PATCH", "calls", params={"id": f"eq.{call_id}"}, json=fields)
 

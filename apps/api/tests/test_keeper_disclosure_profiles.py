@@ -69,7 +69,7 @@ def test_resolution_order_request_contact_profile_preset():
     )
     assert m.talk == ["voice"] and m.hear == ["captions"]
     m = resolve_modes(profile_talk=["replies"], preset="hoh")
-    assert m.talk == ["replies"] and m.hear == ["clear", "audio", "summary"]
+    assert m.talk == ["replies"] and m.hear == ["clear", "captions", "summary"]
     m = resolve_modes(preset=None)
     assert m.talk == ["type", "replies", "help"]  # default preset
 

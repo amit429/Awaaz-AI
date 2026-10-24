@@ -8,7 +8,9 @@ from pydantic import BaseModel, Field
 from app.auth import _user_id, current_user
 from app.config import Settings, get_settings
 from app.relay import registry
+from app.providers.gemini import GeminiLlm
 from app.services.calls import CallError, create_relay_call
+from app.services.summary import summarise
 from app.store import Store, get_store
 
 router = APIRouter(tags=["calls"])
@@ -59,6 +61,31 @@ async def get_call(
     if not call or call["user_id"] != user_id:
         raise HTTPException(status_code=404)
     return {"call": call, "turns": await store.get_turns(call_id)}
+
+
+@router.get("/v1/calls/{call_id}/summary")
+async def call_summary(
+    call_id: str,
+    user_id: str = Depends(current_user),
+    settings: Settings = Depends(get_settings),
+    store: Store = Depends(get_store),
+) -> dict:
+    """The after-call summary, made on first request and kept."""
+    call = await store.get_call(call_id)
+    if not call or call["user_id"] != user_id:
+        raise HTTPException(status_code=404)
+    if call["status"] not in ("ended", "completed", "failed", "no_answer", "busy"):
+        raise HTTPException(status_code=409, detail="call_not_finished")
+    saved = await store.get_summary(call_id)
+    if saved:
+        return saved
+    turns = await store.get_turns(call_id)
+    profile = await store.get_profile(user_id)
+    llm = None if settings.mock_providers or not settings.llm_api_key else GeminiLlm(settings)
+    summary = await summarise(turns, profile.read_lang, llm)
+    if any(t["speaker"] == "other" for t in turns):
+        await store.save_summary(call_id, user_id, summary)
+    return summary
 
 
 @router.websocket("/v1/relay/{session_id}")

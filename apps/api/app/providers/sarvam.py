@@ -75,3 +75,21 @@ async def for_reading(text: str, mode: str, settings: Settings, source: str = "h
     if mode == "marathi":
         return await translate(text, settings, target="mr-IN", source=source)
     return text
+
+
+async def transcribe(
+    audio: bytes, content_type: str, settings: Settings, lang: str = "unknown"
+) -> str:
+    """Speech to text for the user's own voice (Saaras). Empty string when nothing was heard."""
+    if settings.mock_providers or not settings.sarvam_api_key:
+        return ""
+    ext = "webm" if "webm" in content_type else "mp4" if "mp4" in content_type else "wav"
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.post(
+            f"{API}/speech-to-text",
+            files={"file": (f"voice.{ext}", audio, content_type)},
+            data={"model": "saaras:v3", "mode": "transcribe", "language_code": lang},
+            headers={"api-subscription-key": settings.sarvam_api_key},
+        )
+        r.raise_for_status()
+        return str(r.json().get("transcript", "")).strip()

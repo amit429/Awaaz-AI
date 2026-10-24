@@ -1,6 +1,6 @@
 import { getToken } from './auth';
 import { API_BASE } from './config';
-import type { CallRow, Contact, Me, Phrase, Profile, Turn } from './types';
+import type { CallRow, CallSummary, Contact, Me, Phrase, Profile, Turn } from './types';
 
 export interface CreatedCall {
   session_id: string;
@@ -16,7 +16,11 @@ export class ApiError extends Error {
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${await getToken()}`, ...init.headers },
+    headers: {
+      ...(init.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+      Authorization: `Bearer ${await getToken()}`,
+      ...init.headers,
+    },
   });
   if (!res.ok) {
     let detail = '';
@@ -46,6 +50,13 @@ export const api = {
   calls: () => request<CallRow[]>('/calls'),
   call: (id: string) => request<{ call: CallRow; turns: Turn[] }>(`/calls/${id}`),
   createCall: (to: string, callee?: string, language?: string) => request<CreatedCall>('/calls', send('POST', { to, callee, call_language: language })),
+  transcribe: async (audio: Blob, lang: string) => {
+    const form = new FormData();
+    form.append('audio', audio, 'voice.webm');
+    form.append('lang', lang);
+    return request<{ text: string }>('/text/transcribe', { method: 'POST', body: form });
+  },
+  callSummary: (id: string) => request<CallSummary>(`/calls/${id}/summary`),
   transliterate: (text: string, to: string) => request<{ text: string }>('/text/transliterate', send('POST', { text, to })),
 };
 

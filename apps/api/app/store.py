@@ -50,6 +50,8 @@ class Store(Protocol):
     async def add_scam_event(
         self, call_id: str, turn_seq: int | None, reason: str, action: str
     ) -> None: ...
+    async def get_summary(self, call_id: str) -> dict[str, Any] | None: ...
+    async def save_summary(self, call_id: str, user_id: str, summary: dict[str, Any]) -> None: ...
     async def dev_user(self, email: str = "dev@awaaz.local") -> str: ...
 
 
@@ -61,6 +63,7 @@ class InMemoryStore:
     phrases: dict[str, dict[str, Any]] = field(default_factory=dict)
     calls: dict[str, dict[str, Any]] = field(default_factory=dict)
     turns: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    summaries: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     async def get_profile(self, user_id: str) -> Profile:
         return self.profiles.get(user_id) or Profile(user_id=user_id)
@@ -142,6 +145,12 @@ class InMemoryStore:
     async def list_calls(self, user_id: str, limit: int = 30) -> list[dict[str, Any]]:
         mine = [c for c in self.calls.values() if c["user_id"] == user_id]
         return sorted(mine, key=lambda c: c["created_at"], reverse=True)[:limit]
+
+    async def get_summary(self, call_id: str) -> dict[str, Any] | None:
+        return self.summaries.get(call_id)
+
+    async def save_summary(self, call_id: str, user_id: str, summary: dict[str, Any]) -> None:
+        self.summaries[call_id] = summary
 
     async def dev_user(self, email: str = "dev@awaaz.local") -> str:
         return "dev-user"

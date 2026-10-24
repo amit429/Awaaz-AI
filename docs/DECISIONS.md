@@ -65,3 +65,10 @@ Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice clonin
 
 ## 2026-10-24: Python 3.14 in production
 - `requires-python = ">=3.12"`. The full API test suite (136 tests) passes on 3.12 and 3.14.6. Render defaults to 3.14.x and its build failed with the old 3.12-only pin (uv cannot download a managed Python there), so production runs the latest, `PYTHON_VERSION=3.14.8`.
+
+## 2026-10-24: onboarding options that are built (and two that are not offered)
+- Built: speak into the mic (Sarvam Saaras turns it into text, the user checks it, Awaaz says it), read aloud (browser voice, slower, exact words), vibration cues (Android and desktop Chrome; iOS Safari does not vibrate), after-call summary (Gemini, kept in `summaries`, can be listened to).
+- **Own voice passed straight through** is not possible: the Bolna phone leg only speaks text we return, so there is no way to inject the user's audio. The mic option converts speech to text first. "Speak clearly for me" is the same flow, so the two options were merged.
+- **Normal audio** (live call audio into the app) is not possible for the same reason: Awaaz never receives the other person's audio on a Bolna leg, only the transcript. Removed.
+- **Sign language interpreter** needs a partner service; removed until there is one.
+- Older profiles holding `clarity`, `sign` or `audio` still load; the app ignores them.

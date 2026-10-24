@@ -61,3 +61,12 @@ export interface Turn {
   entities?: { type: string; text: string; start?: number; end?: number }[];
   t_ms: number;
 }
+
+export interface CallSummary {
+  title: string;
+  agreed: string[];
+  facts: { type: string; label: string; value: string; iso?: string | null }[];
+  next_steps: string[];
+  summary_read_lang: string;
+  reminders: { label: string; at_iso: string }[];
+}

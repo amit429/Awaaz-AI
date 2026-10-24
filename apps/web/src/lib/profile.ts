@@ -1,28 +1,23 @@
-import { AudioLines, Bell, Captions, Ear, Hand, Keyboard, Languages, type LucideIcon, Mic, MessageSquare, Sparkles, Volume2, Watch } from 'lucide-react';
+import { AudioLines, Bell, Captions, Ear, Keyboard, Languages, type LucideIcon, Mic, MessageSquare, Sparkles, Volume2, Watch } from 'lucide-react';
 import type { HearMode, PresetDef, Profile, TalkMode } from './types';
 
 export interface Option<K extends string> {
   key: K;
   icon: LucideIcon;
-  soon?: boolean; // shown, but not built yet
-  tag?: boolean; // has a tag string in the catalog (talk.<key>.tag)
 }
 
 export const TALK_OPTIONS: Option<TalkMode>[] = [
-  { key: 'voice', icon: Mic, soon: true },
+  { key: 'voice', icon: Mic },
   { key: 'type', icon: Keyboard },
   { key: 'replies', icon: MessageSquare },
   { key: 'help', icon: Sparkles },
-  { key: 'clarity', icon: AudioLines, soon: true, tag: true },
-  { key: 'sign', icon: Hand, soon: true, tag: true },
 ];
 
 export const HEAR_OPTIONS: Option<HearMode>[] = [
   { key: 'captions', icon: Captions },
-  { key: 'clear', icon: Ear, soon: true },
-  { key: 'audio', icon: Volume2, soon: true },
-  { key: 'summary', icon: Bell, soon: true },
-  { key: 'vibe', icon: Watch, soon: true },
+  { key: 'clear', icon: Ear },
+  { key: 'summary', icon: Bell },
+  { key: 'vibe', icon: Watch },
   { key: 'translate', icon: Languages },
 ];
 
@@ -55,8 +50,8 @@ type T = (key: string, options?: Record<string, string>) => string;
 
 /** One plain sentence describing the profile, in the app language. */
 export function summary(p: Profile, t: T): string {
-  const talk = (p.talk_modes ?? []).map((k) => t(`talk.${k}.title`).toLowerCase());
-  const hear = (p.hear_modes ?? []).map((k) => t(`hear.${k}.title`).toLowerCase());
+  const talk = (p.talk_modes ?? []).filter((k) => TALK_OPTIONS.some((o) => o.key === k)).map((k) => t(`talk.${k}.title`).toLowerCase());
+  const hear = (p.hear_modes ?? []).filter((k) => HEAR_OPTIONS.some((o) => o.key === k)).map((k) => t(`hear.${k}.title`).toLowerCase());
   if (!talk[0]) return t('profile.chooseTalk');
   const also = talk.length > 1 ? t('profile.summaryAlso', { list: talk.slice(1).join(', ') }) : '';
   return t('profile.summary', { talk: talk[0], also, hear: hear.join(', ') || t('profile.summaryNone') });

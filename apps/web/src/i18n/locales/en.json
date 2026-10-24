@@ -1,5 +1,9 @@
 {
-  "nav": { "calls": "Calls", "contacts": "Contacts", "me": "Me" },
+  "nav": {
+    "calls": "Calls",
+    "contacts": "Contacts",
+    "me": "Me"
+  },
   "common": {
     "loading": "Loading…",
     "save": "Save",
@@ -136,7 +140,6 @@
     "iType": "I type",
     "largerText": "Larger text",
     "disclosure": "Tell the other person an assistant is helping",
-    "comingSoon": "Coming soon",
     "default": "Default",
     "summary": "You talk with: {{talk}}{{also}}. You hear with: {{hear}}.",
     "summaryAlso": " (also {{list}})",
@@ -152,20 +155,44 @@
     "lowread": "I don’t read much"
   },
   "talk": {
-    "voice": { "title": "My own voice", "hint": "I speak; they hear me directly." },
-    "type": { "title": "Type, Awaaz speaks", "hint": "In a voice I pick." },
-    "replies": { "title": "Phrases and smart replies", "hint": "One tap answers." },
-    "help": { "title": "Help me say it", "hint": "A few words in, a clear sentence out. I approve first." },
-    "clarity": { "title": "Speak clearly for me", "hint": "I talk; Awaaz re-says it clearly.", "tag": "Later" },
-    "sign": { "title": "Sign language", "hint": "Connect a human ISL interpreter by video.", "tag": "Partner service" }
+    "voice": {
+      "title": "Speak, Awaaz says it",
+      "hint": "I speak into the mic. Awaaz turns it into text, I check it, and Awaaz says it clearly."
+    },
+    "type": {
+      "title": "Type, Awaaz speaks",
+      "hint": "In a voice I pick."
+    },
+    "replies": {
+      "title": "Phrases and smart replies",
+      "hint": "One tap answers."
+    },
+    "help": {
+      "title": "Help me say it",
+      "hint": "A few words in, a clear sentence out. I approve first."
+    }
   },
   "hear": {
-    "captions": { "title": "Live captions", "hint": "Big text, numbers highlighted." },
-    "clear": { "title": "Clear voice", "hint": "Each sentence repeated slower and louder." },
-    "audio": { "title": "Normal audio", "hint": "Straight through, boosted for speech." },
-    "summary": { "title": "Spoken summary after", "hint": "What was agreed, as a voice note." },
-    "vibe": { "title": "Vibration cues", "hint": "Phone buzzes when they start and stop talking." },
-    "translate": { "title": "Translate for me", "hint": "Read and type in my language, whatever they speak." }
+    "captions": {
+      "title": "Live captions",
+      "hint": "Big text, numbers highlighted."
+    },
+    "clear": {
+      "title": "Read aloud to me",
+      "hint": "Each thing they say is read out slowly and at full volume."
+    },
+    "summary": {
+      "title": "Summary after the call",
+      "hint": "What was agreed, with the numbers, that I can read or listen to."
+    },
+    "vibe": {
+      "title": "Vibration cues",
+      "hint": "The phone buzzes when they start and finish speaking."
+    },
+    "translate": {
+      "title": "Translate for me",
+      "hint": "Read and type in my language, whatever they speak."
+    }
   },
   "phrases": {
     "title": "My phrases",
@@ -185,7 +212,12 @@
     "them": "Them",
     "you": "You",
     "opening": "Awaaz, opening line",
-    "hold": "Awaaz, please hold"
+    "hold": "Awaaz, please hold",
+    "summarise": "Summarise this call",
+    "listen": "Listen",
+    "stop": "Stop",
+    "nextSteps": "Next steps",
+    "summaryFailed": "Could not make a summary right now."
   },
   "call": {
     "connecting": "Connecting…",
@@ -226,15 +258,38 @@
       "scam_digits": "Not sent: Awaaz won’t speak OTP or PIN digits on this call.",
       "empty": "Nothing to send.",
       "too_long": "That message is too long. Please shorten it."
-    }
+    },
+    "micStart": "Speak",
+    "micStop": "Stop and use what I said",
+    "micNothing": "Nothing was heard. Try again, closer to the phone.",
+    "micFailed": "Could not turn your voice into text. Try again or type.",
+    "micDenied": "Allow the microphone to speak."
   },
   "scam": {
-    "otp_request": { "title": "They asked for your OTP", "body": "Banks never ask for an OTP on a call. Awaaz won’t read out OTPs or PINs on this call." },
-    "pin_request": { "title": "They asked for your PIN", "body": "No bank or shop needs your PIN on a call. Awaaz won’t read out PINs or codes on this call." },
-    "upi_pin": { "title": "They asked for your UPI PIN", "body": "Your UPI PIN is only for you. Awaaz won’t read out PINs or codes on this call." },
-    "cvv_request": { "title": "They asked for your card’s CVV", "body": "Never share the CVV on a call. Awaaz won’t read out card details on this call." },
-    "remote_app": { "title": "They asked you to install an app", "body": "Never install an app because a caller asks. It lets them see your phone and your bank." },
-    "other": { "title": "This may be a scam call", "body": "Be careful. Awaaz won’t read out OTPs, PINs or card details on this call." }
+    "otp_request": {
+      "title": "They asked for your OTP",
+      "body": "Banks never ask for an OTP on a call. Awaaz won’t read out OTPs or PINs on this call."
+    },
+    "pin_request": {
+      "title": "They asked for your PIN",
+      "body": "No bank or shop needs your PIN on a call. Awaaz won’t read out PINs or codes on this call."
+    },
+    "upi_pin": {
+      "title": "They asked for your UPI PIN",
+      "body": "Your UPI PIN is only for you. Awaaz won’t read out PINs or codes on this call."
+    },
+    "cvv_request": {
+      "title": "They asked for your card’s CVV",
+      "body": "Never share the CVV on a call. Awaaz won’t read out card details on this call."
+    },
+    "remote_app": {
+      "title": "They asked you to install an app",
+      "body": "Never install an app because a caller asks. It lets them see your phone and your bank."
+    },
+    "other": {
+      "title": "This may be a scam call",
+      "body": "Be careful. Awaaz won’t read out OTPs, PINs or card details on this call."
+    }
   },
   "errors": {
     "draft_failed": "I couldn’t draft that. Try different words.",

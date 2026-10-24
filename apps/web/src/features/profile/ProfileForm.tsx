@@ -40,7 +40,6 @@ function Options<K extends string>({ group, options, selected, onToggle }: { gro
               <span className="block font-medium leading-tight">{t(`${group}.${o.key}.title`)}</span>
               <span className="mt-0.5 block text-sm text-muted-foreground">{t(`${group}.${o.key}.hint`)}</span>
               <span className="mt-1.5 flex flex-wrap gap-1.5">
-                {(o.soon || o.tag) && <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{o.tag ? t(`${group}.${o.key}.tag`) : t('profile.comingSoon')}</span>}
                 {on && selected[0] === o.key && selected.length > 1 && <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">{t('profile.default')}</span>}
               </span>
             </span>
@@ -85,8 +84,9 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 
 export function ProfileForm({ value, presets, onChange, showPresets = true }: { value: Profile; presets: Record<string, PresetDef>; onChange: (p: Profile) => void; showPresets?: boolean }) {
   const { t } = useTranslation();
-  const talk = value.talk_modes ?? [];
-  const hear = value.hear_modes ?? [];
+  // Older profiles may hold modes that no longer exist; only the ones on offer are shown and kept.
+  const talk = (value.talk_modes ?? []).filter((k) => TALK_OPTIONS.some((o) => o.key === k));
+  const hear = (value.hear_modes ?? []).filter((k) => HEAR_OPTIONS.some((o) => o.key === k));
   return (
     <div className="grid gap-8">
       {showPresets && (

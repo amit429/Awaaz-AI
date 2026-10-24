@@ -1,6 +1,6 @@
 """Settings API: profile, contacts, phrases, call history. The app talks only to this API."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from app.auth import current_user
 from app.config import Settings, get_settings
@@ -150,3 +150,25 @@ async def transliterate(
         return {"text": await sarvam.transliterate(text, settings, target=target[1])}
     except Exception:  # noqa: BLE001
         return {"text": text}
+
+
+@router.post("/v1/text/transcribe")
+async def transcribe(
+    audio: UploadFile = File(...),
+    lang: str = Form("unknown"),
+    user_id: str = Depends(current_user),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    """The user's own voice to text, so they can speak instead of type. The text goes into the
+    message box; nothing is said on the call until they send it."""
+    data = await audio.read()
+    if not data or len(data) > 5_000_000:
+        raise HTTPException(status_code=413, detail="audio_too_large")
+    target = SPOKEN.get(lang)
+    try:
+        text = await sarvam.transcribe(
+            data, audio.content_type or "audio/webm", settings, target[1] if target else "unknown"
+        )
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail="transcribe_failed") from exc
+    return {"text": text}
