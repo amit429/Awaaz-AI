@@ -62,3 +62,6 @@ Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice clonin
 - Twilio trial shared WhatsApp number: REST sends with a plain Body fail with 21654 "ContentSid Required"; the Content API is blocked on trial (20003). Only replies inside the inbound webhook (TwiML) work, which cannot push live captions.
 - Decision: `WA_PROVIDER=meta_cloud` (WhatsApp Cloud API test number: free, free-form text within 24 h of the user's last message, up to 5 verified recipients). Adapter `providers/meta_wa.py`; webhook `GET/POST /v1/webhooks/wa/meta` (verify token, X-Hub-Signature-256).
 - Twilio adapter stays for a paid account. Verified: bot logic end to end through the dev endpoint (`WA_PROVIDER=log`).
+
+## 2026-10-24: Python 3.14 in production
+- `requires-python = ">=3.12"`. The full API test suite (136 tests) passes on 3.12 and 3.14.6. Render defaults to 3.14.x and its build failed with the old 3.12-only pin (uv cannot download a managed Python there), so production runs the latest, `PYTHON_VERSION=3.14.8`.

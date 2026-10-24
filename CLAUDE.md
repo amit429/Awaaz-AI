@@ -13,7 +13,7 @@ You are implementing **Awaaz**: phone calls for people who can’t hear or speak
 
 ## Fixed stack (ask Amit before changing)
 - `apps/web`: React 18 + TypeScript + Vite PWA, React Router, TanStack Query, Supabase JS, plain CSS from the prototype, AudioWorklets for audio.
-- `apps/api`: Python 3.12, FastAPI, Pydantic v2, asyncio, httpx, websockets; one Render Starter instance (sessions live in memory).
+- `apps/api`: Python 3.12 or newer (tested on 3.12 and 3.14; production runs 3.14), FastAPI, Pydantic v2, asyncio, httpx, websockets; one Render Starter instance (sessions live in memory).
 - Supabase (Postgres + RLS, Auth, Realtime, Storage).
 - Telephony: **Bolna** is the live phone leg (custom-LLM relay agent; Twilio upgrade skipped, see `docs/DECISIONS.md` and `docs/SPIKE-bolna.md`). Calls from the app and from WhatsApp use the same `OtherLeg` abstraction. Incoming calls and own-number design: `docs/ARCHITECTURE-incoming.md`.
 - WhatsApp: **Meta WhatsApp Cloud API** (free test number). The Twilio trial cannot push free-form messages; its adapter stays for a paid account.
