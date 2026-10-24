@@ -191,10 +191,10 @@ export function Call() {
       </header>
 
       {state.scam && !scamSeen && state.status !== 'ended' && (
-        <Alert variant="destructive" role="alert" className="mx-3 mb-2 border-destructive/60 bg-destructive text-white">
+        <Alert variant="destructive" role="alert" className="mx-3 mb-2 w-auto border-destructive/60 bg-destructive text-white">
           <ShieldAlert className="size-4 !text-white" />
-          <AlertTitle className="text-base">{t(`scam.${scamKey}.title`)}</AlertTitle>
-          <AlertDescription className="text-white/90">
+          <AlertTitle className="line-clamp-none text-base">{t(`scam.${scamKey}.title`)}</AlertTitle>
+          <AlertDescription className="!text-white/90">
             <p>{t(`scam.${scamKey}.body`)}</p>
             <div className="mt-3 flex gap-2">
               <Button size="sm" variant="secondary" className="text-destructive" onClick={() => send({ t: 'call.end' })}>{t('call.endCall')}</Button>
