@@ -3,7 +3,7 @@
 | Part | Where | Notes |
 |---|---|---|
 | API | Render **free** web service `awaaz-api`, Singapore | `cd apps/api && pip install uv && uv sync --frozen --no-dev`; start `uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT`; `PYTHON_VERSION=3.14.8`; one instance (sessions are in memory) |
-| Web | Vercel hobby, project `awaaz-web` (team Amit-Personal-Projects) | built from `apps/web` with `vercel deploy --prod`; routing in `apps/web/vercel.json` |
+| Web | Vercel hobby, project `awaaz-web` (team Amit-Personal-Projects) | project **Root Directory is `apps/web`**; every push to `main` builds on Vercel from GitHub; routing in `apps/web/vercel.json` |
 | Database and auth | Supabase project `awaaz` (ap-south-1) | migrations in `supabase/migrations`; Google and email sign-in; redirect URLs include the Vercel address |
 | Keep-alive | Supabase `pg_cron` job `awaaz-keepalive` | pings `/v1/health` every 10 minutes so Render's free plan does not sleep (migration 0003) |
 | Phone calls | Bolna | production custom model `awaaz-relay-prod` and a production relay agent whose webhook and LLM point at the Render address; set `BOLNA_RELAY_AGENT_ID` on Render |
@@ -16,7 +16,7 @@
 
 ## Redeploy
 - API: push to `main` (auto deploy), or change an environment variable.
-- Web: `cd apps/web && vercel deploy --prod --yes --scope amit-personal-projects`.
+- Web: push to `main` (Vercel builds from GitHub). By hand: run `vercel deploy --prod --yes --scope amit-personal-projects` from the **repo root**, not from `apps/web`, because the project's Root Directory is already `apps/web` (running it inside `apps/web` would look for `apps/web/apps/web` and fail).
 - Bolna agent after the API address changes: `PUBLIC_BASE_URL=... WEBHOOK_SECRET=... RELAY_MODEL=awaaz-relay-prod PRINT_ONLY=1 uv run python scripts/bolna_spike.py register` then `relay-agent`.
 
 ## Free-plan limits to remember
