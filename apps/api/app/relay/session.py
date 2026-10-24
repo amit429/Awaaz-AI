@@ -25,6 +25,7 @@ from app.models.events import (
     DraftRequest,
     ModeSet,
     Ping,
+    ReadSet,
     SayConfirm,
     UserSay,
     UserTyping,
@@ -37,6 +38,7 @@ from app.relay.entities import extract_entities
 from app.relay.keeper import Keeper
 from app.relay.legs import OtherLeg
 from app.services.drafts import make_draft
+from app.services.languages import Translator
 from app.services.profiles import Modes
 from app.services.replies import ReplyContext, suggest
 from app.services.say_prep import Prepared
@@ -73,6 +75,8 @@ class RelaySession:
         on_end: Callable[[], None] | None = None,
         llm: Llm | None = None,
         reply_ctx: ReplyContext | None = None,
+        read_lang: str | None = None,
+        translate: Translator | None = None,
         max_seconds: float = 15 * 60,
         idle_seconds: float = 60.0,
     ) -> None:
@@ -87,6 +91,9 @@ class RelaySession:
         self.reply_ctx = reply_ctx or ReplyContext(user_name=name)
         self._convo: list[tuple[str, str]] = []  # (speaker, text) for suggestions
         self._reply_task: asyncio.Task[None] | None = None
+        self.read_lang = read_lang or short_lang(call_lang)
+        self.translate = translate
+        self._captions: list[tuple[int, str]] = []  # (turn, text) for re-translation
         self._recent_other: list[str] = []
         self._pending: dict[str, tuple[str, str, str]] = {}  # preview_id -> (spoken, source, typed)
         self.max_seconds, self.idle_seconds = max_seconds, idle_seconds
@@ -182,9 +189,31 @@ class RelaySession:
             }
         )
         self._convo.append(("other", text))
+        self._captions.append((turn, text))
+        self._spawn_translation(turn, text)
         await self._scam_check(text, turn)
         self._schedule_suggestions(turn)
         return turn
+
+    def _spawn_translation(self, turn: int, text: str) -> None:
+        """Captions go out at once in the spoken language; the translation follows."""
+        if not self.translate:
+            return
+        translate, lang = self.translate, self.read_lang
+
+        async def run() -> None:
+            out = await translate(text, self.call_lang, lang, self.reply_ctx.contact_notes)
+            if out and lang == self.read_lang and not self.ended:
+                self.emit({"t": "caption.translation", "turn": turn, "lang": lang, "text": out})
+
+        self._spawn(run())
+
+    async def set_read_lang(self, lang: str) -> None:
+        """Switch the caption language mid-call and re-translate the last few captions."""
+        self.read_lang = lang
+        self.emit({"t": "read.updated", "lang": lang})
+        for turn, text in self._captions[-5:]:
+            self._spawn_translation(turn, text)
 
     def _schedule_suggestions(self, turn: int) -> None:
         """Three one-tap replies for this turn; dropped if the user or the other person moves on."""
@@ -340,6 +369,8 @@ class RelaySession:
                 line = ask_repeat_line(self.call_lang)
                 await self._you(line, "ask_repeat")
                 await self.leg.speak(line)
+            case ReadSet():
+                await self.set_read_lang(ev.lang)
             case ModeSet():
                 if ev.talk_modes:
                     self.modes = Modes(list(ev.talk_modes), self.modes.hear)

@@ -3,7 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import current_user
+from app.config import Settings, get_settings
 from app.models.api import ContactIn, PhraseIn, ProfileIn
+from app.providers import sarvam
+from app.services.languages import SPOKEN
 from app.specs import load_json
 from app.store import Profile, Store, get_store
 
@@ -18,6 +21,7 @@ def profile_json(p: Profile) -> dict:
         "hear_modes": p.hear_modes,
         "read_lang": p.read_lang,
         "type_lang": p.type_lang,
+        "app_lang": p.app_lang,
         "easy_font": p.easy_font,
         "speech_rate": p.speech_rate,
     }
@@ -46,6 +50,7 @@ async def put_me(
             hear_modes=list(body.hear_modes),
             read_lang=body.read_lang,
             type_lang=body.type_lang,
+            app_lang=body.app_lang,
             easy_font=body.easy_font,
             speech_rate=body.speech_rate,
         )
@@ -127,3 +132,21 @@ async def call_history(
     return [
         {**{k: c.get(k) for k in keep}, "name": names.get(c.get("other_number"))} for c in calls
     ]
+
+
+@router.post("/v1/text/transliterate")
+async def transliterate(
+    body: dict,
+    user_id: str = Depends(current_user),
+    settings: Settings = Depends(get_settings),
+) -> dict:
+    """English letters to an Indian script ("Telma 40 chahiye" to "टेल्मा चालीस चाहिए"), for people
+    without a regional keyboard. Falls back to the text unchanged."""
+    text = str(body.get("text", ""))[:500]
+    target = SPOKEN.get(str(body.get("to", "hi")))
+    if not text.strip() or target is None or target[1] == "en-IN":
+        return {"text": text}
+    try:
+        return {"text": await sarvam.transliterate(text, settings, target=target[1])}
+    except Exception:  # noqa: BLE001
+        return {"text": text}

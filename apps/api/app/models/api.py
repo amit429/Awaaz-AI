@@ -7,7 +7,8 @@ from pydantic import BaseModel, Field, field_validator
 from app.models.events import Hear, Talk
 from app.specs import load_json
 
-Lang = Literal["hi", "mr", "en", "bn", "ta", "te", "kn", "ml", "gu", "pa", "or"]
+Lang = Literal["hi", "mr", "en", "bn", "ta", "te", "kn", "ml", "gu", "pa", "or"]  # spoken
+ReadLang = Literal["hi", "mr", "en", "bn", "ta", "te", "kn", "ml", "gu", "pa", "or", "hi-Latn"]
 
 
 class ProfileIn(BaseModel):
@@ -15,8 +16,9 @@ class ProfileIn(BaseModel):
     preset: str | None = None
     talk_modes: list[Talk] = Field(min_length=1)
     hear_modes: list[Hear] = Field(min_length=1)
-    read_lang: Lang = "hi"
+    read_lang: ReadLang = "hi"
     type_lang: str = "hi-Latn"
+    app_lang: ReadLang = "en"
     easy_font: bool = False
     speech_rate: float = Field(default=0.75, ge=0.5, le=1.2)
 

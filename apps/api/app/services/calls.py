@@ -11,6 +11,7 @@ from app.relay.bolna_leg import BolnaLeg
 from app.relay.disclosure import disclosure_line
 from app.relay.legs import MockLeg
 from app.relay.session import RelaySession
+from app.services.languages import call_code, make_translator
 from app.services.profiles import disability_phrase, resolve_modes
 from app.services.replies import ReplyContext
 from app.services.say_prep import make_preparer
@@ -51,7 +52,10 @@ async def create_relay_call(
         profile_hear=profile.hear_modes,
         preset=profile.preset,
     )
-    call_lang = call_language or "hi-IN"
+    contact = next(
+        (c for c in await store.list_contacts(user_id) if c.get("phone_e164") == to), None
+    )
+    call_lang = call_code(call_language or (contact or {}).get("call_lang"))
     call_id = str(uuid.uuid4())
     if use_mock:
         try:
@@ -86,9 +90,6 @@ async def create_relay_call(
         registry.remove(call_id)
         bolna_registry.remove(call_id)
 
-    contact = next(
-        (c for c in await store.list_contacts(user_id) if c.get("phone_e164") == to), None
-    )
     reply_ctx = ReplyContext(
         user_name=profile.display_name,
         disability_phrase=disability_phrase(profile.preset),
@@ -110,6 +111,8 @@ async def create_relay_call(
         on_end=cleanup,
         llm=None if settings.mock_providers else GeminiLlm(settings),
         reply_ctx=reply_ctx,
+        read_lang=profile.read_lang,
+        translate=make_translator(settings, GeminiLlm(settings)),
     )
     registry.add(session)
     return session

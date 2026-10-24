@@ -3,27 +3,568 @@
   "$id": "relay_events",
   "title": "Relay session JSON events",
   "oneOf": [
-    { "type": "object", "required": ["t","state"], "properties": { "t": {"const":"call.state"}, "state": {"enum":["ringing","connected","ended","failed"]}, "reason": {"type":"string"}, "elapsed_ms": {"type":"integer"} } },
-    { "type": "object", "required": ["t","turn","text"], "properties": { "t": {"const":"caption.partial"}, "turn": {"type":"integer"}, "text": {"type":"string"} } },
-    { "type": "object", "required": ["t","turn","text","confidence","entities"], "properties": { "t": {"const":"caption.final"}, "turn": {"type":"integer"}, "text": {"type":"string"}, "lang": {"type":"string"}, "translated": {"type":["string","null"]}, "confidence": {"type":"number"}, "entities": { "type":"array", "items": { "$ref": "#/$defs/entity" } } } },
-    { "type": "object", "required": ["t","turn","text","source"], "properties": { "t": {"const":"you.final"}, "turn": {"type":"integer"}, "text": {"type":"string"}, "original": {"type":"string"}, "source": {"enum":["typed","reply","phrase","draft","voice","clarity","keeper","disclosure","ask_repeat"]} } },
-    { "type": "object", "required": ["t","turn","items"], "properties": { "t": {"const":"suggestions"}, "turn": {"type":"integer"}, "items": {"type":"array","maxItems":3,"items":{"type":"string","maxLength":80}} } },
-    { "type": "object", "required": ["t","draft_id","text"], "properties": { "t": {"const":"draft.ready"}, "draft_id": {"type":"string"}, "text": {"type":"string"}, "from_words": {"type":"string"}, "changed_meaning_risk": {"type":"boolean"} } },
-    { "type": "object", "required": ["t","preview_id","text"], "properties": { "t": {"const":"say.preview"}, "preview_id": {"type":"string"}, "text": {"type":"string"}, "original": {"type":"string"} } },
-    { "type": "object", "required": ["t","reason"], "properties": { "t": {"const":"say.blocked"}, "reason": {"enum":["scam_digits","empty","too_long"]} } },
-    { "type": "object", "required": ["t","reason"], "properties": { "t": {"const":"scam.warning"}, "reason": {"enum":["otp_request","pin_request","cvv_request","upi_pin","remote_app","other"]}, "turn": {"type":"integer"} } },
-    { "type": "object", "required": ["t","options"], "properties": { "t": {"const":"ivr.menu"}, "options": {"type":"array","items":{"type":"object","required":["digit","label"],"properties":{"digit":{"type":"string"},"label":{"type":"string"}}}} } },
-    { "type": "object", "required": ["t"], "properties": { "t": {"enum":["keeper.spoken","user.typing","user.ask_repeat","call.end","ping"]} } },
-    { "type": "object", "required": ["t","text","source"], "properties": { "t": {"const":"user.say"}, "text": {"type":"string","minLength":1,"maxLength":500}, "source": {"enum":["typed","reply","phrase","draft"]}, "preview_id": {"type":"string"} } },
-    { "type": "object", "required": ["t","preview_id"], "properties": { "t": {"const":"say.confirm"}, "preview_id": {"type":"string"} } },
-    { "type": "object", "required": ["t","words"], "properties": { "t": {"const":"draft.request"}, "words": {"type":"string","minLength":1,"maxLength":200} } },
-    { "type": "object", "required": ["t"], "properties": { "t": {"const":"user.respeak"}, "turn": {"type":"integer"}, "rate": {"type":"number","minimum":0.5,"maximum":1.2} } },
-    { "type": "object", "required": ["t","digits"], "properties": { "t": {"const":"user.dtmf"}, "digits": {"type":"string","pattern":"^[0-9*#]{1,20}$"} } },
-    { "type": "object", "required": ["t"], "properties": { "t": {"enum":["mode.set","mode.updated"]}, "talk_modes": {"type":"array","items":{"enum":["voice","type","replies","help","clarity","sign"]}}, "hear_modes": {"type":"array","items":{"enum":["captions","clear","audio","summary","vibe","translate"]}} } },
-    { "type": "object", "required": ["t","turn"], "properties": { "t": {"enum":["respeak.started","respeak.ended"]}, "turn": {"type":"integer"}, "rate": {"type":"number"} } },
-    { "type": "object", "required": ["t","code","message"], "properties": { "t": {"const":"error"}, "code": {"type":"string"}, "message": {"type":"string"} } }
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "state"
+      ],
+      "properties": {
+        "t": {
+          "const": "call.state"
+        },
+        "state": {
+          "enum": [
+            "ringing",
+            "connected",
+            "ended",
+            "failed"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "elapsed_ms": {
+          "type": "integer"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "turn",
+        "text"
+      ],
+      "properties": {
+        "t": {
+          "const": "caption.partial"
+        },
+        "turn": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "turn",
+        "text",
+        "confidence",
+        "entities"
+      ],
+      "properties": {
+        "t": {
+          "const": "caption.final"
+        },
+        "turn": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "translated": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "confidence": {
+          "type": "number"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entity"
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "turn",
+        "text",
+        "source"
+      ],
+      "properties": {
+        "t": {
+          "const": "you.final"
+        },
+        "turn": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "original": {
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "typed",
+            "reply",
+            "phrase",
+            "draft",
+            "voice",
+            "clarity",
+            "keeper",
+            "disclosure",
+            "ask_repeat"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "turn",
+        "items"
+      ],
+      "properties": {
+        "t": {
+          "const": "suggestions"
+        },
+        "turn": {
+          "type": "integer"
+        },
+        "items": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "string",
+            "maxLength": 80
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "draft_id",
+        "text"
+      ],
+      "properties": {
+        "t": {
+          "const": "draft.ready"
+        },
+        "draft_id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "from_words": {
+          "type": "string"
+        },
+        "changed_meaning_risk": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "preview_id",
+        "text"
+      ],
+      "properties": {
+        "t": {
+          "const": "say.preview"
+        },
+        "preview_id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "original": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "reason"
+      ],
+      "properties": {
+        "t": {
+          "const": "say.blocked"
+        },
+        "reason": {
+          "enum": [
+            "scam_digits",
+            "empty",
+            "too_long"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "reason"
+      ],
+      "properties": {
+        "t": {
+          "const": "scam.warning"
+        },
+        "reason": {
+          "enum": [
+            "otp_request",
+            "pin_request",
+            "cvv_request",
+            "upi_pin",
+            "remote_app",
+            "other"
+          ]
+        },
+        "turn": {
+          "type": "integer"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "options"
+      ],
+      "properties": {
+        "t": {
+          "const": "ivr.menu"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "digit",
+              "label"
+            ],
+            "properties": {
+              "digit": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t"
+      ],
+      "properties": {
+        "t": {
+          "enum": [
+            "keeper.spoken",
+            "user.typing",
+            "user.ask_repeat",
+            "call.end",
+            "ping"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "text",
+        "source"
+      ],
+      "properties": {
+        "t": {
+          "const": "user.say"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "source": {
+          "enum": [
+            "typed",
+            "reply",
+            "phrase",
+            "draft"
+          ]
+        },
+        "preview_id": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "preview_id"
+      ],
+      "properties": {
+        "t": {
+          "const": "say.confirm"
+        },
+        "preview_id": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "words"
+      ],
+      "properties": {
+        "t": {
+          "const": "draft.request"
+        },
+        "words": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t"
+      ],
+      "properties": {
+        "t": {
+          "const": "user.respeak"
+        },
+        "turn": {
+          "type": "integer"
+        },
+        "rate": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1.2
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "digits"
+      ],
+      "properties": {
+        "t": {
+          "const": "user.dtmf"
+        },
+        "digits": {
+          "type": "string",
+          "pattern": "^[0-9*#]{1,20}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t"
+      ],
+      "properties": {
+        "t": {
+          "enum": [
+            "mode.set",
+            "mode.updated"
+          ]
+        },
+        "talk_modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "voice",
+              "type",
+              "replies",
+              "help",
+              "clarity",
+              "sign"
+            ]
+          }
+        },
+        "hear_modes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "captions",
+              "clear",
+              "audio",
+              "summary",
+              "vibe",
+              "translate"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "turn"
+      ],
+      "properties": {
+        "t": {
+          "enum": [
+            "respeak.started",
+            "respeak.ended"
+          ]
+        },
+        "turn": {
+          "type": "integer"
+        },
+        "rate": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "t": {
+          "const": "error"
+        },
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "lang"
+      ],
+      "properties": {
+        "t": {
+          "enum": [
+            "read.set",
+            "read.updated"
+          ]
+        },
+        "lang": {
+          "enum": [
+            "hi",
+            "en",
+            "mr",
+            "bn",
+            "ta",
+            "te",
+            "kn",
+            "ml",
+            "gu",
+            "pa",
+            "or",
+            "hi-Latn"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t",
+        "turn",
+        "lang",
+        "text"
+      ],
+      "properties": {
+        "t": {
+          "const": "caption.translation"
+        },
+        "turn": {
+          "type": "integer"
+        },
+        "lang": {
+          "enum": [
+            "hi",
+            "en",
+            "mr",
+            "bn",
+            "ta",
+            "te",
+            "kn",
+            "ml",
+            "gu",
+            "pa",
+            "or",
+            "hi-Latn"
+          ]
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    }
   ],
   "$defs": {
-    "entity": { "type":"object", "required":["type","text"], "properties": { "type": {"enum":["money","time","date","phone","otp_request","name","quantity"]}, "text": {"type":"string"}, "value": {"type":["string","number","null"]}, "start": {"type":"integer"}, "end": {"type":"integer"} } }
+    "entity": {
+      "type": "object",
+      "required": [
+        "type",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "money",
+            "time",
+            "date",
+            "phone",
+            "otp_request",
+            "name",
+            "quantity"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "null"
+          ]
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        }
+      }
+    }
   }
 }

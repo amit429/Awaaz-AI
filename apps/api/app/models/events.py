@@ -52,6 +52,16 @@ class ModeSet(BaseModel):
     hear_modes: list[Hear] | None = None
 
 
+ReadLang = Literal["hi", "en", "mr", "bn", "ta", "te", "kn", "ml", "gu", "pa", "or", "hi-Latn"]
+
+
+class ReadSet(BaseModel):
+    """Change the caption language during the call."""
+
+    t: Literal["read.set"]
+    lang: ReadLang
+
+
 class CallEnd(BaseModel):
     t: Literal["call.end"]
 
@@ -69,6 +79,7 @@ ClientEvent = Annotated[
     | Respeak
     | Dtmf
     | ModeSet
+    | ReadSet
     | CallEnd
     | Ping,
     Field(discriminator="t"),

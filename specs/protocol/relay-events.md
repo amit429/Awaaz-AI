@@ -26,6 +26,8 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 | `keeper.spoken` | — | “Please hold” line was said to the other person |
 | `respeak.started` / `respeak.ended` | `turn`, `rate` | Clear voice playback |
 | `mode.updated` | `talk_modes[]`, `hear_modes[]` | After `mode.set` |
+| `caption.translation` | `turn`, `lang`, `text` | The caption of `turn` in the reading language; follows `caption.final` (captions are never held back for translation) |
+| `read.updated` | `lang` | After `read.set` |
 | `error` | `code`, `message` | Recoverable errors |
 
 ## App → server
@@ -40,6 +42,7 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 | `user.respeak` | `turn?`, `rate?` | Clear voice: repeat to me (default last turn) |
 | `user.dtmf` | `digits` | Send tones |
 | `mode.set` | `talk_modes?`, `hear_modes?` | Switch mid-call |
+| `read.set` | `lang` | Change the caption language mid-call; the last 5 captions are translated again |
 | `call.end` | — | Hang up |
 | `ping` | — | Keepalive every 15 s |
 

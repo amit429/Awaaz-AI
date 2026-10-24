@@ -6,14 +6,54 @@ text is shown to the user and spoken only after they confirm).
 """
 
 import asyncio
-import re
 from dataclasses import dataclass
 
 from app.config import Settings
 from app.providers import sarvam
 from app.providers.base import Llm
+from app.services.languages import SPOKEN, short
 
-_DEVANAGARI = re.compile(r"[ऀ-ॿ]")
+# Unicode blocks of Indian scripts, and the script each spoken language is written in
+_BLOCKS = [
+    (0x0900, 0x097F, "devanagari"),
+    (0x0980, 0x09FF, "bengali"),
+    (0x0A00, 0x0A7F, "gurmukhi"),
+    (0x0A80, 0x0AFF, "gujarati"),
+    (0x0B00, 0x0B7F, "odia"),
+    (0x0B80, 0x0BFF, "tamil"),
+    (0x0C00, 0x0C7F, "telugu"),
+    (0x0C80, 0x0CFF, "kannada"),
+    (0x0D00, 0x0D7F, "malayalam"),
+]
+SCRIPT_OF_LANG = {
+    "hi": "devanagari",
+    "mr": "devanagari",
+    "bn": "bengali",
+    "pa": "gurmukhi",
+    "gu": "gujarati",
+    "or": "odia",
+    "ta": "tamil",
+    "te": "telugu",
+    "kn": "kannada",
+    "ml": "malayalam",
+    "en": "latin",
+}
+
+
+def script_of(text: str) -> str:
+    """The dominant script of the letters in `text`: latin, devanagari, tamil, ... or none."""
+    counts: dict[str, int] = {}
+    for ch in text:
+        if not ch.isalpha():
+            continue
+        cp = ord(ch)
+        if ch.isascii():
+            name = "latin"
+        else:
+            name = next((n for lo, hi, n in _BLOCKS if lo <= cp <= hi), "other")
+        counts[name] = counts.get(name, 0) + 1
+    return max(counts, key=counts.__getitem__) if counts else "none"
+
 
 LANGS = ["hindi_roman", "marathi_roman", "english", "other"]
 DETECT_SCHEMA = {
@@ -27,8 +67,8 @@ TRANSLATE_SCHEMA = {
     "required": ["translation"],
 }
 
-CALL_LANG_NAME = {"hi-IN": "Hindi", "mr-IN": "Marathi"}
-SAME_LANG = {"hi-IN": "hindi_roman", "mr-IN": "marathi_roman"}
+CALL_LANG_NAME = {code: name for name, code in SPOKEN.values()}
+SAME_LANG = {"hi-IN": "hindi_roman", "mr-IN": "marathi_roman", "en-IN": "english"}
 
 
 @dataclass
@@ -59,10 +99,20 @@ async def prepare_say(text: str, call_lang: str, settings: Settings, llm: Llm) -
     text = text.strip()
     if not text:
         return Prepared("", False, "as_is")
-    if _DEVANAGARI.search(text) and not sarvam.needs_transliteration(text):
-        return Prepared(text, False, "as_is")  # already native script
-    if not sarvam.needs_transliteration(text):  # digits and punctuation only
+    script = script_of(text)
+    if script == "none":  # digits and punctuation only
         return Prepared(text, False, "as_is")
+    if script != "latin":
+        if script == SCRIPT_OF_LANG.get(short(call_lang)):
+            return Prepared(text, False, "as_is")  # already in the call's own script
+        # Typed in another Indian script (for example Tamil on a Hindi call): translate, confirm.
+        try:
+            out = await llm.complete_json(
+                _translate_prompt(text, call_lang), schema=TRANSLATE_SCHEMA
+            )
+            return Prepared(out["translation"], True, "translated", script)
+        except Exception:  # noqa: BLE001 - never speak something unreviewed
+            return Prepared(text, True, "translated", script)
     # Latin letters: detect the language and transliterate in parallel.
     translit, detected = await asyncio.gather(
         sarvam.transliterate(text, settings, target=call_lang),
@@ -74,8 +124,11 @@ async def prepare_say(text: str, call_lang: str, settings: Settings, llm: Llm) -
         # Cannot tell: show the transliteration and ask.
         return Prepared(translit if translit_ok else text, True, "same_language", None)
     language = detected["language"]
-    if language == SAME_LANG.get(call_lang) and translit_ok:
-        return Prepared(translit, False, "same_language", language)
+    if language == SAME_LANG.get(call_lang):
+        if language == "english":  # English typed for an English call: speak it as typed
+            return Prepared(text, False, "as_is", language)
+        if translit_ok:
+            return Prepared(translit, False, "same_language", language)
     try:
         out = await llm.complete_json(_translate_prompt(text, call_lang), schema=TRANSLATE_SCHEMA)
         return Prepared(out["translation"], True, "translated", language)

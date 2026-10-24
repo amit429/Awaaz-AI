@@ -22,6 +22,7 @@ class Profile:
     hear_modes: list[str] | None = None
     read_lang: str = "hi"
     type_lang: str = "hi-Latn"
+    app_lang: str = "en"
     easy_font: bool = False
     speech_rate: float = 0.75
     onboarded: bool = False

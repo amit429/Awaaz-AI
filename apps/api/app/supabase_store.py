@@ -111,6 +111,7 @@ class SupabaseStore:
             "preset": profile.preset,
             "read_lang": profile.read_lang,
             "type_lang": profile.type_lang,
+            "app_lang": profile.app_lang,
         }
         if profile.talk_modes:
             comm["talk_modes"] = profile.talk_modes
