@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Login } from './features/auth/Login';
 import { Call } from './features/call/Call';
 import { Contacts } from './features/contacts/Contacts';
 import { CallDetail } from './features/history/CallDetail';
@@ -8,6 +9,7 @@ import { Onboarding } from './features/onboarding/Onboarding';
 import { Me } from './features/profile/Me';
 import { Phrases } from './features/profile/Phrases';
 import { useMe } from './hooks/useData';
+import { useSession } from './hooks/useSession';
 
 /** Everything except onboarding needs a saved profile (the name is spoken at the start of each call). */
 function Gate() {
@@ -22,9 +24,17 @@ function Gate() {
   return <Outlet />;
 }
 
+function RequireAuth() {
+  const session = useSession();
+  if (session.loading) return <div className="app"><div className="scroll"><p>Loading…</p></div></div>;
+  return session.signedIn ? <Outlet /> : <Navigate to="/login" replace />;
+}
+
 export function App() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route element={<RequireAuth />}>
       <Route path="/onboarding" element={<Onboarding />} />
       <Route element={<Gate />}>
         <Route path="/" element={<Home />} />
@@ -33,6 +43,7 @@ export function App() {
         <Route path="/me/phrases" element={<Phrases />} />
         <Route path="/calls/:id" element={<CallDetail />} />
         <Route path="/call/:sessionId" element={<Call />} />
+      </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

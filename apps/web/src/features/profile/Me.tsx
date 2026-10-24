@@ -1,19 +1,33 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '../../components/Icons';
 import { TabBar } from '../../components/TabBar';
 import { useMe, useSaveMe } from '../../hooks/useData';
+import { useSession } from '../../hooks/useSession';
+import { setDevLogin } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
 import type { Profile } from '../../lib/types';
 import { ProfileForm } from './ProfileForm';
 
 export function Me() {
   const me = useMe();
   const save = useSaveMe();
+  const session = useSession();
+  const qc = useQueryClient();
+  const nav = useNavigate();
   const [draft, setDraft] = useState<Profile | null>(null);
 
   useEffect(() => {
     if (me.data && !draft) setDraft(me.data.profile);
   }, [me.data, draft]);
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    setDevLogin(false);
+    qc.clear();
+    nav('/login', { replace: true });
+  }
 
   const dirty = draft && me.data && JSON.stringify(draft) !== JSON.stringify(me.data.profile);
 
@@ -33,6 +47,12 @@ export function Me() {
                 <span className="av"><Icon name="chat" /></span><span className="tx"><b>My phrases</b><small>Quick things to say on calls</small></span>
                 <Icon name="chev" size="sm" style={{ color: 'var(--ink-3)' }} />
               </Link>
+            </div>
+            <div className="group">
+              <button className="rowi" type="button" onClick={() => void signOut()}>
+                <span className="av"><Icon name="user" /></span>
+                <span className="tx"><b>Sign out</b><small>{session.email ?? ''}</small></span>
+              </button>
             </div>
             {save.isError && <p className="err" role="alert">Could not save. Please try again.</p>}
             <button className="cta" type="button" disabled={!dirty || save.isPending || !draft.display_name.trim()} onClick={() => save.mutate(draft)}>
