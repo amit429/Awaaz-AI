@@ -45,14 +45,15 @@ export const api = {
   deletePhrase: (id: string) => request<void>(`/phrases/${id}`, send('DELETE')),
   calls: () => request<CallRow[]>('/calls'),
   call: (id: string) => request<{ call: CallRow; turns: Turn[] }>(`/calls/${id}`),
-  createCall: (to: string, callee?: string) => request<CreatedCall>('/calls', send('POST', { to, callee })),
+  createCall: (to: string, callee?: string, language?: string) => request<CreatedCall>('/calls', send('POST', { to, callee, call_language: language })),
+  transliterate: (text: string, to: string) => request<{ text: string }>('/text/transliterate', send('POST', { text, to })),
 };
 
-export async function createCall(to: string, callee?: string): Promise<CreatedCall> {
+export async function createCall(to: string, callee?: string, language?: string): Promise<CreatedCall> {
   try {
-    return await api.createCall(to, callee);
+    return await api.createCall(to, callee, language);
   } catch (e) {
-    if (e instanceof ApiError && e.status === 422) throw new Error('Check the phone number');
-    throw e instanceof ApiError && e.message ? e : new Error('Could not start the call');
+    if (e instanceof ApiError && e.status === 422) throw new Error('home.checkNumber');
+    throw e instanceof ApiError && e.message ? e : new Error('home.couldNotStart');
   }
 }

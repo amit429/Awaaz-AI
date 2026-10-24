@@ -1,5 +1,7 @@
 import { ChevronRight, Loader2, Phone } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelect } from '@/components/LanguageSelect';
 import { useNavigate } from 'react-router-dom';
 import { AppShell } from '@/components/AppShell';
 import { EmptyState, Person, RowList } from '@/components/Person';
@@ -12,31 +14,33 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCalls, useContacts } from '@/hooks/useData';
 import { createCall } from '@/lib/api';
-import { maskNumber, STATUS_TEXT, when } from '@/lib/format';
+import { maskNumber, when } from '@/lib/format';
 
 const PRACTICE = [
-  { name: 'Sharma Medical', detail: 'Pharmacy, Hindi', number: '+919800000001', callee: 'pharmacy' },
-  { name: 'Netra Clinic', detail: 'Clinic, Marathi', number: '+919800000002', callee: 'clinic_mr' },
-  { name: 'Unknown number', detail: 'A bank scam call', number: '+919800000003', callee: 'bank_scam' },
+  { name: 'Sharma Medical', detail: 'home.practiceSharma', number: '+919800000001', callee: 'pharmacy' },
+  { name: 'Netra Clinic', detail: 'home.practiceNetra', number: '+919800000002', callee: 'clinic_mr' },
+  { name: 'Unknown number', detail: 'home.practiceScam', number: '+919800000003', callee: 'bank_scam' },
 ];
 
 export function Home() {
+  const { t } = useTranslation();
   const nav = useNavigate();
   const contacts = useContacts();
   const calls = useCalls();
   const [open, setOpen] = useState(false);
   const [number, setNumber] = useState('');
+  const [theySpeak, setTheySpeak] = useState('hi');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  async function start(name: string, to: string, callee?: string) {
+  async function start(name: string, to: string, callee?: string, language?: string) {
     setBusy(true);
     setError('');
     try {
-      const call = await createCall(to, callee);
+      const call = await createCall(to, callee, language);
       nav(`/call/${call.session_id}`, { state: { name, number: to } });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not start the call');
+      setError(e instanceof Error ? t(e.message, { defaultValue: e.message }) : t('home.couldNotStart'));
       setBusy(false);
     }
   }
@@ -46,7 +50,7 @@ export function Home() {
   const loading = contacts.isLoading || calls.isLoading;
 
   return (
-    <AppShell title="Calls" action={<Button onClick={() => setOpen(true)}><Phone className="size-4" /> New call</Button>}>
+    <AppShell title={t('home.title')} action={<Button onClick={() => setOpen(true)}><Phone className="size-4" /> {t('home.newCall')}</Button>}>
       <div className="grid gap-8">
         {error && <Alert variant="destructive" role="alert"><AlertDescription>{error}</AlertDescription></Alert>}
 
@@ -54,7 +58,7 @@ export function Home() {
 
         {favourites.length > 0 && (
           <section className="grid gap-3">
-            <h2 className="text-sm font-medium text-muted-foreground">Favourites</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">{t('home.favourites')}</h2>
             <RowList>
               {favourites.map((c) => (
                 <div key={c.id} className="flex items-center gap-3 p-3.5">
@@ -63,7 +67,7 @@ export function Home() {
                     <p className="truncate font-medium">{c.name}</p>
                     <p className="truncate text-sm text-muted-foreground">{c.notes || c.phone_e164}</p>
                   </div>
-                  <Button size="icon" className="rounded-full" aria-label={`Call ${c.name}`} disabled={busy} onClick={() => void start(c.name, c.phone_e164)}><Phone className="size-4" /></Button>
+                  <Button size="icon" className="rounded-full" aria-label={`Call ${c.name}`} disabled={busy} onClick={() => void start(c.name, c.phone_e164, undefined, c.call_lang ?? undefined)}><Phone className="size-4" /></Button>
                 </div>
               ))}
             </RowList>
@@ -71,9 +75,9 @@ export function Home() {
         )}
 
         <section className="grid gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">{t('home.recent')}</h2>
           {!loading && recent.length === 0 ? (
-            <EmptyState title="No calls yet" body="Start a call, or try a practice call below to see how captions and replies work." action={<Button onClick={() => setOpen(true)}>New call</Button>} />
+            <EmptyState title={t('home.noCallsTitle')} body={t('home.noCallsBody')} action={<Button onClick={() => setOpen(true)}>{t('home.newCall')}</Button>} />
           ) : (
             <RowList>
               {recent.map((c) => (
@@ -83,7 +87,7 @@ export function Home() {
                     <p className="truncate font-medium">{c.name ?? maskNumber(c.other_number)}</p>
                     <p className="truncate text-sm text-muted-foreground">{when(c.created_at)}</p>
                   </div>
-                  <Badge variant={c.status === 'ended' ? 'secondary' : 'outline'}>{STATUS_TEXT[c.status] ?? c.status}</Badge>
+                  <Badge variant={c.status === 'ended' ? 'secondary' : 'outline'}>{t(`status.${c.status}`, { defaultValue: c.status })}</Badge>
                   <ChevronRight className="size-4 text-muted-foreground" />
                 </button>
               ))}
@@ -93,8 +97,8 @@ export function Home() {
 
         <section className="grid gap-3">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-medium text-muted-foreground">Practice calls</h2>
-            <span className="text-xs text-muted-foreground">Scripted callers, no real phone call</span>
+            <h2 className="text-sm font-medium text-muted-foreground">{t('home.practiceTitle')}</h2>
+            <span className="text-xs text-muted-foreground">{t('home.practiceHint')}</span>
           </div>
           <RowList>
             {PRACTICE.map((p) => (
@@ -102,9 +106,9 @@ export function Home() {
                 <Person name={p.name} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{p.name}</p>
-                  <p className="truncate text-sm text-muted-foreground">{p.detail}</p>
+                  <p className="truncate text-sm text-muted-foreground">{t(p.detail)}</p>
                 </div>
-                <Badge variant="outline">Practice</Badge>
+                <Badge variant="outline">{t('common.practice')}</Badge>
               </button>
             ))}
           </RowList>
@@ -114,17 +118,21 @@ export function Home() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>New call</DialogTitle>
-            <DialogDescription>Enter the number you want to call. Awaaz tells them an assistant is helping.</DialogDescription>
+            <DialogTitle>{t('home.newCall')}</DialogTitle>
+            <DialogDescription>{t('home.newCallHint')}</DialogDescription>
           </DialogHeader>
-          <form className="grid gap-4" onSubmit={(e) => { e.preventDefault(); const n = number.length === 10 ? `+91${number}` : number; void start(n, n); }}>
+          <form className="grid gap-4" onSubmit={(e) => { e.preventDefault(); const n = number.length === 10 ? `+91${number}` : number; void start(n, n, undefined, theySpeak); }}>
             <div className="grid gap-2">
-              <Label htmlFor="number">Phone number</Label>
+              <Label htmlFor="number">{t('home.phoneNumber')}</Label>
               <Input id="number" inputMode="tel" autoFocus placeholder="98765 43210" className="h-12 text-lg" value={number} onChange={(e) => setNumber(e.target.value.replace(/[^\d+]/g, ''))} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="they-speak">{t('home.theySpeak')}</Label>
+              <LanguageSelect id="they-speak" spokenOnly value={theySpeak} onChange={setTheySpeak} />
             </div>
             {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
             <Button type="submit" size="lg" disabled={busy || number.length < 8}>
-              {busy ? <Loader2 className="size-4 animate-spin" /> : <Phone className="size-4" />} Call
+              {busy ? <Loader2 className="size-4 animate-spin" /> : <Phone className="size-4" />} {t('home.callButton')}
             </Button>
           </form>
         </DialogContent>

@@ -1,8 +1,10 @@
 import { User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelect } from '@/components/LanguageSelect';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { applyPreset, HEAR_OPTIONS, PRESET_ICONS, READ_LANGS, summary, TALK_OPTIONS, toggle, TYPE_LANGS, withModes, type Option } from '@/lib/profile';
+import { setAppLanguage } from '@/i18n';
+import { applyPreset, HEAR_OPTIONS, PRESET_ICONS, summary, TALK_OPTIONS, toggle, withModes, type Option } from '@/lib/profile';
 import type { HearMode, PresetDef, Profile, TalkMode } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +25,8 @@ function Choice({ pressed, onClick, children, className }: { pressed: boolean; o
   );
 }
 
-function Options<K extends string>({ options, selected, onToggle }: { options: Option<K>[]; selected: K[]; onToggle: (k: K) => void }) {
+function Options<K extends string>({ group, options, selected, onToggle }: { group: 'talk' | 'hear'; options: Option<K>[]; selected: K[]; onToggle: (k: K) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="grid gap-2 sm:grid-cols-2">
       {options.map((o) => {
@@ -34,11 +37,11 @@ function Options<K extends string>({ options, selected, onToggle }: { options: O
               <o.icon className="size-[18px]" />
             </span>
             <span className="min-w-0">
-              <span className="block font-medium leading-tight">{o.title}</span>
-              <span className="mt-0.5 block text-sm text-muted-foreground">{o.hint}</span>
+              <span className="block font-medium leading-tight">{t(`${group}.${o.key}.title`)}</span>
+              <span className="mt-0.5 block text-sm text-muted-foreground">{t(`${group}.${o.key}.hint`)}</span>
               <span className="mt-1.5 flex flex-wrap gap-1.5">
-                {(o.soon || o.tag) && <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{o.tag ?? 'Coming soon'}</span>}
-                {on && selected[0] === o.key && selected.length > 1 && <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">Default</span>}
+                {(o.soon || o.tag) && <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{o.tag ? t(`${group}.${o.key}.tag`) : t('profile.comingSoon')}</span>}
+                {on && selected[0] === o.key && selected.length > 1 && <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">{t('profile.default')}</span>}
               </span>
             </span>
           </Choice>
@@ -49,6 +52,7 @@ function Options<K extends string>({ options, selected, onToggle }: { options: O
 }
 
 export function PresetChips({ value, presets, onChange }: { value: Profile; presets: Record<string, PresetDef>; onChange: (p: Profile) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="grid gap-2 sm:grid-cols-2">
       {Object.entries(presets).map(([key, def]) => {
@@ -59,7 +63,7 @@ export function PresetChips({ value, presets, onChange }: { value: Profile; pres
             <span className={cn('grid size-9 shrink-0 place-items-center rounded-lg', on ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground')}>
               <Icon className="size-[18px]" />
             </span>
-            <span className="font-medium">{def.label}</span>
+            <span className="font-medium">{t(`presets.${key}`, { defaultValue: def.label })}</span>
           </Choice>
         );
       })}
@@ -80,54 +84,53 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
 }
 
 export function ProfileForm({ value, presets, onChange, showPresets = true }: { value: Profile; presets: Record<string, PresetDef>; onChange: (p: Profile) => void; showPresets?: boolean }) {
+  const { t } = useTranslation();
   const talk = value.talk_modes ?? [];
   const hear = value.hear_modes ?? [];
   return (
     <div className="grid gap-8">
       {showPresets && (
-        <Section title="Start from" hint="A preset only sets defaults. You can change anything below.">
+        <Section title={t('profile.startFrom')} hint={t('profile.startFromHint')}>
           <PresetChips value={value} presets={presets} onChange={onChange} />
         </Section>
       )}
 
-      <Section title="How I talk" hint="Choose all that you use. The first one is your default.">
-        <Options<TalkMode> options={TALK_OPTIONS} selected={talk} onToggle={(k) => onChange(withModes(value, { talk_modes: toggle(talk, k) }))} />
+      <Section title={t('profile.howTalk')} hint={t('profile.howTalkHint')}>
+        <Options<TalkMode> group="talk" options={TALK_OPTIONS} selected={talk} onToggle={(k) => onChange(withModes(value, { talk_modes: toggle(talk, k) }))} />
       </Section>
 
-      <Section title="How I hear them" hint="Mix freely, for example captions and clear voice together.">
-        <Options<HearMode> options={HEAR_OPTIONS} selected={hear} onToggle={(k) => onChange(withModes(value, { hear_modes: toggle(hear, k) }))} />
+      <Section title={t('profile.howHear')} hint={t('profile.howHearHint')}>
+        <Options<HearMode> group="hear" options={HEAR_OPTIONS} selected={hear} onToggle={(k) => onChange(withModes(value, { hear_modes: toggle(hear, k) }))} />
       </Section>
 
-      <Section title="Languages and reading">
-        <div className="grid gap-3 sm:grid-cols-2">
+      <Section title={t('profile.languages')}>
+        <div className="grid gap-3 sm:grid-cols-3">
           <div className="grid gap-2">
-            <Label htmlFor="read-lang">I read</Label>
-            <Select value={value.read_lang} onValueChange={(v) => onChange({ ...value, read_lang: v })}>
-              <SelectTrigger id="read-lang" className="h-11 w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>{READ_LANGS.map(([k, n]) => <SelectItem key={k} value={k}>{n}</SelectItem>)}</SelectContent>
-            </Select>
+            <Label htmlFor="app-lang">{t('me.appLanguage')}</Label>
+            <LanguageSelect id="app-lang" value={value.app_lang} onChange={(c) => { void setAppLanguage(c); onChange({ ...value, app_lang: c }); }} />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="type-lang">I type</Label>
-            <Select value={value.type_lang} onValueChange={(v) => onChange({ ...value, type_lang: v })}>
-              <SelectTrigger id="type-lang" className="h-11 w-full"><SelectValue /></SelectTrigger>
-              <SelectContent>{TYPE_LANGS.map(([k, n]) => <SelectItem key={k} value={k}>{n}</SelectItem>)}</SelectContent>
-            </Select>
+            <Label htmlFor="read-lang">{t('profile.iRead')}</Label>
+            <LanguageSelect id="read-lang" value={value.read_lang} onChange={(c) => onChange({ ...value, read_lang: c })} />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="type-lang">{t('profile.iType')}</Label>
+            <LanguageSelect id="type-lang" value={value.type_lang} onChange={(c) => onChange({ ...value, type_lang: c })} />
           </div>
         </div>
         <div className="divide-y rounded-xl border bg-card">
           <div className="flex items-center justify-between gap-4 p-3.5">
-            <Label htmlFor="large-text" className="font-normal">Larger text</Label>
+            <Label htmlFor="large-text" className="font-normal">{t('profile.largerText')}</Label>
             <Switch id="large-text" checked={value.easy_font} onCheckedChange={(v) => onChange({ ...value, easy_font: v })} />
           </div>
           <div className="flex items-center justify-between gap-4 p-3.5">
-            <Label htmlFor="disclosure" className="font-normal">Tell the other person an assistant is helping</Label>
+            <Label htmlFor="disclosure" className="font-normal">{t('profile.disclosure')}</Label>
             <Switch id="disclosure" checked disabled aria-label="Always on" />
           </div>
         </div>
       </Section>
 
-      <p aria-live="polite" className="rounded-xl bg-secondary px-4 py-3 text-sm">{summary(value)}</p>
+      <p aria-live="polite" className="rounded-xl bg-secondary px-4 py-3 text-sm">{summary(value, t as never)}</p>
     </div>
   );
 }

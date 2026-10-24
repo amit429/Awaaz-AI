@@ -18,6 +18,7 @@
 - Help me say it (draft shown, spoken only after Say it); architecture for incoming calls, own number, merge and app choice written down in docs/ARCHITECTURE-incoming.md (design only)
 - Deployed: API on Render free plan (Singapore, Python 3.14.8, https://awaaz-api-jv6d.onrender.com), web on Vercel (https://awaaz-web-amit-personal-projects.vercel.app), Supabase keep-alive ping every 10 min (pg_cron), production Bolna relay agent and model registered. One-call-at-a-time and daily-minutes guards. Dev endpoints return 404 in production
 - UI redesigned on Tailwind v4 + shadcn/ui (login with live-caption demo, onboarding, calls, contacts, me, call screen, dark mode, larger-text setting); screenshots reviewed in light, dark, phone and desktop sizes. 16 web tests
+- Languages: 12-language app (i18n), language step in onboarding, caption translation with live switching, typing in any Indian script, per-contact call language. Translations are machine-made, pending native review. 146 API tests, 18 web tests
 - Scam shield (rules from specs, zero missed requests on scam_eval.csv, LLM second opinion, warning, digit block, scam_events) and smart replies (Gemini, cancelled when stale); scam alert on the call screen. 128 API tests, 14 web tests
 - Disclosure uses the name "Friend" until onboarding stores a profile (M1-06)
 - M1-03 JWT auth (JWKS, optional HS256 fallback) with tests

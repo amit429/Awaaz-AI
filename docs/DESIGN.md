@@ -23,3 +23,10 @@ Atkinson Hyperlegible Next for the interface (made for readability), Bricolage G
 
 ## Structure
 Phones: one column with a bottom tab bar (Calls, Contacts, Me). Wider screens: the same column under a top bar. The call screen is full height with a dock for typing and four tools (Phrases, Keypad, Ask again, End).
+
+## Languages
+- The app is available in 12 languages: English, Hindi, Hinglish (Hindi in English letters), Marathi, Bengali, Tamil, Telugu, Kannada, Gujarati, Punjabi, Malayalam, Odia. The first onboarding step is the language picker; it can be changed any time in Me (and on the login screen).
+- Strings live in `apps/web/src/i18n/locales/en.json` and are loaded per language on demand. The other 11 files are machine translations made with `scripts/translate_locales.py` and **need native-speaker review before launch**. Run the script again after adding English strings.
+- Live captions arrive at once in the language the other person speaks; the translation follows (`caption.translation`) with the original underneath. The caption language can be switched during the call (`read.set`); the last 5 captions are translated again.
+- Typing: any Indian script works with the phone keyboard. Text in another script than the call's is translated and confirmed once. People typing English letters see a suggestion in their own script.
+- The other person's language comes from the contact (or the "They speak" choice when starting a call).

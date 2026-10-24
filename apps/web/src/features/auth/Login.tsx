@@ -1,5 +1,6 @@
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Navigate } from 'react-router-dom';
 import { Brand } from '@/components/Brand';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -12,6 +13,8 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSession } from '@/hooks/useSession';
 import { DEV_LOGIN, friendlyAuthError, setDevLogin } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
+import { LanguageSelect } from '@/components/LanguageSelect';
+import { setAppLanguage } from '@/i18n';
 import { CaptionDemo } from './CaptionDemo';
 
 type Mode = 'signin' | 'signup';
@@ -26,6 +29,7 @@ const GoogleMark = () => (
 );
 
 export function Login() {
+  const { t, i18n } = useTranslation();
   const session = useSession();
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
@@ -44,22 +48,22 @@ export function Login() {
     const creds = { email: email.trim(), password };
     const { data, error: err } = mode === 'signin' ? await supabase.auth.signInWithPassword(creds) : await supabase.auth.signUp(creds);
     setBusy(false);
-    if (err) return setError(friendlyAuthError(err.message));
-    if (mode === 'signup' && !data.session) setNotice('Account created. Check your email for a link to confirm it, then sign in.');
+    if (err) return setError(t(friendlyAuthError(err.message), { defaultValue: err.message }));
+    if (mode === 'signup' && !data.session) setNotice(t('login.accountCreated'));
   }
 
   async function google() {
     setError('');
     const { error: err } = await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
-    if (err) setError(friendlyAuthError(err.message));
+    if (err) setError(t(friendlyAuthError(err.message), { defaultValue: err.message }));
   }
 
   async function reset() {
-    if (!email.trim()) return setError('Type your email above first, then tap “Forgot password”.');
+    if (!email.trim()) return setError(t('login.typeEmailFirst'));
     const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
-    if (err) return setError(friendlyAuthError(err.message));
+    if (err) return setError(t(friendlyAuthError(err.message), { defaultValue: err.message }));
     setError('');
-    setNotice('If that email has an account, we sent a link to reset the password.');
+    setNotice(t('login.resetSent'));
   }
 
   return (
@@ -68,46 +72,49 @@ export function Login() {
         className="dark flex flex-col justify-between gap-10 px-6 py-8 text-foreground sm:px-10 lg:py-12"
         style={{ background: 'radial-gradient(120% 80% at 0% 0%, oklch(0.3 0.08 275), transparent 60%), oklch(0.16 0.035 270)' }}
       >
-        <Brand />
+        <div className="flex items-center justify-between gap-4">
+          <Brand />
+          <LanguageSelect value={i18n.language} onChange={(c) => void setAppLanguage(c)} className="h-10 w-44 bg-white/10 text-sm" />
+        </div>
         <div className="flex flex-col items-start gap-8">
-          <h1 className="max-w-xl text-4xl font-semibold leading-[1.08] sm:text-5xl">Phone calls for people who can’t hear or speak.</h1>
-          <p className="max-w-md text-lg text-muted-foreground">Type and Awaaz speaks for you. What they say appears as captions, with prices and times picked out.</p>
+          <h1 className="max-w-xl text-4xl font-semibold leading-[1.08] sm:text-5xl">{t('login.headline')}</h1>
+          <p className="max-w-md text-lg text-muted-foreground">{t('login.subhead')}</p>
           <CaptionDemo />
         </div>
-        <p className="text-sm text-muted-foreground">Awaaz tells the other person an assistant is helping, at the start of every call.</p>
+        <p className="text-sm text-muted-foreground">{t('login.footnote')}</p>
       </section>
 
       <section className="flex items-center justify-center px-4 py-10 sm:px-8">
         <Card className="w-full max-w-md border-0 bg-transparent shadow-none lg:border lg:bg-card lg:shadow-sm">
           <CardHeader>
-            <CardTitle className="text-2xl">{mode === 'signin' ? 'Welcome back' : 'Create your account'}</CardTitle>
-            <CardDescription>{mode === 'signin' ? 'Sign in to make and receive calls.' : 'It takes a minute. You choose how you talk and hear next.'}</CardDescription>
+            <CardTitle className="text-2xl">{mode === 'signin' ? t('login.welcomeBack') : t('login.createTitle')}</CardTitle>
+            <CardDescription>{mode === 'signin' ? t('login.signInHint') : t('login.createHint')}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-5">
             <Tabs value={mode} onValueChange={(v) => { setMode(v as Mode); setError(''); setNotice(''); }}>
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign in</TabsTrigger>
-                <TabsTrigger value="signup">Create account</TabsTrigger>
+                <TabsTrigger value="signin">{t('login.signIn')}</TabsTrigger>
+                <TabsTrigger value="signup">{t('login.createAccount')}</TabsTrigger>
               </TabsList>
             </Tabs>
 
             <Button variant="outline" size="lg" className="w-full gap-3" onClick={() => void google()}>
-              <GoogleMark /> Continue with Google
+              <GoogleMark /> {t('login.google')}
             </Button>
 
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Separator className="flex-1" /> or use your email <Separator className="flex-1" />
+              <Separator className="flex-1" /> {t('login.orEmail')} <Separator className="flex-1" />
             </div>
 
             <form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('login.email')}</Label>
                 <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('login.password')}</Label>
                 <Input id="password" type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="h-11" />
-                {mode === 'signup' && <p className="text-sm text-muted-foreground">At least 6 characters.</p>}
+                {mode === 'signup' && <p className="text-sm text-muted-foreground">{t('login.passwordHint')}</p>}
               </div>
               {error && (
                 <Alert variant="destructive" role="alert">
@@ -118,13 +125,13 @@ export function Login() {
               {notice && <Alert role="status"><AlertDescription>{notice}</AlertDescription></Alert>}
               <Button type="submit" size="lg" disabled={busy || !email || password.length < 6}>
                 {busy && <Loader2 className="size-4 animate-spin" />}
-                {mode === 'signin' ? 'Sign in' : 'Create account'}
+                {mode === 'signin' ? t('login.signIn') : t('login.createAccount')}
               </Button>
             </form>
 
             <div className="flex flex-col items-center gap-1">
-              {mode === 'signin' && <Button variant="link" onClick={() => void reset()}>Forgot password</Button>}
-              {DEV_LOGIN && <Button variant="ghost" size="sm" onClick={() => setDevLogin(true)}>Continue as the dev user (local only)</Button>}
+              {mode === 'signin' && <Button variant="link" onClick={() => void reset()}>{t('login.forgot')}</Button>}
+              {DEV_LOGIN && <Button variant="ghost" size="sm" onClick={() => setDevLogin(true)}>{t('login.devUser')}</Button>}
             </div>
           </CardContent>
         </Card>

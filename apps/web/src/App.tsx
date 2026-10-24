@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { setAppLanguage } from './i18n';
 import { Button } from '@/components/ui/button';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { Centered } from '@/components/AppShell';
@@ -16,7 +18,11 @@ import { useSession } from './hooks/useSession';
 
 /** Everything except onboarding needs a saved profile (the name is spoken at the start of each call). */
 function Gate() {
+  const { t } = useTranslation();
   const me = useMe();
+  useEffect(() => {
+    if (me.data?.onboarded) void setAppLanguage(me.data.profile.app_lang);
+  }, [me.data?.onboarded, me.data?.profile.app_lang]);
   useEffect(() => {
     document.documentElement.classList.toggle('large-text', Boolean(me.data?.profile.easy_font));
   }, [me.data?.profile.easy_font]);
@@ -24,8 +30,8 @@ function Gate() {
   if (me.isError) {
     return (
       <Centered>
-        <p role="alert" className="text-center">Could not reach Awaaz. The server may be starting up, which can take a minute.</p>
-        <Button className="mx-auto mt-4" onClick={() => void me.refetch()}>Try again</Button>
+        <p role="alert" className="text-center">{t('common.serverDown')}</p>
+        <Button className="mx-auto mt-4" onClick={() => void me.refetch()}>{t('common.tryAgain')}</Button>
       </Centered>
     );
   }

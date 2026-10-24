@@ -5,9 +5,12 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { Toaster } from './components/ui/sonner';
+import { initialLanguage, setAppLanguage } from './i18n';
 import './index.css';
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } });
+
+void setAppLanguage(initialLanguage());
 
 createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
