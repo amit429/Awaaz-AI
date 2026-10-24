@@ -18,7 +18,7 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 | `caption.final` | `turn`, `text`, `lang`, `translated?`, `confidence`, `entities[]` | End of the other person’s turn |
 | `you.final` | `turn`, `text`, `source`, `original?` | A user turn was spoken or transcribed (typed, reply, phrase, draft, voice, clarity). `original` is what the user typed when it was converted (Hinglish to native script) |
 | `suggestions` | `turn`, `items[3]` | Smart replies for the latest turn |
-| `draft.ready` | `draft_id`, `text`, `from_words` | Help me say result |
+| `draft.ready` | `draft_id`, `text`, `from_words`, `changed_meaning_risk?` | Help me say result; shown to the user, spoken only after they send `user.say` with source `draft` |
 | `say.preview` | `preview_id`, `text`, `original` | Translation shown before speaking |
 | `say.blocked` | `reason` (`scam_digits`, `empty`, `too_long`) | A say was refused |
 | `scam.warning` | `reason`, `turn` | OTP/PIN/CVV/remote-app request detected |

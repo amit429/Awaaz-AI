@@ -50,7 +50,11 @@ async def test_valid_output_is_cleaned_and_limited():
         ]
     )
     out = await suggest(llm, CTX, TURNS)
-    assert out == ["Theek hai, rakh dijiye", "Ghar bhej sakte hain?", "Phir se boliye"]  # capped at 3
+    assert out == [
+        "Theek hai, rakh dijiye",
+        "Ghar bhej sakte hain?",
+        "Phir se boliye",
+    ]  # capped at 3
 
 
 async def test_digit_runs_and_empty_items_never_become_suggestions():

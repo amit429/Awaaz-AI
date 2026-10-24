@@ -6,6 +6,7 @@ export type ClientEvent =
   | { t: 'user.typing' }
   | { t: 'user.say'; text: string; source: 'typed' | 'reply' | 'phrase' | 'draft'; preview_id?: string }
   | { t: 'say.confirm'; preview_id: string }
+  | { t: 'draft.request'; words: string }
   | { t: 'user.ask_repeat' }
   | { t: 'user.dtmf'; digits: string }
   | { t: 'call.end' }

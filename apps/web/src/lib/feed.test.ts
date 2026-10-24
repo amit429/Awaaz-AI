@@ -35,6 +35,17 @@ describe('applyEvent', () => {
     expect(s.feed.some((i) => i.kind === 'preview')).toBe(false);
   });
 
+  it('shows one draft at a time and clears it once speech goes out', () => {
+    const s1 = run([
+      { t: 'draft.ready', draft_id: 'd1', text: 'Mujhe 30 goliyan chahiye.', from_words: '30 goli' },
+      { t: 'draft.ready', draft_id: 'd2', text: 'Mujhe 60 goliyan chahiye.', changed_meaning_risk: true },
+    ]);
+    expect(s1.feed.filter((i) => i.kind === 'draft')).toHaveLength(1);
+    expect(s1.feed[0]).toMatchObject({ kind: 'draft', id: 'd2', risk: true });
+    const s2 = applyEvent(s1, { t: 'you.final', turn: 5, text: 'Mujhe 60 goliyan chahiye.', source: 'draft' });
+    expect(s2.feed.some((i) => i.kind === 'draft')).toBe(false);
+  });
+
   it('explains blocked messages and flags scam warnings', () => {
     const s = run([{ t: 'say.blocked', reason: 'scam_digits' }, { t: 'scam.warning', reason: 'otp_request' }]);
     expect(s.scam).toBe(true);

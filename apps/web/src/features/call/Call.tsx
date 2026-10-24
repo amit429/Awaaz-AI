@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '../../components/Icons';
 import starterPhrases from '../../data/phrases.json';
-import { usePhrases } from '../../hooks/useData';
+import { useMe, usePhrases } from '../../hooks/useData';
 import { applyEvent, initialState, SCAM_COPY, splitByEntities, type FeedItem } from '../../lib/feed';
 import { RelayClient } from '../../lib/relay';
 
@@ -38,6 +38,9 @@ export function Call() {
   const who = (location.state as { name?: string; number?: string } | null) ?? {};
   const [state, dispatch] = useReducer(applyEvent, initialState);
   const mine = usePhrases();
+  const me = useMe();
+  const canHelp = Boolean(me.data?.profile.talk_modes?.includes('help'));
+  const [mode, setMode] = useState<'type' | 'help'>('type');
   const usablePhrases = mine.data && mine.data.length > 0 ? mine.data : starter;
   const [online, setOnline] = useState(false);
   const [text, setText] = useState('');
@@ -69,7 +72,8 @@ export function Call() {
       return;
     }
     if (!v) return;
-    client.current?.send({ t: 'user.say', text: v, source: 'typed' });
+    if (mode === 'help') client.current?.send({ t: 'draft.request', words: v });
+    else client.current?.send({ t: 'user.say', text: v, source: 'typed' });
     setText('');
   }
 
@@ -118,6 +122,18 @@ export function Call() {
               );
             case 'note':
               return <div key={item.id} className="note">{item.text}</div>;
+            case 'draft':
+              return (
+                <div key={`d${item.id}`} className="draft">
+                  <div className="h"><Icon name="spark" size="sm" />Drafted for you. Check it before it’s spoken</div>
+                  <p>{item.text}</p>
+                  {item.risk && <small style={{ color: '#FFAE3D' }}>Your words were a little unclear. Check this says what you mean.</small>}
+                  <div className="b">
+                    <button className="go" type="button" onClick={() => client.current?.send({ t: 'user.say', text: item.text, source: 'draft' })}>Say it</button>
+                    <button className="no" type="button" onClick={() => { setMode('type'); setText(item.text); }}>Edit</button>
+                  </div>
+                </div>
+              );
             case 'preview':
               return (
                 <div key={`p${i}`} className="draft">
@@ -144,10 +160,16 @@ export function Call() {
       )}
 
       <div className="dock">
+        {live && canHelp && (
+          <div className="talkmode" role="group" aria-label="How you talk">
+            <button type="button" aria-pressed={mode === 'type'} onClick={() => setMode('type')}><Icon name="keyboard" size="sm" />Type</button>
+            <button type="button" aria-pressed={mode === 'help'} onClick={() => setMode('help')}><Icon name="spark" size="sm" />Help me say</button>
+          </div>
+        )}
         {live ? (
           <form className="compose" onSubmit={submit}>
-            <input value={text} onChange={(e) => onType(e.target.value)} placeholder="Type, they hear it" aria-label="Type a message" autoFocus />
-            <button className="round send" type="submit" aria-label="Speak"><Icon name="send" /></button>
+            <input value={text} onChange={(e) => onType(e.target.value)} placeholder={mode === 'help' ? 'A few words, I’ll make a sentence' : 'Type, they hear it'} aria-label={mode === 'help' ? 'A few words' : 'Type a message'} autoFocus />
+            <button className="round send" type="submit" aria-label={mode === 'help' ? 'Draft' : 'Speak'}><Icon name={mode === 'help' ? 'spark' : 'send'} /></button>
           </form>
         ) : (
           <button className="cta soft" type="button" onClick={() => nav('/')}>Back to calls</button>

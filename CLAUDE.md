@@ -15,14 +15,16 @@ You are implementing **Awaaz**: phone calls for people who can’t hear or speak
 - `apps/web`: React 18 + TypeScript + Vite PWA, React Router, TanStack Query, Supabase JS, plain CSS from the prototype, AudioWorklets for audio.
 - `apps/api`: Python 3.12, FastAPI, Pydantic v2, asyncio, httpx, websockets; one Render Starter instance (sessions live in memory).
 - Supabase (Postgres + RLS, Auth, Realtime, Storage).
-- Telephony and WhatsApp: **Twilio** (Media Streams for live legs, WhatsApp sandbox for the bot). Plivo and Exotel dropped: India numbers need an India-registered business (see `docs/DECISIONS.md`).
+- Telephony: **Bolna** is the live phone leg (custom-LLM relay agent; Twilio upgrade skipped, see `docs/DECISIONS.md` and `docs/SPIKE-bolna.md`). Calls from the app and from WhatsApp use the same `OtherLeg` abstraction. Incoming calls and own-number design: `docs/ARCHITECTURE-incoming.md`.
+- WhatsApp: **Meta WhatsApp Cloud API** (free test number). The Twilio trial cannot push free-form messages; its adapter stays for a paid account.
+- Auth and data: Supabase Auth (Google and email/password), Postgres via the API's service role.
 - Speech: **Sarvam only** (Saaras v3 streaming STT, Bulbul v3 streaming TTS, translation). Deepgram and Cartesia dropped after a bake-off (see `docs/DECISIONS.md`); add a second provider only for a measured requirement.
 - Call for me: Bolna agents. LLM behind one adapter with JSON-schema output.
 - No WebRTC SFU, no Redis, no Next.js for v1.
 
 ## How to work
-- **M0 first.** Prove two-way audio with Twilio Media Streams before building UI. Record findings in `docs/SPIKE-audio.md`.
-- **Three run modes:** `MOCK_PROVIDERS=true` (scripted fake callee, text only), **callee simulator** (`/dev/callee/:id`, real STT/TTS, no telephony), **live** (Twilio). Every feature must work in mock mode; audio features must work with the simulator before going live.
+- Current plan and decisions: `tasks/PLAN.md` (revision at the top), `docs/DECISIONS.md`, `PROGRESS.md`.
+- **Three run modes:** `MOCK_PROVIDERS=true` (scripted fake callee, text only), **callee simulator** (`/dev/callee/:id`, real STT/TTS, no telephony), **live** (Bolna phone leg). Every feature must work in mock mode; audio features must work with the simulator before going live.
 - One ticket at a time; tests; commit `<ID>: <summary>`; keep `PROGRESS.md` (done / doing / blocked / unverified).
 - Provider code only in `apps/api/app/providers/`. Relay logic only in `apps/api/app/relay/`.
 - **⚠️ VERIFY** items: check current provider docs (use web fetch if available) before writing live adapters; otherwise isolate the assumption in one function with a fixture test and list it under “Unverified” in `PROGRESS.md`.

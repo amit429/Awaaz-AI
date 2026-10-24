@@ -21,6 +21,7 @@ from pydantic import ValidationError
 from app.models.events import (
     AskRepeat,
     CallEnd,
+    DraftRequest,
     ModeSet,
     Ping,
     SayConfirm,
@@ -34,6 +35,7 @@ from app.relay.disclosure import ask_repeat_line, disclosure_line, keeper_line, 
 from app.relay.entities import extract_entities
 from app.relay.keeper import Keeper
 from app.relay.legs import OtherLeg
+from app.services.drafts import make_draft
 from app.services.profiles import Modes
 from app.services.replies import ReplyContext, suggest
 from app.services.say_prep import Prepared
@@ -325,6 +327,8 @@ class RelaySession:
                 await self._user_say(ev)
             case SayConfirm():
                 await self._say_confirm(ev)
+            case DraftRequest():
+                await self._draft(ev)
             case AskRepeat():
                 line = ask_repeat_line(self.call_lang)
                 await self._you(line, "ask_repeat")
@@ -372,6 +376,32 @@ class RelaySession:
             )
             return
         await self._speak(prepared.spoken, ev.source, ev.text)
+
+    async def _draft(self, ev: DraftRequest) -> None:
+        """Help me say it: draft one sentence from a few words. Nothing is spoken here."""
+        if not self.llm:
+            return self._error("not_available", "Help me say it needs the live AI service.")
+        last = next((t for who, t in reversed(self._convo) if who == "other"), "")
+        draft = await make_draft(
+            self.llm,
+            words=ev.words,
+            call_lang=self.call_lang,
+            type_lang=self.reply_ctx.type_lang,
+            last_caption=last,
+            contact_notes=self.reply_ctx.contact_notes,
+        )
+        if draft is None:
+            return self._error("draft_failed", "I couldn’t draft that. Try different words.")
+        draft_id = uuid.uuid4().hex[:12]
+        self.emit(
+            {
+                "t": "draft.ready",
+                "draft_id": draft_id,
+                "text": draft.text,
+                "from_words": ev.words,
+                "changed_meaning_risk": draft.risk,
+            }
+        )
 
     async def _say_confirm(self, ev: SayConfirm) -> None:
         pending = self._pending.pop(ev.preview_id, None)

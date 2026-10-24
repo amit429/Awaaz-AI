@@ -14,6 +14,7 @@ export type ServerEvent =
   | { t: 'caption.final'; turn: number; text: string; lang?: string; translated?: string | null; confidence: number; entities: Entity[] }
   | { t: 'you.final'; turn: number; text: string; source: string; original?: string }
   | { t: 'suggestions'; turn: number; items: string[] }
+  | { t: 'draft.ready'; draft_id: string; text: string; from_words?: string; changed_meaning_risk?: boolean }
   | { t: 'say.preview'; preview_id: string; text: string; original?: string }
   | { t: 'say.blocked'; reason: 'scam_digits' | 'empty' | 'too_long' }
   | { t: 'scam.warning'; reason: string; turn?: number }
@@ -26,7 +27,8 @@ export type FeedItem =
   | { kind: 'them'; turn: number; text: string; entities: Entity[]; translated?: string | null; partial?: boolean }
   | { kind: 'you'; turn: number; text: string; source: string; original?: string }
   | { kind: 'note'; id: string; text: string }
-  | { kind: 'preview'; id: string; text: string; original?: string };
+  | { kind: 'preview'; id: string; text: string; original?: string }
+  | { kind: 'draft'; id: string; text: string; fromWords?: string; risk: boolean };
 
 export interface CallState {
   status: 'connecting' | 'ringing' | 'connected' | 'ended' | 'failed';
@@ -77,11 +79,13 @@ export function applyEvent(state: CallState, ev: ServerEvent): CallState {
       if (ev.source === 'disclosure') return { ...state, feed: [...state.feed, note(`Awaaz told them: ${ev.text}`)] };
       if (ev.source === 'keeper') return { ...state, feed: [...state.feed, note(`Awaaz told them: ${ev.text}`)] };
       if (state.feed.some((i) => i.kind === 'you' && i.turn === ev.turn)) return state; // replay duplicate
-      const feed = state.feed.filter((i) => i.kind !== 'preview');
+      const feed = state.feed.filter((i) => i.kind !== 'preview' && i.kind !== 'draft');
       return { ...state, suggestions: [], feed: [...feed, { kind: 'you', turn: ev.turn, text: ev.text, source: ev.source, original: ev.original }] };
     }
     case 'suggestions':
       return { ...state, suggestions: ev.items };
+    case 'draft.ready':
+      return { ...state, feed: [...state.feed.filter((i) => i.kind !== 'draft'), { kind: 'draft', id: ev.draft_id, text: ev.text, fromWords: ev.from_words, risk: Boolean(ev.changed_meaning_risk) }] };
     case 'say.preview':
       return { ...state, feed: [...state.feed.filter((i) => i.kind !== 'preview'), { kind: 'preview', id: ev.preview_id, text: ev.text, original: ev.original }] };
     case 'say.blocked':
