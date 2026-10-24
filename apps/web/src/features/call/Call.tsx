@@ -84,7 +84,7 @@ export function Call() {
   }, [sessionId]);
 
   useEffect(() => {
-    feedEnd.current?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    feedEnd.current?.scrollIntoView({ block: 'end' });
   }, [state.feed]);
 
   useEffect(() => {
@@ -114,7 +114,10 @@ export function Call() {
     onSpeechStart: () => client.current?.send({ t: 'user.typing' }),
     onText: (spoken) => {
       setHeard(spoken);
-      if (autoSend) client.current?.send({ t: 'user.say', text: spoken, source: 'voice' });
+      if (autoSend) {
+        dispatch({ t: 'local.pending', id: `p${Date.now()}`, text: spoken });
+        client.current?.send({ t: 'user.say', text: spoken, source: 'voice' });
+      }
       else { setMode('type'); setText(spoken); }
     },
     onError: (code) => toast.error(t(code === 'denied' ? 'call.micDenied' : 'call.voiceFailed')),
@@ -162,12 +165,24 @@ export function Call() {
     if (!v && preview) return client.current?.send({ t: 'say.confirm', preview_id: preview.id });
     if (!v) return;
     if (mode === 'help') client.current?.send({ t: 'draft.request', words: v });
-    else client.current?.send({ t: 'user.say', text: v, source: 'typed' });
+    else {
+      dispatch({ t: 'local.pending', id: `p${Date.now()}`, text: v });
+      client.current?.send({ t: 'user.say', text: v, source: 'typed' });
+    }
     setText('');
+    window.clearTimeout(prefetchTimer.current);
   }
 
+  // While the user pauses mid-message, the server prepares it (script conversion, translation),
+  // so pressing send is instant. Text already in a native script needs no preparation.
+  const prefetchTimer = useRef<number>(0);
   function onType(v: string) {
     setText(v);
+    window.clearTimeout(prefetchTimer.current);
+    const draft = v.trim();
+    if (mode === 'type' && draft.length >= 3 && /^[\x00-\x7F]+$/.test(draft)) {
+      prefetchTimer.current = window.setTimeout(() => client.current?.send({ t: 'say.prefetch', text: draft }), 300);
+    }
     if (Date.now() - lastTyping.current > 1500) {
       lastTyping.current = Date.now();
       client.current?.send({ t: 'user.typing' });
@@ -224,6 +239,13 @@ export function Call() {
                 <div key={`y${item.turn}`} className="max-w-[86%] self-end rounded-3xl rounded-br-md bg-accent px-4 py-2.5 text-lg font-medium text-accent-foreground">
                   {item.text}
                   {item.original && <small className="mt-0.5 block text-xs font-normal opacity-75">{t('call.youTyped', { text: item.original })}</small>}
+                </div>
+              );
+            case 'pending':
+              return (
+                <div key={item.id} className="max-w-[86%] self-end rounded-3xl rounded-br-md bg-accent/60 px-4 py-2.5 text-lg font-medium text-accent-foreground">
+                  {item.text}
+                  <small className="mt-0.5 block text-xs font-normal opacity-75">{t('call.sending')}</small>
                 </div>
               );
             case 'note':

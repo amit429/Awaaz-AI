@@ -5,6 +5,8 @@ from typing import Any
 
 import httpx
 
+from app.providers.http import shared
+
 from app.config import Settings
 
 API = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -46,8 +48,8 @@ class GeminiLlm:
             },
         }
         url = f"{API}/{self.settings.llm_model}:generateContent?key={self.settings.llm_api_key}"
-        async with httpx.AsyncClient(timeout=20) as client:
-            r = await client.post(url, json=body)
-            r.raise_for_status()
+        client = shared("gemini", 20)
+        r = await client.post(url, json=body)
+        r.raise_for_status()
         text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
         return json.loads(text)

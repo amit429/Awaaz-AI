@@ -265,7 +265,8 @@
     "voiceListening": "Listening. Speak, and Awaaz says it.",
     "voiceHeard": "Said: {{text}}",
     "autoSend": "Send automatically",
-    "voiceFailed": "Live voice isn’t available right now. You can type instead."
+    "voiceFailed": "Live voice isn’t available right now. You can type instead.",
+    "sending": "Sending…"
   },
   "scam": {
     "otp_request": {

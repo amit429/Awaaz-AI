@@ -47,6 +47,22 @@ async def test_english_is_translated_and_needs_confirmation(monkeypatch):
 
 
 async def test_llm_failure_falls_back_to_confirmation(monkeypatch):
+    # No obvious words, so the language model is needed; when it fails, ask the user to confirm.
+    monkeypatch.setattr(say_prep.sarvam, "transliterate", fake_translit)
+    p = await prepare_say("Telma Sharma Medical", "hi-IN", S, FakeLlm(fail=True))
+    assert p.needs_confirm is True and p.kind == "same_language"
+
+
+async def test_obvious_hinglish_never_waits_for_the_language_model(monkeypatch):
     monkeypatch.setattr(say_prep.sarvam, "transliterate", fake_translit)
     p = await prepare_say("Theek hai, rakh dijiye.", "hi-IN", S, FakeLlm(fail=True))
-    assert p.needs_confirm is True and p.spoken == "ठीक है, रख दीजिए।"
+    assert p.needs_confirm is False and p.spoken == "ठीक है, रख दीजिए।"
+
+
+def test_quick_language():
+    q = say_prep.quick_language
+    assert q("Telma 40 chahiye") == "hindi_roman"
+    assert q("I need Telma 40 please") == "english"
+    assert q("mala goli pahije") == "marathi_roman"
+    assert q("Telma Sharma Medical") is None
+    assert q("kya I need this") is None  # mixed: leave it to the model

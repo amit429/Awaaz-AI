@@ -169,6 +169,6 @@ async def transcribe(
         text = await sarvam.transcribe(
             data, audio.content_type or "audio/webm", settings, target[1] if target else "unknown"
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(status_code=502, detail="transcribe_failed") from exc
     return {"text": text}

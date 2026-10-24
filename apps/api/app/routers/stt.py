@@ -111,7 +111,7 @@ async def stt(ws: WebSocket, token: str | None = Query(None), lang: str = Query(
                 t.cancel()
     except (WebSocketDisconnect, websockets.ConnectionClosed) as exc:
         log.debug("live speech to text closed: %r", exc)
-    except Exception:  # noqa: BLE001 - tell the app, never crash the server
+    except Exception:
         log.exception("live speech to text failed")
         try:
             await ws.send_json({"t": "error", "code": "stt_failed"})

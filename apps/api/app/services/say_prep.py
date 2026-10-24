@@ -6,6 +6,7 @@ text is shown to the user and spoken only after they confirm).
 """
 
 import asyncio
+import re
 from dataclasses import dataclass
 
 from app.config import Settings
@@ -53,6 +54,48 @@ def script_of(text: str) -> str:
             name = next((n for lo, hi, n in _BLOCKS if lo <= cp <= hi), "other")
         counts[name] = counts.get(name, 0) + 1
     return max(counts, key=counts.__getitem__) if counts else "none"
+
+
+# Words that settle the language of text typed in English letters without asking a model.
+# Words that mean something in both languages are left out on purpose.
+def _words(text: str) -> frozenset[str]:
+    return frozenset(text.split())
+
+
+_HINDI = _words(
+    "hai hain hoon kya kyun kyon kaise kab kahan kaun kitna kitni kitne mujhe mere meri mera aap "
+    "aapko aapka aapki tum tumhe nahi nahin haan ji chahiye chahie dijiye kijiye bataiye batao "
+    "dena lena karna karo ka ki ke ko se mein par aur ya bhi toh abhi kal aaj subah shaam raat baje "
+    "rupaye rupay goli dawai dawa theek thik accha achha wala wali sahi paisa tak pehle baad ruko "
+    "sunai samajh lijiye dijiyega boliye bolo chalega hoga hogi honge milega milegi bhejiye bhej "
+    "kuch sab liye lagega"
+)
+_MARATHI = _words(
+    "aahe ahe aahet pahije pahijet mala tumhala kay kaay kuthe kiti kasa kashi zhala jhala mhanje "
+    "tumhi amhi aamhi dya saanga sanga vaajta vajta tumhi aahes nako hoy"
+)
+_ENGLISH = _words(
+    "the is are am was i you we he she it need want please what how when where my your can could "
+    "will would does did have has of for and with this that in on at not yes okay thank thanks "
+    "hello medicine tablet tablets price time today tomorrow give send call us them if but be been "
+    "an morning evening night delivery address number"
+)
+_WORD = re.compile(r"[a-z]+")
+
+
+def quick_language(text: str) -> str | None:
+    """hindi_roman, marathi_roman or english when the words make it obvious, else None."""
+    words = _WORD.findall(text.lower())
+    hi = sum(w in _HINDI for w in words)
+    mr = sum(w in _MARATHI for w in words)
+    en = sum(w in _ENGLISH for w in words)
+    if mr and mr >= hi and not en:
+        return "marathi_roman"
+    if hi and en == 0:
+        return "hindi_roman"
+    if en and hi == 0 and mr == 0:
+        return "english"
+    return None
 
 
 LANGS = ["hindi_roman", "marathi_roman", "english", "other"]
@@ -113,12 +156,23 @@ async def prepare_say(text: str, call_lang: str, settings: Settings, llm: Llm) -
             return Prepared(out["translation"], True, "translated", script)
         except Exception:  # noqa: BLE001 - never speak something unreviewed
             return Prepared(text, True, "translated", script)
-    # Latin letters: detect the language and transliterate in parallel.
-    translit, detected = await asyncio.gather(
-        sarvam.transliterate(text, settings, target=call_lang),
-        llm.complete_json(_detect_prompt(text), schema=DETECT_SCHEMA),
-        return_exceptions=True,
-    )
+    # Latin letters. Obvious cases skip the language model, which is what made sending slow.
+    quick = quick_language(text)
+    if quick is None:
+        translit, detected = await asyncio.gather(
+            sarvam.transliterate(text, settings, target=call_lang),
+            llm.complete_json(_detect_prompt(text), schema=DETECT_SCHEMA),
+            return_exceptions=True,
+        )
+    else:
+        detected = {"language": quick}
+        if quick == SAME_LANG.get(call_lang) and quick != "english":
+            try:
+                translit = await sarvam.transliterate(text, settings, target=call_lang)
+            except Exception as exc:  # noqa: BLE001
+                translit = exc
+        else:
+            translit = text  # unused: translated or spoken as typed
     translit_ok = not isinstance(translit, BaseException)
     if isinstance(detected, BaseException) or "language" not in detected:
         # Cannot tell: show the transliteration and ask.

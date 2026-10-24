@@ -265,7 +265,8 @@
     "voiceListening": "Sun raha hai. Aap bolein, Awaaz kahega.",
     "voiceHeard": "Kaha: {{text}}",
     "autoSend": "Apne aap bhej dein",
-    "voiceFailed": "Live voice abhi kaam nahi kar raha hai. Aap likh kar baat kar sakte hain."
+    "voiceFailed": "Live voice abhi kaam nahi kar raha hai. Aap likh kar baat kar sakte hain.",
+    "sending": "Bhej rahe hain…"
   },
   "scam": {
     "otp_request": {

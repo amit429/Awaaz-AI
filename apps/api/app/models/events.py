@@ -21,6 +21,13 @@ class UserSay(BaseModel):
     preview_id: str | None = None
 
 
+class SayPrefetch(BaseModel):
+    """The user is still typing: prepare this text now so sending it is instant."""
+
+    t: Literal["say.prefetch"]
+    text: str = Field(min_length=1, max_length=500)
+
+
 class SayConfirm(BaseModel):
     t: Literal["say.confirm"]
     preview_id: str
@@ -73,6 +80,7 @@ class Ping(BaseModel):
 ClientEvent = Annotated[
     UserTyping
     | UserSay
+    | SayPrefetch
     | SayConfirm
     | DraftRequest
     | AskRepeat

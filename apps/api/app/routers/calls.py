@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field
 
 from app.auth import _user_id, current_user
 from app.config import Settings, get_settings
-from app.relay import registry
 from app.providers.gemini import GeminiLlm
+from app.relay import registry
 from app.services.calls import CallError, create_relay_call
 from app.services.summary import summarise
 from app.store import Store, get_store
@@ -124,7 +124,7 @@ async def relay(
             if not receive.done():  # the call ended and the pump closed the socket
                 receive.cancel()
                 break
-            await session.handle_text(receive.result())
+            session.dispatch_text(receive.result())
     except WebSocketDisconnect:
         pass
     finally:

@@ -93,4 +93,20 @@ describe('splitByEntities', () => {
     expect(pieces.map((p) => p.text).join('')).toBe('abc');
     expect(pieces.filter((p) => p.entity)).toHaveLength(1);
   });
+
+  it('shows a sent message at once and swaps it for the prepared one', () => {
+    let st = applyEvent(initialState, { t: 'local.pending', id: 'p1', text: 'Telma 40 chahiye' });
+    expect(st.feed).toEqual([{ kind: 'pending', id: 'p1', text: 'Telma 40 chahiye' }]);
+    st = applyEvent(st, { t: 'you.final', turn: 2, text: 'टेल्मा चालीस चाहिए', source: 'typed', original: 'Telma 40 chahiye' });
+    expect(st.feed.map((i) => i.kind)).toEqual(['you']);
+  });
+
+  it('settles pending messages in order and drops them when the call ends', () => {
+    let st = applyEvent(initialState, { t: 'local.pending', id: 'a', text: 'one' });
+    st = applyEvent(st, { t: 'local.pending', id: 'b', text: 'two' });
+    st = applyEvent(st, { t: 'say.preview', preview_id: 'x', text: 'preview' });
+    expect(st.feed.filter((i) => i.kind === 'pending').map((i) => (i as { id: string }).id)).toEqual(['b']);
+    st = applyEvent(st, { t: 'call.state', state: 'ended' });
+    expect(st.feed.some((i) => i.kind === 'pending')).toBe(false);
+  });
 });

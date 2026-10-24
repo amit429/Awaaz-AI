@@ -27,6 +27,7 @@ from app.models.events import (
     Ping,
     ReadSet,
     SayConfirm,
+    SayPrefetch,
     UserSay,
     UserTyping,
     client_event,
@@ -41,7 +42,7 @@ from app.services.drafts import make_draft
 from app.services.languages import Translator
 from app.services.profiles import Modes
 from app.services.replies import ReplyContext, suggest
-from app.services.say_prep import Prepared
+from app.services.say_prep import Prepared, script_of
 from app.store import Store
 
 log = logging.getLogger("awaaz.relay")
@@ -108,6 +109,8 @@ class RelaySession:
         self._buffer: deque[dict[str, Any]] = deque(maxlen=REPLAY)
         self._tasks: set[asyncio.Task[None]] = set()
         self._last_sub_gone: float | None = None
+        self._prefetched: dict[str, asyncio.Task[Prepared]] = {}
+        self._say_tail: asyncio.Task[None] | None = None
 
     # ---------- events out ----------
     def elapsed_ms(self) -> int:
@@ -361,6 +364,8 @@ class RelaySession:
                 self.keeper.typing()
             case UserSay():
                 await self._user_say(ev)
+            case SayPrefetch():
+                self._prefetch(ev.text)
             case SayConfirm():
                 await self._say_confirm(ev)
             case DraftRequest():
@@ -390,6 +395,61 @@ class RelaySession:
             case _:
                 self._error("not_implemented", f"{ev.t} is not available yet")
 
+    def _prefetch(self, text: str) -> None:
+        """Prepare typed text while the user is still typing, so sending it feels instant."""
+        key = text.strip()
+        if not key or key in self._prefetched or script_of(key) != "latin":
+            return
+        if len(self._prefetched) >= 4:  # cost guard: oldest out
+            old = next(iter(self._prefetched))
+            self._prefetched.pop(old).cancel()
+        task = asyncio.create_task(self.prepare(key))
+        task.add_done_callback(lambda t: t.cancelled() or t.exception())  # never "unretrieved"
+        self._prefetched[key] = task
+        asyncio.get_running_loop().call_later(60, self._expire_prefetch, key, task)
+
+    def _expire_prefetch(self, key: str, task: asyncio.Task[Prepared]) -> None:
+        if self._prefetched.get(key) is task:
+            del self._prefetched[key]
+            task.cancel()
+
+    async def _prepared(self, text: str) -> Prepared:
+        task = self._prefetched.pop(text.strip(), None)
+        if task is not None and not task.cancelled():
+            try:
+                return await task
+            except Exception:  # noqa: BLE001 - fall through and prepare again
+                log.debug("prefetched preparation failed; preparing again")
+        return await self.prepare(text)
+
+    def dispatch_text(self, data: str) -> None:
+        """Entry point for the app's socket. Saying things is slow (conversion, translation), so it
+        runs in order in the background and never holds up typing, pings or later events."""
+        try:
+            raw = json.loads(data)
+        except json.JSONDecodeError:
+            return self._error("bad_event", "not valid JSON")
+        slow = isinstance(raw, dict) and raw.get("t") in (
+            "user.say",
+            "say.confirm",
+            "draft.request",
+        )
+        if not slow:
+            self._spawn(self.handle(raw))
+            return
+        previous = self._say_tail if raw.get("t") != "draft.request" else None
+
+        async def run() -> None:
+            if previous is not None:
+                await asyncio.gather(previous, return_exceptions=True)
+            await self.handle(raw)
+
+        task = asyncio.create_task(run())
+        self._tasks.add(task)
+        task.add_done_callback(self._tasks.discard)
+        if raw.get("t") != "draft.request":
+            self._say_tail = task
+
     async def _user_say(self, ev: UserSay) -> None:
         # Digit runs are checked on what the user typed: conversion may spell numbers out.
         if self.scam and DIGIT_RUN.search(ev.text):
@@ -397,7 +457,7 @@ class RelaySession:
         if ev.preview_id and ev.preview_id in self._pending:
             return await self._say_confirm(SayConfirm(t="say.confirm", preview_id=ev.preview_id))
         try:
-            prepared = await self.prepare(ev.text)
+            prepared = await self._prepared(ev.text)
         except Exception:
             log.exception("say preparation failed")
             prepared = Prepared(ev.text, True, "same_language")

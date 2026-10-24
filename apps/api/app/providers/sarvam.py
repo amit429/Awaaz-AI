@@ -4,6 +4,8 @@ import re
 
 import httpx
 
+from app.providers.http import shared
+
 from app.config import Settings
 
 API = "https://api.sarvam.ai"
@@ -34,14 +36,14 @@ async def transliterate(
         "spoken_form": True,
         "spoken_form_numerals_language": "native",
     }
-    async with httpx.AsyncClient(timeout=15) as client:
-        r = await client.post(
-            f"{API}/transliterate",
-            json=body,
-            headers={"api-subscription-key": settings.sarvam_api_key},
-        )
-        r.raise_for_status()
-        return r.json()["transliterated_text"]
+    client = shared("sarvam", 15)
+    r = await client.post(
+        f"{API}/transliterate",
+        json=body,
+        headers={"api-subscription-key": settings.sarvam_api_key},
+    )
+    r.raise_for_status()
+    return r.json()["transliterated_text"]
 
 
 async def translate(text: str, settings: Settings, target: str, source: str = "hi-IN") -> str:
@@ -55,12 +57,12 @@ async def translate(text: str, settings: Settings, target: str, source: str = "h
         "model": "sarvam-translate:v1",
         "numerals_format": "international",
     }
-    async with httpx.AsyncClient(timeout=15) as client:
-        r = await client.post(
-            f"{API}/translate", json=body, headers={"api-subscription-key": settings.sarvam_api_key}
-        )
-        r.raise_for_status()
-        return r.json()["translated_text"]
+    client = shared("sarvam", 15)
+    r = await client.post(
+        f"{API}/translate", json=body, headers={"api-subscription-key": settings.sarvam_api_key}
+    )
+    r.raise_for_status()
+    return r.json()["translated_text"]
 
 
 READ_MODES = {"original", "hinglish", "english", "marathi"}
@@ -84,12 +86,12 @@ async def transcribe(
     if settings.mock_providers or not settings.sarvam_api_key:
         return ""
     ext = "webm" if "webm" in content_type else "mp4" if "mp4" in content_type else "wav"
-    async with httpx.AsyncClient(timeout=30) as client:
-        r = await client.post(
-            f"{API}/speech-to-text",
-            files={"file": (f"voice.{ext}", audio, content_type)},
-            data={"model": "saaras:v3", "mode": "transcribe", "language_code": lang},
-            headers={"api-subscription-key": settings.sarvam_api_key},
-        )
-        r.raise_for_status()
-        return str(r.json().get("transcript", "")).strip()
+    client = shared("sarvam", 30)
+    r = await client.post(
+        f"{API}/speech-to-text",
+        files={"file": (f"voice.{ext}", audio, content_type)},
+        data={"model": "saaras:v3", "mode": "transcribe", "language_code": lang},
+        headers={"api-subscription-key": settings.sarvam_api_key},
+    )
+    r.raise_for_status()
+    return str(r.json().get("transcript", "")).strip()
