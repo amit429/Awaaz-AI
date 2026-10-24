@@ -1,8 +1,9 @@
+import { AudioLines, Bell, Captions, Ear, Hand, Keyboard, Languages, type LucideIcon, Mic, MessageSquare, Sparkles, Volume2, Watch } from 'lucide-react';
 import type { HearMode, PresetDef, Profile, TalkMode } from './types';
 
 export interface Option<K extends string> {
   key: K;
-  icon: 'mic' | 'keyboard' | 'chat' | 'spark' | 'wave' | 'hand' | 'cc' | 'ear' | 'volume' | 'bell' | 'watch' | 'lang';
+  icon: LucideIcon;
   title: string;
   hint: string;
   tag?: string;
@@ -10,30 +11,30 @@ export interface Option<K extends string> {
 }
 
 export const TALK_OPTIONS: Option<TalkMode>[] = [
-  { key: 'voice', icon: 'mic', title: 'My own voice', hint: 'I speak; they hear me directly.', soon: true },
-  { key: 'type', icon: 'keyboard', title: 'Type, Awaaz speaks', hint: 'In a voice I pick.' },
-  { key: 'replies', icon: 'chat', title: 'Phrases and smart replies', hint: 'One tap answers.' },
-  { key: 'help', icon: 'spark', title: 'Help me say it', hint: 'A few words in, a clear sentence out. I approve first.', soon: true },
-  { key: 'clarity', icon: 'wave', title: 'Speak clearly for me', hint: 'I talk; Awaaz re-says it clearly.', tag: 'Later', soon: true },
-  { key: 'sign', icon: 'hand', title: 'Sign language', hint: 'Connect a human ISL interpreter by video.', tag: 'Partner service', soon: true },
+  { key: 'voice', icon: Mic, title: 'My own voice', hint: 'I speak; they hear me directly.', soon: true },
+  { key: 'type', icon: Keyboard, title: 'Type, Awaaz speaks', hint: 'In a voice I pick.' },
+  { key: 'replies', icon: MessageSquare, title: 'Phrases and smart replies', hint: 'One tap answers.' },
+  { key: 'help', icon: Sparkles, title: 'Help me say it', hint: 'A few words in, a clear sentence out. I approve first.', soon: true },
+  { key: 'clarity', icon: AudioLines, title: 'Speak clearly for me', hint: 'I talk; Awaaz re-says it clearly.', tag: 'Later', soon: true },
+  { key: 'sign', icon: Hand, title: 'Sign language', hint: 'Connect a human ISL interpreter by video.', tag: 'Partner service', soon: true },
 ];
 
 export const HEAR_OPTIONS: Option<HearMode>[] = [
-  { key: 'captions', icon: 'cc', title: 'Live captions', hint: 'Big text, numbers highlighted.' },
-  { key: 'clear', icon: 'ear', title: 'Clear voice', hint: 'Each sentence repeated slower and louder.', soon: true },
-  { key: 'audio', icon: 'volume', title: 'Normal audio', hint: 'Straight through, boosted for speech.', soon: true },
-  { key: 'summary', icon: 'bell', title: 'Spoken summary after', hint: 'What was agreed, as a voice note.', soon: true },
-  { key: 'vibe', icon: 'watch', title: 'Vibration cues', hint: 'Phone buzzes when they start and stop talking.', soon: true },
-  { key: 'translate', icon: 'lang', title: 'Translate for me', hint: 'Read and type in my language, whatever they speak.' },
+  { key: 'captions', icon: Captions, title: 'Live captions', hint: 'Big text, numbers highlighted.' },
+  { key: 'clear', icon: Ear, title: 'Clear voice', hint: 'Each sentence repeated slower and louder.', soon: true },
+  { key: 'audio', icon: Volume2, title: 'Normal audio', hint: 'Straight through, boosted for speech.', soon: true },
+  { key: 'summary', icon: Bell, title: 'Spoken summary after', hint: 'What was agreed, as a voice note.', soon: true },
+  { key: 'vibe', icon: Watch, title: 'Vibration cues', hint: 'Phone buzzes when they start and stop talking.', soon: true },
+  { key: 'translate', icon: Languages, title: 'Translate for me', hint: 'Read and type in my language, whatever they speak.' },
 ];
 
-export const PRESET_ICONS: Record<string, 'keyboard' | 'mic' | 'cc' | 'ear' | 'wave' | 'volume'> = {
-  mute: 'keyboard',
-  deafspeak: 'mic',
-  deaftype: 'cc',
-  hoh: 'ear',
-  speech: 'wave',
-  lowread: 'volume',
+export const PRESET_ICONS: Record<string, LucideIcon> = {
+  mute: Keyboard,
+  deafspeak: Mic,
+  deaftype: Captions,
+  hoh: Ear,
+  speech: AudioLines,
+  lowread: Volume2,
 };
 
 export const READ_LANGS = [

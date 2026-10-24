@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { Centered } from '@/components/AppShell';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Login } from './features/auth/Login';
 import { Call } from './features/call/Call';
 import { Contacts } from './features/contacts/Contacts';
@@ -15,18 +18,25 @@ import { useSession } from './hooks/useSession';
 function Gate() {
   const me = useMe();
   useEffect(() => {
-    document.documentElement.classList.toggle('readable', Boolean(me.data?.profile.easy_font));
+    document.documentElement.classList.toggle('large-text', Boolean(me.data?.profile.easy_font));
   }, [me.data?.profile.easy_font]);
 
-  if (me.isError) return <div className="app"><div className="scroll"><p className="err" role="alert">Could not reach Awaaz. Is the server running?</p><button className="cta" type="button" onClick={() => void me.refetch()}>Try again</button></div></div>;
-  if (!me.data) return <div className="app"><div className="scroll"><p>Loading…</p></div></div>;
+  if (me.isError) {
+    return (
+      <Centered>
+        <p role="alert" className="text-center">Could not reach Awaaz. The server may be starting up, which can take a minute.</p>
+        <Button className="mx-auto mt-4" onClick={() => void me.refetch()}>Try again</Button>
+      </Centered>
+    );
+  }
+  if (!me.data) return <Centered><Skeleton className="h-8 w-40" /><Skeleton className="mt-6 h-40 w-full" /></Centered>;
   if (!me.data.onboarded) return <Navigate to="/onboarding" replace />;
   return <Outlet />;
 }
 
 function RequireAuth() {
   const session = useSession();
-  if (session.loading) return <div className="app"><div className="scroll"><p>Loading…</p></div></div>;
+  if (session.loading) return <Centered><Skeleton className="h-8 w-40" /><Skeleton className="mt-6 h-40 w-full" /></Centered>;
   return session.signedIn ? <Outlet /> : <Navigate to="/login" replace />;
 }
 

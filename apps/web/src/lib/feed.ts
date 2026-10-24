@@ -57,7 +57,8 @@ const BLOCKED: Record<string, string> = {
 };
 
 let noteId = 0;
-const note = (text: string): FeedItem => ({ kind: 'note', id: `n${++noteId}`, text });
+const note = (text: string, id?: string): FeedItem => ({ kind: 'note', id: id ?? `n${++noteId}`, text });
+const withNote = (feed: FeedItem[], item: FeedItem): FeedItem[] => (feed.some((i) => i.kind === 'note' && i.id === (item as { id: string }).id) ? feed : [...feed, item]);
 
 export function applyEvent(state: CallState, ev: ServerEvent): CallState {
   switch (ev.t) {
@@ -76,8 +77,10 @@ export function applyEvent(state: CallState, ev: ServerEvent): CallState {
       };
     }
     case 'you.final': {
-      if (ev.source === 'disclosure') return { ...state, feed: [...state.feed, note(`Awaaz told them: ${ev.text}`)] };
-      if (ev.source === 'keeper') return { ...state, feed: [...state.feed, note(`Awaaz told them: ${ev.text}`)] };
+      if (ev.source === 'disclosure' || ev.source === 'keeper') {
+        // keyed by turn, so a reconnect that replays the turn does not add it twice
+        return { ...state, feed: withNote(state.feed, note(`Awaaz told them: ${ev.text}`, `turn-${ev.turn}`)) };
+      }
       if (state.feed.some((i) => i.kind === 'you' && i.turn === ev.turn)) return state; // replay duplicate
       const feed = state.feed.filter((i) => i.kind !== 'preview' && i.kind !== 'draft');
       return { ...state, suggestions: [], feed: [...feed, { kind: 'you', turn: ev.turn, text: ev.text, source: ev.source, original: ev.original }] };

@@ -1,11 +1,29 @@
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Icon } from '../../components/Icons';
-import { useSession } from '../../hooks/useSession';
-import { DEV_LOGIN, friendlyAuthError, setDevLogin } from '../../lib/auth';
-import { supabase } from '../../lib/supabase';
+import { Brand } from '@/components/Brand';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSession } from '@/hooks/useSession';
+import { DEV_LOGIN, friendlyAuthError, setDevLogin } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
+import { CaptionDemo } from './CaptionDemo';
 
 type Mode = 'signin' | 'signup';
+
+const GoogleMark = () => (
+  <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
+    <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z" />
+    <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1C3.3 21.4 7.3 24 12 24z" />
+    <path fill="#FBBC05" d="M5.3 14.3c-.2-.7-.4-1.5-.4-2.3s.1-1.6.4-2.3V6.6H1.3C.5 8.2 0 10 0 12s.5 3.8 1.3 5.4l4-3.1z" />
+    <path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C18 1.2 15.2 0 12 0 7.3 0 3.3 2.6 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9z" />
+  </svg>
+);
 
 export function Login() {
   const session = useSession();
@@ -45,27 +63,72 @@ export function Login() {
   }
 
   return (
-    <div className="app">
-      <div className="navtitle"><h4>{mode === 'signin' ? 'Sign in' : 'Create your account'}</h4></div>
-      <div className="scroll">
-        <p style={{ color: 'var(--ink-2)' }}>Awaaz makes phone calls possible for people who can’t hear or speak.</p>
-        <button className="cta soft" type="button" onClick={() => void google()}>Continue with Google</button>
-        <div className="label" style={{ textAlign: 'center' }}>or with your email</div>
-        <form className="cardx" onSubmit={(e) => void submit(e)}>
-          <input className="sel" style={{ width: '100%', font: 'inherit', marginBottom: '.5rem' }} type="email" autoComplete="email" aria-label="Email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input className="sel" style={{ width: '100%', font: 'inherit' }} type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} aria-label="Password" placeholder="Password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} />
-          {error && <p className="err" role="alert">{error}</p>}
-          {notice && <p style={{ color: 'var(--live)', fontSize: '.88rem' }} role="status">{notice}</p>}
-          <button className="cta" type="submit" disabled={busy || !email || password.length < 6} style={{ marginTop: '.7rem' }}>
-            <Icon name="check" /> {mode === 'signin' ? 'Sign in' : 'Create account'}
-          </button>
-        </form>
-        <button className="cta soft" type="button" onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(''); setNotice(''); }}>
-          {mode === 'signin' ? 'New here? Create an account' : 'Already have an account? Sign in'}
-        </button>
-        {mode === 'signin' && <button className="cta soft" type="button" onClick={() => void reset()}>Forgot password</button>}
-        {DEV_LOGIN && <button className="cta soft" type="button" onClick={() => setDevLogin(true)}>Continue as the dev user (local only)</button>}
-      </div>
+    <div className="grid min-h-dvh lg:grid-cols-[1.1fr_1fr]">
+      <section
+        className="dark flex flex-col justify-between gap-10 px-6 py-8 text-foreground sm:px-10 lg:py-12"
+        style={{ background: 'radial-gradient(120% 80% at 0% 0%, oklch(0.3 0.08 275), transparent 60%), oklch(0.16 0.035 270)' }}
+      >
+        <Brand />
+        <div className="flex flex-col items-start gap-8">
+          <h1 className="max-w-xl text-4xl font-semibold leading-[1.08] sm:text-5xl">Phone calls for people who can’t hear or speak.</h1>
+          <p className="max-w-md text-lg text-muted-foreground">Type and Awaaz speaks for you. What they say appears as captions, with prices and times picked out.</p>
+          <CaptionDemo />
+        </div>
+        <p className="text-sm text-muted-foreground">Awaaz tells the other person an assistant is helping, at the start of every call.</p>
+      </section>
+
+      <section className="flex items-center justify-center px-4 py-10 sm:px-8">
+        <Card className="w-full max-w-md border-0 bg-transparent shadow-none lg:border lg:bg-card lg:shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl">{mode === 'signin' ? 'Welcome back' : 'Create your account'}</CardTitle>
+            <CardDescription>{mode === 'signin' ? 'Sign in to make and receive calls.' : 'It takes a minute. You choose how you talk and hear next.'}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-5">
+            <Tabs value={mode} onValueChange={(v) => { setMode(v as Mode); setError(''); setNotice(''); }}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign in</TabsTrigger>
+                <TabsTrigger value="signup">Create account</TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <Button variant="outline" size="lg" className="w-full gap-3" onClick={() => void google()}>
+              <GoogleMark /> Continue with Google
+            </Button>
+
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <Separator className="flex-1" /> or use your email <Separator className="flex-1" />
+            </div>
+
+            <form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} className="h-11" />
+                {mode === 'signup' && <p className="text-sm text-muted-foreground">At least 6 characters.</p>}
+              </div>
+              {error && (
+                <Alert variant="destructive" role="alert">
+                  <AlertCircle className="size-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {notice && <Alert role="status"><AlertDescription>{notice}</AlertDescription></Alert>}
+              <Button type="submit" size="lg" disabled={busy || !email || password.length < 6}>
+                {busy && <Loader2 className="size-4 animate-spin" />}
+                {mode === 'signin' ? 'Sign in' : 'Create account'}
+              </Button>
+            </form>
+
+            <div className="flex flex-col items-center gap-1">
+              {mode === 'signin' && <Button variant="link" onClick={() => void reset()}>Forgot password</Button>}
+              {DEV_LOGIN && <Button variant="ghost" size="sm" onClick={() => setDevLogin(true)}>Continue as the dev user (local only)</Button>}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 }

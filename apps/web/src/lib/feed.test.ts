@@ -14,6 +14,12 @@ describe('applyEvent', () => {
     expect(s.feed[0]).toMatchObject({ kind: 'note' });
   });
 
+  it('does not repeat the opening line when a reconnect replays it', () => {
+    const opening: ServerEvent = { t: 'you.final', turn: 1, text: 'Namaste, main Rafiq bol raha hoon.', source: 'disclosure' };
+    const s = run([opening, opening]);
+    expect(s.feed.filter((i) => i.kind === 'note')).toHaveLength(1);
+  });
+
   it('replaces a partial caption with the final one for the same turn', () => {
     const s = run([
       { t: 'caption.partial', turn: 2, text: 'हाँ जी' },

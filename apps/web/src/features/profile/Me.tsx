@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { Check, ChevronRight, Loader2, LogOut, MessageSquare } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Icon } from '../../components/Icons';
-import { TabBar } from '../../components/TabBar';
-import { useMe, useSaveMe } from '../../hooks/useData';
-import { useSession } from '../../hooks/useSession';
-import { setDevLogin } from '../../lib/auth';
-import { supabase } from '../../lib/supabase';
-import type { Profile } from '../../lib/types';
+import { toast } from 'sonner';
+import { AppShell } from '@/components/AppShell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useMe, useSaveMe } from '@/hooks/useData';
+import { useSession } from '@/hooks/useSession';
+import { setDevLogin } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
+import type { Profile } from '@/lib/types';
 import { ProfileForm } from './ProfileForm';
 
 export function Me() {
@@ -22,6 +27,8 @@ export function Me() {
     if (me.data && !draft) setDraft(me.data.profile);
   }, [me.data, draft]);
 
+  const dirty = Boolean(draft && me.data && JSON.stringify(draft) !== JSON.stringify(me.data.profile));
+
   async function signOut() {
     await supabase.auth.signOut();
     setDevLogin(false);
@@ -29,39 +36,38 @@ export function Me() {
     nav('/login', { replace: true });
   }
 
-  const dirty = draft && me.data && JSON.stringify(draft) !== JSON.stringify(me.data.profile);
-
   return (
-    <div className="app">
-      <div className="navtitle"><h4>How I talk and hear</h4></div>
-      <div className="scroll">
-        {me.data && draft ? (
-          <>
-            <div className="cardx">
-              <h5>Name</h5>
-              <input className="sel" style={{ width: '100%', font: 'inherit' }} aria-label="Your name" value={draft.display_name} onChange={(e) => setDraft({ ...draft, display_name: e.target.value })} />
-            </div>
-            <div className="cardx"><ProfileForm value={draft} presets={me.data.presets} onChange={setDraft} /></div>
-            <div className="group">
-              <Link className="rowi" to="/me/phrases" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <span className="av"><Icon name="chat" /></span><span className="tx"><b>My phrases</b><small>Quick things to say on calls</small></span>
-                <Icon name="chev" size="sm" style={{ color: 'var(--ink-3)' }} />
-              </Link>
-            </div>
-            <div className="group">
-              <button className="rowi" type="button" onClick={() => void signOut()}>
-                <span className="av"><Icon name="user" /></span>
-                <span className="tx"><b>Sign out</b><small>{session.email ?? ''}</small></span>
-              </button>
-            </div>
-            {save.isError && <p className="err" role="alert">Could not save. Please try again.</p>}
-            <button className="cta" type="button" disabled={!dirty || save.isPending || !draft.display_name.trim()} onClick={() => save.mutate(draft)}>
-              <Icon name="check" /> {save.isSuccess && !dirty ? 'Saved' : 'Save changes'}
-            </button>
-          </>
-        ) : <p>Loading…</p>}
-      </div>
-      <TabBar />
-    </div>
+    <AppShell title="Me">
+      {!me.data || !draft ? (
+        <Skeleton className="h-64 w-full rounded-2xl" />
+      ) : (
+        <div className="grid gap-8">
+          <div className="grid gap-2">
+            <Label htmlFor="me-name">Your name</Label>
+            <Input id="me-name" className="h-11" value={draft.display_name} onChange={(e) => setDraft({ ...draft, display_name: e.target.value })} />
+            <p className="text-sm text-muted-foreground">Said to the other person at the start of every call.</p>
+          </div>
+
+          <ProfileForm value={draft} presets={me.data.presets} onChange={setDraft} />
+
+          <Link to="/me/phrases" className="flex items-center gap-3 rounded-2xl border bg-card p-3.5 transition-colors hover:bg-secondary/60">
+            <span className="grid size-10 place-items-center rounded-lg bg-secondary"><MessageSquare className="size-[18px]" /></span>
+            <span className="flex-1"><span className="block font-medium">My phrases</span><span className="block text-sm text-muted-foreground">Quick things to say on calls</span></span>
+            <ChevronRight className="size-4 text-muted-foreground" />
+          </Link>
+
+          <div className="pb-safe sticky bottom-20 z-20 md:bottom-4">
+            <Button size="lg" className="w-full shadow-lg" disabled={!dirty || save.isPending || !draft.display_name.trim()} onClick={() => save.mutate(draft, { onSuccess: () => toast.success('Saved'), onError: () => toast.error('Could not save. Please try again.') })}>
+              {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} {dirty ? 'Save changes' : 'Saved'}
+            </Button>
+          </div>
+
+          <div className="flex items-center justify-between gap-4 border-t pt-6">
+            <p className="min-w-0 truncate text-sm text-muted-foreground">Signed in as {session.email ?? 'you'}</p>
+            <Button variant="outline" onClick={() => void signOut()}><LogOut className="size-4" /> Sign out</Button>
+          </div>
+        </div>
+      )}
+    </AppShell>
   );
 }

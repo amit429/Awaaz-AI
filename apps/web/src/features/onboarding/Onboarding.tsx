@@ -1,9 +1,16 @@
+import { ArrowRight, Check, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon } from '../../components/Icons';
-import { useMe, useSaveMe } from '../../hooks/useData';
-import { emptyProfile } from '../../lib/profile';
-import type { Profile } from '../../lib/types';
+import { Brand } from '@/components/Brand';
+import { Centered } from '@/components/AppShell';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useMe, useSaveMe } from '@/hooks/useData';
+import { emptyProfile } from '@/lib/profile';
+import type { Profile } from '@/lib/types';
 import { PresetChips, ProfileForm } from '../profile/ProfileForm';
 
 export function Onboarding() {
@@ -17,47 +24,58 @@ export function Onboarding() {
     if (me.data?.onboarded) nav('/', { replace: true });
   }, [me.data, nav]);
 
-  if (!me.data) return <div className="app"><div className="scroll"><p>Loading…</p></div></div>;
+  if (!me.data) {
+    return (
+      <Centered>
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="mt-6 h-40 w-full" />
+      </Centered>
+    );
+  }
   const presets = me.data.presets;
   const ready = profile.display_name.trim().length > 0 && profile.preset !== null;
 
-  function choose(p: Profile) {
-    setProfile(p);
-  }
-
   return (
-    <div className="app">
-      <div className="navtitle"><h4>{step === 1 ? 'Welcome to Awaaz' : 'Fine-tune'}</h4></div>
-      <div className="scroll">
-        {step === 1 ? (
-          <>
-            <p style={{ color: 'var(--ink-2)' }}>Phone calls for people who can’t hear or speak. Two quick questions.</p>
-            <div className="cardx">
-              <h5>What should we call you?</h5>
-              <p style={{ color: 'var(--ink-2)', fontSize: '.85rem' }}>This name is said to the other person at the start of every call.</p>
-              <input
-                className="sel" style={{ width: '100%', font: 'inherit' }} autoFocus aria-label="Your name" placeholder="Your name"
-                value={profile.display_name} onChange={(e) => choose({ ...profile, display_name: e.target.value })}
-              />
-            </div>
-            <div className="cardx">
-              <h5>How do you use the phone?</h5>
-              <p style={{ color: 'var(--ink-2)', fontSize: '.85rem', marginBottom: '.7rem' }}>You can change every detail next, and later in Me.</p>
-              <PresetChips value={profile} presets={presets} onChange={choose} />
-            </div>
-            <button className="cta" type="button" disabled={!ready} onClick={() => setStep(2)}>Continue <Icon name="chev" /></button>
-          </>
-        ) : (
-          <>
-            <ProfileForm value={profile} presets={presets} onChange={setProfile} />
-            {save.isError && <p className="err" role="alert">Could not save. Please try again.</p>}
-            <button className="cta" type="button" disabled={save.isPending} onClick={() => save.mutate(profile, { onSuccess: () => nav('/', { replace: true }) })}>
-              <Icon name="check" /> Finish
-            </button>
-            <button className="cta soft" type="button" onClick={() => setStep(1)}>Back</button>
-          </>
-        )}
+    <div className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col px-4 py-8">
+      <Brand />
+      <div className="mt-8 flex gap-1.5" aria-label={`Step ${step} of 2`}>
+        <span className="h-1.5 flex-1 rounded-full bg-primary" />
+        <span className={`h-1.5 flex-1 rounded-full ${step === 2 ? 'bg-primary' : 'bg-muted'}`} />
       </div>
+
+      {step === 1 ? (
+        <div className="mt-8 grid gap-8">
+          <div>
+            <h1 className="text-3xl font-semibold sm:text-4xl">Let’s set up your calls</h1>
+            <p className="mt-2 text-muted-foreground">Two quick questions. You can change everything later in Me.</p>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="name" className="text-base">What should we call you?</Label>
+            <Input id="name" autoFocus className="h-12 text-base" value={profile.display_name} onChange={(e) => setProfile({ ...profile, display_name: e.target.value })} />
+            <p className="text-sm text-muted-foreground">This name is said to the other person at the start of every call.</p>
+          </div>
+          <div className="grid gap-3">
+            <h2 className="text-base font-medium">How do you use the phone?</h2>
+            <PresetChips value={profile} presets={presets} onChange={setProfile} />
+          </div>
+          <Button size="lg" disabled={!ready} onClick={() => setStep(2)}>Continue <ArrowRight className="size-4" /></Button>
+        </div>
+      ) : (
+        <div className="mt-8 grid gap-8">
+          <div>
+            <h1 className="text-3xl font-semibold sm:text-4xl">Fine-tune</h1>
+            <p className="mt-2 text-muted-foreground">Turn on any mix. The first way of talking is your default on calls.</p>
+          </div>
+          <ProfileForm value={profile} presets={presets} onChange={setProfile} showPresets={false} />
+          {save.isError && <Alert variant="destructive" role="alert"><AlertDescription>Could not save. Please try again.</AlertDescription></Alert>}
+          <div className="grid gap-2 sm:grid-cols-[auto_1fr]">
+            <Button variant="outline" size="lg" onClick={() => setStep(1)}>Back</Button>
+            <Button size="lg" disabled={save.isPending} onClick={() => save.mutate(profile, { onSuccess: () => nav('/', { replace: true }) })}>
+              {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} Finish
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

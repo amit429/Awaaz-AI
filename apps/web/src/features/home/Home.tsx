@@ -1,23 +1,31 @@
+import { ChevronRight, Loader2, Phone } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon } from '../../components/Icons';
-import { TabBar } from '../../components/TabBar';
-import { useCalls, useContacts } from '../../hooks/useData';
-import { createCall } from '../../lib/api';
-import { initials, maskNumber, STATUS_TEXT, when } from '../../lib/format';
+import { AppShell } from '@/components/AppShell';
+import { EmptyState, Person, RowList } from '@/components/Person';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useCalls, useContacts } from '@/hooks/useData';
+import { createCall } from '@/lib/api';
+import { maskNumber, STATUS_TEXT, when } from '@/lib/format';
 
 const PRACTICE = [
-  { name: 'Sharma Medical', detail: 'Practice call: pharmacy, Hindi', number: '+919800000001', callee: 'pharmacy' },
-  { name: 'Netra Clinic', detail: 'Practice call: clinic, Marathi', number: '+919800000002', callee: 'clinic_mr' },
-  { name: 'Unknown number', detail: 'Practice call: bank scam', number: '+919800000003', callee: 'bank_scam' },
+  { name: 'Sharma Medical', detail: 'Pharmacy, Hindi', number: '+919800000001', callee: 'pharmacy' },
+  { name: 'Netra Clinic', detail: 'Clinic, Marathi', number: '+919800000002', callee: 'clinic_mr' },
+  { name: 'Unknown number', detail: 'A bank scam call', number: '+919800000003', callee: 'bank_scam' },
 ];
 
 export function Home() {
   const nav = useNavigate();
   const contacts = useContacts();
   const calls = useCalls();
+  const [open, setOpen] = useState(false);
   const [number, setNumber] = useState('');
-  const [asking, setAsking] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -35,73 +43,92 @@ export function Home() {
 
   const favourites = (contacts.data ?? []).filter((c) => c.favourite);
   const recent = (calls.data ?? []).filter((c) => c.kind !== 'task').slice(0, 8);
+  const loading = contacts.isLoading || calls.isLoading;
 
   return (
-    <div className="app">
-      <div className="navtitle"><h4>Awaaz</h4></div>
-      <div className="scroll">
-        <div className="hero-actions">
-          <button className="qa primary" type="button" onClick={() => setAsking(true)}>
-            <span className="ic"><Icon name="phone" /></span>
-            <span><b>New call</b><small>Type, talk or let AI help</small></span>
-          </button>
-          <button className="qa" type="button" disabled title="Coming soon">
-            <span className="ic"><Icon name="bot" /></span>
-            <span><b>Call for me</b><small>Coming soon</small></span>
-          </button>
-        </div>
+    <AppShell title="Calls" action={<Button onClick={() => setOpen(true)}><Phone className="size-4" /> New call</Button>}>
+      <div className="grid gap-8">
+        {error && <Alert variant="destructive" role="alert"><AlertDescription>{error}</AlertDescription></Alert>}
 
-        {asking && (
-          <form className="cardx" onSubmit={(e) => { e.preventDefault(); const n = number.length === 10 ? `+91${number}` : number; void start(n, n); }}>
-            <h5>Who are you calling?</h5>
-            <input className="sel" style={{ width: '100%', font: 'inherit' }} inputMode="tel" autoFocus placeholder="Phone number, for example 98765 43210" aria-label="Phone number" value={number} onChange={(e) => setNumber(e.target.value.replace(/[^\d+]/g, ''))} />
-            <button className="cta" type="submit" disabled={busy || number.length < 8} style={{ marginTop: '.6rem' }}><Icon name="phone" /> Call</button>
-          </form>
-        )}
-        {error && <p className="err" role="alert">{error}</p>}
+        {loading && <Skeleton className="h-32 w-full rounded-2xl" />}
 
         {favourites.length > 0 && (
-          <>
-            <div className="label">Favourites</div>
-            <div className="group">
+          <section className="grid gap-3">
+            <h2 className="text-sm font-medium text-muted-foreground">Favourites</h2>
+            <RowList>
               {favourites.map((c) => (
-                <button key={c.id} className="rowi" type="button" disabled={busy} onClick={() => void start(c.name, c.phone_e164)}>
-                  <span className="av acc">{initials(c.name)}</span>
-                  <span className="tx"><b>{c.name}</b><small>{c.notes || c.phone_e164}</small></span>
-                  <Icon name="chev" size="sm" style={{ color: 'var(--ink-3)' }} />
-                </button>
+                <div key={c.id} className="flex items-center gap-3 p-3.5">
+                  <Person name={c.name} accent />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{c.name}</p>
+                    <p className="truncate text-sm text-muted-foreground">{c.notes || c.phone_e164}</p>
+                  </div>
+                  <Button size="icon" className="rounded-full" aria-label={`Call ${c.name}`} disabled={busy} onClick={() => void start(c.name, c.phone_e164)}><Phone className="size-4" /></Button>
+                </div>
               ))}
-            </div>
-          </>
+            </RowList>
+          </section>
         )}
 
-        {recent.length > 0 && (
-          <>
-            <div className="label">Recent</div>
-            <div className="group">
+        <section className="grid gap-3">
+          <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
+          {!loading && recent.length === 0 ? (
+            <EmptyState title="No calls yet" body="Start a call, or try a practice call below to see how captions and replies work." action={<Button onClick={() => setOpen(true)}>New call</Button>} />
+          ) : (
+            <RowList>
               {recent.map((c) => (
-                <button key={c.id} className="rowi" type="button" onClick={() => nav(`/calls/${c.id}`)}>
-                  <span className="av">{initials(c.name ?? 'Unknown')}</span>
-                  <span className="tx"><b>{c.name ?? maskNumber(c.other_number)}</b><small>{when(c.created_at)} · {STATUS_TEXT[c.status] ?? c.status}</small></span>
-                  <Icon name="chev" size="sm" style={{ color: 'var(--ink-3)' }} />
+                <button key={c.id} type="button" onClick={() => nav(`/calls/${c.id}`)} className="flex w-full items-center gap-3 p-3.5 text-left transition-colors hover:bg-secondary/60">
+                  <Person name={c.name} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{c.name ?? maskNumber(c.other_number)}</p>
+                    <p className="truncate text-sm text-muted-foreground">{when(c.created_at)}</p>
+                  </div>
+                  <Badge variant={c.status === 'ended' ? 'secondary' : 'outline'}>{STATUS_TEXT[c.status] ?? c.status}</Badge>
+                  <ChevronRight className="size-4 text-muted-foreground" />
                 </button>
               ))}
-            </div>
-          </>
-        )}
+            </RowList>
+          )}
+        </section>
 
-        <div className="label">Practice calls</div>
-        <div className="group">
-          {PRACTICE.map((c) => (
-            <button key={c.number} className="rowi" type="button" disabled={busy} onClick={() => void start(c.name, c.number, c.callee)}>
-              <span className="av">{initials(c.name)}</span>
-              <span className="tx"><b>{c.name}</b><small>{c.detail}</small></span>
-              <Icon name="chev" size="sm" style={{ color: 'var(--ink-3)' }} />
-            </button>
-          ))}
-        </div>
+        <section className="grid gap-3">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-medium text-muted-foreground">Practice calls</h2>
+            <span className="text-xs text-muted-foreground">Scripted callers, no real phone call</span>
+          </div>
+          <RowList>
+            {PRACTICE.map((p) => (
+              <button key={p.number} type="button" disabled={busy} onClick={() => void start(p.name, p.number, p.callee)} className="flex w-full items-center gap-3 p-3.5 text-left transition-colors hover:bg-secondary/60 disabled:opacity-60">
+                <Person name={p.name} />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{p.name}</p>
+                  <p className="truncate text-sm text-muted-foreground">{p.detail}</p>
+                </div>
+                <Badge variant="outline">Practice</Badge>
+              </button>
+            ))}
+          </RowList>
+        </section>
       </div>
-      <TabBar />
-    </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New call</DialogTitle>
+            <DialogDescription>Enter the number you want to call. Awaaz tells them an assistant is helping.</DialogDescription>
+          </DialogHeader>
+          <form className="grid gap-4" onSubmit={(e) => { e.preventDefault(); const n = number.length === 10 ? `+91${number}` : number; void start(n, n); }}>
+            <div className="grid gap-2">
+              <Label htmlFor="number">Phone number</Label>
+              <Input id="number" inputMode="tel" autoFocus placeholder="98765 43210" className="h-12 text-lg" value={number} onChange={(e) => setNumber(e.target.value.replace(/[^\d+]/g, ''))} />
+            </div>
+            {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+            <Button type="submit" size="lg" disabled={busy || number.length < 8}>
+              {busy ? <Loader2 className="size-4 animate-spin" /> : <Phone className="size-4" />} Call
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </AppShell>
   );
 }

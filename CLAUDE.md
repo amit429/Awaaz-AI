@@ -7,12 +7,12 @@ You are implementing **Awaaz**: phone calls for people who can’t hear or speak
 2. `docs/PRD.md` (product v0.1) then `docs/PRD-ADDENDUM-v2.md` (talk/hear profiles, call paths, WhatsApp, own number). The addendum wins over the PRD.
 3. `docs/IMPLEMENTATION.md` — the technical source of truth. It wins over both PRD documents on anything technical.
 4. `tasks/PLAN.md` — your ordered work queue. **Start with M0 (audio spike).**
-5. `design/ui-prototype.html` + `design/README.md` — visual source of truth. Port it; don’t redesign.
+5. `docs/DESIGN.md` — the current interface design. `design/ui-prototype.html` is the original reference for screen content only.
 6. `specs/` — contracts: SQL, relay protocol, JSON schemas, prompts, agent spec, data, fixtures, messages.
 7. `tasks/HUMAN-CHECKLIST.md` — what Amit does (KYC, accounts, testers). Don’t wait on it; use mock and simulator modes.
 
 ## Fixed stack (ask Amit before changing)
-- `apps/web`: React 18 + TypeScript + Vite PWA, React Router, TanStack Query, Supabase JS, plain CSS from the prototype, AudioWorklets for audio.
+- `apps/web`: React 18 + TypeScript + Vite PWA, React Router, TanStack Query, Supabase JS, **Tailwind CSS v4 + shadcn/ui** (see `docs/DESIGN.md`; Amit asked for this redesign), AudioWorklets for audio.
 - `apps/api`: Python 3.12 or newer (tested on 3.12 and 3.14; production runs 3.14), FastAPI, Pydantic v2, asyncio, httpx, websockets; one Render Starter instance (sessions live in memory).
 - Supabase (Postgres + RLS, Auth, Realtime, Storage).
 - Telephony: **Bolna** is the live phone leg (custom-LLM relay agent; Twilio upgrade skipped, see `docs/DECISIONS.md` and `docs/SPIKE-bolna.md`). Calls from the app and from WhatsApp use the same `OtherLeg` abstraction. Incoming calls and own-number design: `docs/ARCHITECTURE-incoming.md`.
@@ -48,7 +48,7 @@ You are implementing **Awaaz**: phone calls for people who can’t hear or speak
 ## Conventions
 - Python: ruff, type hints, pytest + pytest-asyncio. TypeScript: strict, no `any` in new code.
 - Times stored UTC, shown IST. Phone numbers E.164.
-- UI copy: sentence case, curly apostrophes (’), no emoji in the app UI (icons from the sprite).
+- UI copy: sentence case, curly apostrophes (’), no emoji in the app UI (lucide icons). Use shadcn components and theme tokens, not ad-hoc colours.
 
 ## Definition of done
 - Pharmacy (type to speak), bank scam (shield) and clinic (clear voice) scenarios pass on real calls.
