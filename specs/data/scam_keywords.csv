@@ -12,3 +12,8 @@ remote_app,en,\b(anydesk|teamviewer|quicksupport|screen share|rustdesk)\b,2
 remote_app,hi,(एनीडेस्क|ऐप डाउनलोड करो|स्क्रीन शेयर),2
 other,en,\b(digital arrest|kyc expired|card will be blocked|account will be blocked)\b,1
 other,hi,(डिजिटल अरेस्ट|केवाईसी|कार्ड ब्लॉक|अकाउंट ब्लॉक),1
+otp_request,hi,(ओटीपी|OTP|कोड).{0,20}(बताइए|बताओ|बोलिए|दीजिए|शेयर),2
+otp_request,hi-Latn,\b(code|otp)\b.{0,25}\b(bata|batao|bataiye|bolo|boliye|dijiye|de do|dedo|share|bhej)\b,2
+otp_request,hi-Latn,\b(bata|batao|bataiye|bolo|boliye|dijiye|de do|dedo|share|bhej)\b.{0,20}\b(code|otp)\b,2
+pin_request,hi,(एटीएम|ATM)\s?पिन|पिन\s?(नंबर|बताइए|बताओ|क्या)|कार्ड\s?पिन,2
+pin_request,hi-Latn,\b(atm|card)\s?pin\b|\bpin\s?(batao|bataiye|bolo|boliye)\b,2

@@ -257,3 +257,30 @@ def test_digit_block_checks_what_was_typed_not_the_converted_text():
         recv(ws, is_("caption.final"))
         ws.send_json({"t": "user.say", "text": "mera OTP 482913 hai", "source": "typed"})
         assert recv(ws, is_("say.blocked"))[-1]["reason"] == "scam_digits"
+
+
+def test_bank_scam_call_warns_logs_and_blocks_digits():
+    call = create(callee="bank_scam")
+    with connect(call["session_id"]) as ws:
+        recv(
+            ws, is_("caption.final")
+        )  # "I'm calling from SBI, your card will be blocked": vague, no alarm yet
+        ws.send_json({"t": "user.say", "text": "Kyon?", "source": "typed"})
+        got = recv(ws, is_("scam.warning"))
+        assert got[-1]["reason"] == "otp_request"
+        ws.send_json({"t": "user.say", "text": "mera OTP 482913 hai", "source": "typed"})
+        assert recv(ws, is_("say.blocked"))[-1]["reason"] == "scam_digits"
+        ws.send_json({"t": "user.say", "text": "nahi, main branch aa jaunga", "source": "typed"})
+        assert recv(ws, is_("you.final"))[-1]["text"] == "nahi, main branch aa jaunga"
+    events = store_module.get_store().scam_events
+    assert [(e["reason"], e["action"]) for e in events] == [("otp_request", "warned")]
+
+
+def test_normal_pharmacy_call_never_warns():
+    call = create()
+    with connect(call["session_id"]) as ws:
+        recv(ws, is_("caption.final"))
+        for text in ["Telma 40 chahiye", "Theek hai", "ghar bhej do"]:
+            ws.send_json({"t": "user.say", "text": text, "source": "typed"})
+        seen = recv(ws, lambda e: e["t"] == "caption.final" and "₹30" in e["text"], limit=20)
+    assert not any(e["t"] == "scam.warning" for e in seen)

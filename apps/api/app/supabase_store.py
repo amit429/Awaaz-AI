@@ -124,6 +124,21 @@ class SupabaseStore:
             prefer="resolution=merge-duplicates",
         )
 
+    async def add_scam_event(
+        self, call_id: str, turn_seq: int | None, reason: str, action: str
+    ) -> None:
+        row = {
+            "call_id": call_id,
+            "user_id": self._call_owner[call_id],
+            "turn_seq": turn_seq,
+            "reason": reason,
+            "action": action,
+        }
+        try:
+            await self._rest("POST", "scam_events", json=row)
+        except Exception:
+            log.exception("could not save a scam event")
+
     async def list_contacts(self, user_id: str) -> list[dict[str, Any]]:
         return await self._rest(
             "GET",

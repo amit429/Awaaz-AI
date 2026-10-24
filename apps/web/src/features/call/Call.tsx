@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '../../components/Icons';
 import starterPhrases from '../../data/phrases.json';
 import { usePhrases } from '../../hooks/useData';
-import { applyEvent, initialState, splitByEntities, type FeedItem } from '../../lib/feed';
+import { applyEvent, initialState, SCAM_COPY, splitByEntities, type FeedItem } from '../../lib/feed';
 import { RelayClient } from '../../lib/relay';
 
 const STATUS_LABEL = {
@@ -42,6 +42,7 @@ export function Call() {
   const [online, setOnline] = useState(false);
   const [text, setText] = useState('');
   const [sheet, setSheet] = useState<'phrases' | 'keypad' | null>(null);
+  const [scamSeen, setScamSeen] = useState(false);
   const client = useRef<RelayClient | null>(null);
   const feedEnd = useRef<HTMLDivElement>(null);
   const lastTyping = useRef(0);
@@ -93,6 +94,15 @@ export function Call() {
           <small><span className="dot" style={{ background: live && online ? '#3DD68C' : '#9097A3' }} />{online ? STATUS_LABEL[state.status] : 'Reconnecting…'}</small>
         </div>
       </div>
+
+      {state.scam && !scamSeen && state.status !== 'ended' && (
+        <div className="alert" role="alert">
+          <b><Icon name="shield" size="sm" />{(SCAM_COPY[state.scamReason ?? 'other'] ?? SCAM_COPY.other!).title}</b>
+          <p>{(SCAM_COPY[state.scamReason ?? 'other'] ?? SCAM_COPY.other!).body}</p>
+          <button type="button" onClick={() => client.current?.send({ t: 'call.end' })}>End call</button>
+          <button type="button" className="o" onClick={() => setScamSeen(true)}>Continue</button>
+        </div>
+      )}
 
       <div className="feed" aria-live="polite">
         {state.feed.map((item, i) => {

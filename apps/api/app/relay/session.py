@@ -28,11 +28,14 @@ from app.models.events import (
     UserTyping,
     client_event,
 )
+from app.providers.base import Llm
+from app.relay import scam
 from app.relay.disclosure import ask_repeat_line, disclosure_line, keeper_line, short_lang
 from app.relay.entities import extract_entities
 from app.relay.keeper import Keeper
 from app.relay.legs import OtherLeg
 from app.services.profiles import Modes
+from app.services.replies import ReplyContext, suggest
 from app.services.say_prep import Prepared
 from app.store import Store
 
@@ -65,6 +68,8 @@ class RelaySession:
         keeper: Keeper | None = None,
         prepare: Preparer = as_is,
         on_end: Callable[[], None] | None = None,
+        llm: Llm | None = None,
+        reply_ctx: ReplyContext | None = None,
         max_seconds: float = 15 * 60,
         idle_seconds: float = 60.0,
     ) -> None:
@@ -75,6 +80,11 @@ class RelaySession:
         self.keeper = keeper or Keeper()
         self.prepare = prepare
         self.on_end = on_end
+        self.llm = llm
+        self.reply_ctx = reply_ctx or ReplyContext(user_name=name)
+        self._convo: list[tuple[str, str]] = []  # (speaker, text) for suggestions
+        self._reply_task: asyncio.Task[None] | None = None
+        self._recent_other: list[str] = []
         self._pending: dict[str, tuple[str, str, str]] = {}  # preview_id -> (spoken, source, typed)
         self.max_seconds, self.idle_seconds = max_seconds, idle_seconds
         self.seq = 0
@@ -167,7 +177,41 @@ class RelaySession:
                 "entities": entities,
             }
         )
+        self._convo.append(("other", text))
+        await self._scam_check(text, turn)
+        self._schedule_suggestions(turn)
         return turn
+
+    def _schedule_suggestions(self, turn: int) -> None:
+        """Three one-tap replies for this turn; dropped if the user or the other person moves on."""
+        if self._reply_task:
+            self._reply_task.cancel()
+        if not self.llm or "replies" not in self.modes.talk or self.ended:
+            return
+        llm = self.llm
+
+        async def run() -> None:
+            items = await suggest(llm, self.reply_ctx, self._convo)
+            if items and self.seq == turn and not self.ended:  # nothing newer happened
+                self.emit({"t": "suggestions", "turn": turn, "items": items})
+
+        self._reply_task = asyncio.create_task(run())
+        self._tasks.add(self._reply_task)
+        self._reply_task.add_done_callback(self._tasks.discard)
+
+    async def _scam_check(self, text: str, turn: int) -> None:
+        """Warn when the other person asks for a code or a remote-access app; from then on digit
+        runs are never spoken (see _user_say)."""
+        self._recent_other.append(text)
+        match = scam.check(text)
+        if match is None:
+            return
+        confirmed = await scam.second_opinion(match, self._recent_other, self.llm)
+        if confirmed is None:
+            return
+        self.scam = True
+        self.emit({"t": "scam.warning", "reason": confirmed.reason, "turn": turn})
+        await self.store.add_scam_event(self.call_id, turn, confirmed.reason, "warned")
 
     # ---------- lifecycle ----------
     async def start(self) -> None:
@@ -338,6 +382,11 @@ class RelaySession:
 
     async def _speak(self, text: str, source: str, original: str | None = None) -> None:
         self.keeper.reset()
+        if self._reply_task:
+            self._reply_task.cancel()
+        self._convo.append(("user", text))
+        if source == "typed":
+            self.reply_ctx.typed.append(original or text)
         await self._you(text, source, original=original)
         await self.leg.speak(text)
 

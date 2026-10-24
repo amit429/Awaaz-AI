@@ -14,6 +14,8 @@
 - Telephony decision: Twilio upgrade skipped; Bolna is the live phone leg (BolnaLeg, per-call routing by call-id token, status webhook). WhatsApp live relay on the Twilio sandbox (bot, webhook with secret and signature, dev endpoints). 92 API tests
 - WhatsApp: Twilio trial cannot push free-form messages (21654); switched to Meta Cloud API adapter (needs Meta app setup: token, phone id, app secret, verify token)
 - Web app screens: onboarding (2 steps), Me (how I talk and hear, easy font), Phrases, Contacts (add, edit, delete, call), Home (favourites, recents, practice calls), call detail with transcript. Backed by the settings API on Supabase. 12 web tests, 114 API tests
+- Sign in with Google or email and password (Supabase), session gating, sign out; real Supabase tokens verified by the API (ES256 JWKS). Needs Google provider and URL config in the Supabase dashboard
+- Scam shield (rules from specs, zero missed requests on scam_eval.csv, LLM second opinion, warning, digit block, scam_events) and smart replies (Gemini, cancelled when stale); scam alert on the call screen. 128 API tests, 14 web tests
 - Disclosure uses the name "Friend" until onboarding stores a profile (M1-06)
 - M1-03 JWT auth (JWKS, optional HS256 fallback) with tests
 

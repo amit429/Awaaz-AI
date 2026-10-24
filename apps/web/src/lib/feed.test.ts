@@ -38,6 +38,7 @@ describe('applyEvent', () => {
   it('explains blocked messages and flags scam warnings', () => {
     const s = run([{ t: 'say.blocked', reason: 'scam_digits' }, { t: 'scam.warning', reason: 'otp_request' }]);
     expect(s.scam).toBe(true);
+    expect(s.scamReason).toBe('otp_request');
     expect(JSON.stringify(s.feed)).toContain('OTP');
   });
 });

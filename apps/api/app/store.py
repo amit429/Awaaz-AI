@@ -39,12 +39,16 @@ class Store(Protocol):
     async def list_phrases(self, user_id: str) -> list[dict[str, Any]]: ...
     async def save_phrase(self, user_id: str, data: dict[str, Any]) -> dict[str, Any]: ...
     async def delete_phrase(self, user_id: str, phrase_id: str) -> None: ...
+    async def add_scam_event(
+        self, call_id: str, turn_seq: int | None, reason: str, action: str
+    ) -> None: ...
     async def dev_user(self, email: str = "dev@awaaz.local") -> str: ...
 
 
 @dataclass
 class InMemoryStore:
     profiles: dict[str, Profile] = field(default_factory=dict)
+    scam_events: list[dict[str, Any]] = field(default_factory=list)
     contacts: dict[str, dict[str, Any]] = field(default_factory=dict)
     phrases: dict[str, dict[str, Any]] = field(default_factory=dict)
     calls: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -56,6 +60,13 @@ class InMemoryStore:
     async def put_profile(self, profile: Profile) -> None:
         profile.onboarded = True
         self.profiles[profile.user_id] = profile
+
+    async def add_scam_event(
+        self, call_id: str, turn_seq: int | None, reason: str, action: str
+    ) -> None:
+        self.scam_events.append(
+            {"call_id": call_id, "turn_seq": turn_seq, "reason": reason, "action": action}
+        )
 
     async def list_contacts(self, user_id: str) -> list[dict[str, Any]]:
         mine = [c for c in self.contacts.values() if c["user_id"] == user_id]

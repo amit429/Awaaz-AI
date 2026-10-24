@@ -227,3 +227,5 @@ html,body,#root{ height:100%; }
 .hidden{ display:none !important; }
 .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 .err{ color:var(--danger); font-size:.85rem; margin:.3rem .2rem; }
+
+.app .alert{ top:76px; }

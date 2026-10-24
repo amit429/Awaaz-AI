@@ -34,9 +34,19 @@ export interface CallState {
   feed: FeedItem[];
   suggestions: string[];
   scam: boolean;
+  scamReason?: string;
 }
 
 export const initialState: CallState = { status: 'connecting', feed: [], suggestions: [], scam: false };
+
+export const SCAM_COPY: Record<string, { title: string; body: string }> = {
+  otp_request: { title: 'They asked for your OTP', body: 'Banks never ask for an OTP on a call. Awaaz won’t read out OTPs or PINs on this call.' },
+  pin_request: { title: 'They asked for your PIN', body: 'No bank or shop needs your PIN on a call. Awaaz won’t read out PINs or codes on this call.' },
+  upi_pin: { title: 'They asked for your UPI PIN', body: 'Your UPI PIN is only for you. Awaaz won’t read out PINs or codes on this call.' },
+  cvv_request: { title: 'They asked for your card’s CVV', body: 'Never share the CVV on a call. Awaaz won’t read out card details on this call.' },
+  remote_app: { title: 'They asked you to install an app', body: 'Never install an app because a caller asks. It lets them see your phone and your bank.' },
+  other: { title: 'This may be a scam call', body: 'Be careful. Awaaz won’t read out OTPs, PINs or card details on this call.' },
+};
 
 const BLOCKED: Record<string, string> = {
   scam_digits: 'Not sent: Awaaz won’t speak OTP or PIN digits on this call.',
@@ -77,7 +87,7 @@ export function applyEvent(state: CallState, ev: ServerEvent): CallState {
     case 'say.blocked':
       return { ...state, feed: [...state.feed, note(BLOCKED[ev.reason] ?? 'Not sent.')] };
     case 'scam.warning':
-      return { ...state, scam: true };
+      return { ...state, scam: true, scamReason: ev.reason };
     case 'error':
       return { ...state, feed: [...state.feed, note(ev.message)] };
     default:

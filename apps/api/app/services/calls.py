@@ -11,7 +11,8 @@ from app.relay.bolna_leg import BolnaLeg
 from app.relay.disclosure import disclosure_line
 from app.relay.legs import MockLeg
 from app.relay.session import RelaySession
-from app.services.profiles import resolve_modes
+from app.services.profiles import disability_phrase, resolve_modes
+from app.services.replies import ReplyContext
 from app.services.say_prep import make_preparer
 from app.store import Store
 
@@ -81,6 +82,16 @@ async def create_relay_call(
         registry.remove(call_id)
         bolna_registry.remove(call_id)
 
+    contact = next(
+        (c for c in await store.list_contacts(user_id) if c.get("phone_e164") == to), None
+    )
+    reply_ctx = ReplyContext(
+        user_name=profile.display_name,
+        disability_phrase=disability_phrase(profile.preset),
+        type_lang=profile.type_lang,
+        contact_name=(contact or {}).get("name") or "the other person",
+        contact_notes=(contact or {}).get("notes") or "none",
+    )
     session = RelaySession(
         call_id=call_id,
         user_id=user_id,
@@ -93,6 +104,8 @@ async def create_relay_call(
         max_seconds=settings.max_call_minutes * 60,
         prepare=make_preparer(settings, call_lang, GeminiLlm(settings)),
         on_end=cleanup,
+        llm=None if settings.mock_providers else GeminiLlm(settings),
+        reply_ctx=reply_ctx,
     )
     registry.add(session)
     return session
