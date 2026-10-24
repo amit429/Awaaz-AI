@@ -7,6 +7,7 @@ Reads keys from .env in the current directory; saves ids to ../../.spike-state.j
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -17,10 +18,14 @@ ENV = dict(
     for line in Path(".env").read_text().splitlines()
     if "=" in line and not line.startswith("#")
 )
+# Production runs: PUBLIC_BASE_URL / WEBHOOK_SECRET / RELAY_MODEL from the shell win over .env
+for _k in ("PUBLIC_BASE_URL", "WEBHOOK_SECRET"):
+    if os.environ.get(_k):
+        ENV[_k] = os.environ[_k]
 STATE = Path("../../.spike-state.json")
 BASE = ENV.get("BOLNA_API_BASE") or "https://api.bolna.ai"
 HEAD = {"Authorization": f"Bearer {ENV['BOLNA_API_KEY']}", "Content-Type": "application/json"}
-MODEL = "awaaz-relay"
+MODEL = os.environ.get("RELAY_MODEL", "awaaz-relay")
 
 DISCLOSURE = (
     "Namaste, main Rafiq bol raha hoon. Main bol nahi sakta, isliye ek assistant meri likhi "
@@ -134,7 +139,9 @@ def agent(stt: str = "sarvam", live: bool = False) -> None:
             "task_1": {"system_prompt": "[[awaaz:call={call_id}]] Relay agent."}
         }
     out = show(httpx.post(f"{BASE}/v2/agent", headers=HEAD, json=cfg, timeout=60))
-    if live:
+    if live and os.environ.get("PRINT_ONLY"):
+        print("RELAY_AGENT_ID", out["agent_id"])  # production: set it on the server, not in .env
+    elif live:
         env_path = Path(".env")
         lines = [
             f"BOLNA_RELAY_AGENT_ID={out['agent_id']}"

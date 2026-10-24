@@ -22,6 +22,7 @@ log = logging.getLogger("awaaz.bolna_llm")
 router = APIRouter(tags=["bolna-llm"])
 
 MODEL = "awaaz-relay"
+MODELS = ["awaaz-relay", "awaaz-relay-prod"]  # the name registered in Bolna: local and production
 
 
 def require_bearer(
@@ -67,7 +68,10 @@ def current_turn(messages: list[dict]) -> tuple[int, str]:
 
 @router.get("/v1/llm/models", dependencies=[Depends(require_bearer)])
 async def models() -> dict:
-    return {"object": "list", "data": [{"id": MODEL, "object": "model", "owned_by": "awaaz"}]}
+    return {
+        "object": "list",
+        "data": [{"id": m, "object": "model", "owned_by": "awaaz"} for m in MODELS],
+    }
 
 
 @router.post("/v1/llm/chat/completions", dependencies=[Depends(require_bearer)])

@@ -17,7 +17,10 @@ def _events(text: str) -> list[str]:
 
 def test_requires_bearer():
     assert client.get("/v1/llm/models").status_code == 401
-    assert client.get("/v1/llm/models", headers=AUTH).json()["data"][0]["id"] == "awaaz-relay"
+    assert [m["id"] for m in client.get("/v1/llm/models", headers=AUTH).json()["data"]] == [
+        "awaaz-relay",
+        "awaaz-relay-prod",
+    ]
 
 
 def test_current_turn_merges_trailing_user_fragments():
