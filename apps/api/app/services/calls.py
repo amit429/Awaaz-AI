@@ -39,6 +39,10 @@ async def create_relay_call(
     use_mock = bool(settings.mock_providers or callee)
     if not use_mock and not (settings.bolna_api_key and settings.bolna_relay_agent_id):
         raise CallError(501, "live telephony is not configured")
+    if registry.active_for(user_id):
+        raise CallError(409, "You already have a call in progress.")
+    if await store.seconds_used_today(user_id) >= settings.daily_minutes_per_user * 60:
+        raise CallError(429, "You’ve reached today’s call limit. It resets at midnight.")
     profile = await store.get_profile(user_id)
     modes = resolve_modes(
         request_talk=talk_modes,

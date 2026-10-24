@@ -7,7 +7,7 @@ from typing import Any
 import httpx
 
 from app.config import Settings
-from app.store import Profile
+from app.store import Profile, ist_day_start
 
 log = logging.getLogger("awaaz.store")
 
@@ -123,6 +123,18 @@ class SupabaseStore:
             json=comm,
             prefer="resolution=merge-duplicates",
         )
+
+    async def seconds_used_today(self, user_id: str) -> int:
+        rows = await self._rest(
+            "GET",
+            "calls",
+            params={
+                "user_id": f"eq.{user_id}",
+                "created_at": f"gte.{ist_day_start().isoformat()}",
+                "select": "duration_s",
+            },
+        )
+        return sum(int(r.get("duration_s") or 0) for r in rows)
 
     async def add_scam_event(
         self, call_id: str, turn_seq: int | None, reason: str, action: str

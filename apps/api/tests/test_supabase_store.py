@@ -103,3 +103,15 @@ async def test_auth_user_is_created_or_found():
     assert await store.dev_user() == "uid-9"
     store2, _ = make_store(lambda req: httpx.Response(200, json={"id": "uid-new"}))
     assert await store2.dev_user("x@y.z") == "uid-new"
+
+
+async def test_seconds_used_today_sums_this_users_durations_since_midnight_ist():
+    def handler(req):
+        assert req.url.params["user_id"] == "eq.u1"
+        assert req.url.params["created_at"].startswith("gte.")
+        return httpx.Response(
+            200, json=[{"duration_s": 90}, {"duration_s": None}, {"duration_s": 30}]
+        )
+
+    store, _ = make_store(handler)
+    assert await store.seconds_used_today("u1") == 120

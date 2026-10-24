@@ -3,8 +3,14 @@ Supabase implementation (service role, REST) replaces it behind the same interfa
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 from typing import Any, Protocol
+
+
+def ist_day_start() -> datetime:
+    """Midnight today in India (UTC+5:30), as an aware UTC datetime. Daily limits reset then."""
+    ist = timezone(timedelta(hours=5, minutes=30))
+    return datetime.now(ist).replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC)
 
 
 @dataclass
@@ -39,6 +45,7 @@ class Store(Protocol):
     async def list_phrases(self, user_id: str) -> list[dict[str, Any]]: ...
     async def save_phrase(self, user_id: str, data: dict[str, Any]) -> dict[str, Any]: ...
     async def delete_phrase(self, user_id: str, phrase_id: str) -> None: ...
+    async def seconds_used_today(self, user_id: str) -> int: ...
     async def add_scam_event(
         self, call_id: str, turn_seq: int | None, reason: str, action: str
     ) -> None: ...
@@ -60,6 +67,14 @@ class InMemoryStore:
     async def put_profile(self, profile: Profile) -> None:
         profile.onboarded = True
         self.profiles[profile.user_id] = profile
+
+    async def seconds_used_today(self, user_id: str) -> int:
+        start = ist_day_start().isoformat()
+        return sum(
+            int(c.get("duration_s") or 0)
+            for c in self.calls.values()
+            if c["user_id"] == user_id and c["created_at"] >= start
+        )
 
     async def add_scam_event(
         self, call_id: str, turn_seq: int | None, reason: str, action: str

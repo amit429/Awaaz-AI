@@ -120,8 +120,9 @@ def test_phrases_crud(client):
 
 def test_call_history_lists_calls_with_contact_names(client):
     client.post("/v1/contacts", json={"name": "Sharma Medical", "phone_e164": "+919800000001"})
-    client.post("/v1/calls", json={"to": "+919800000001"})
-    client.post("/v1/calls", json={"to": "+919800000077"})
+    for number in ("+919800000001", "+919800000077"):
+        made = client.post("/v1/calls", json={"to": number}).json()
+        registry.get(made["session_id"]).ended = True  # one call at a time: finish it first
     history = client.get("/v1/calls").json()
     assert {h["other_number"]: h["name"] for h in history} == {
         "+919800000001": "Sharma Medical",

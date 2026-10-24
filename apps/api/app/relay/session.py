@@ -14,6 +14,7 @@ import time
 import uuid
 from collections import deque
 from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
 from typing import Any
 
 from pydantic import ValidationError
@@ -95,6 +96,7 @@ class RelaySession:
         self.started = False
         self.ended = False
         self._t0 = time.monotonic()
+        self._started_wall = time.time()
         self._subs: list[asyncio.Queue[dict[str, Any]]] = []
         self._buffer: deque[dict[str, Any]] = deque(maxlen=REPLAY)
         self._tasks: set[asyncio.Task[None]] = set()
@@ -256,7 +258,12 @@ class RelaySession:
         self._set_state("ended", reason)
         with contextlib.suppress(Exception):
             await self.leg.hangup()
-        await self.store.update_call(self.call_id, status="ended")
+        await self.store.update_call(
+            self.call_id,
+            status="ended",
+            ended_at=datetime.now(UTC).isoformat(),
+            duration_s=int(time.time() - self._started_wall) if self.started else 0,
+        )
         if self.on_end:
             self.on_end()
 

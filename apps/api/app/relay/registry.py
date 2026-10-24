@@ -19,3 +19,8 @@ def remove(call_id: str) -> None:
 
 def clear() -> None:
     _sessions.clear()
+
+
+def active_for(user_id: str) -> RelaySession | None:
+    """The user's call in progress, if any (one live call per user)."""
+    return next((s for s in _sessions.values() if s.user_id == user_id and not s.ended), None)
