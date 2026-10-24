@@ -8,6 +8,7 @@ export interface Profile {
   hear_modes: HearMode[] | null;
   read_lang: string;
   type_lang: string;
+  app_lang: string;
   easy_font: boolean;
   speech_rate: number;
 }

@@ -39,15 +39,15 @@ export async function getToken(): Promise<string> {
   throw new Error('Not signed in');
 }
 
-/** Plain-language messages for Supabase auth errors. */
+/** A translation key for a Supabase auth error, or the message itself when it is not one we know. */
 export function friendlyAuthError(message: string): string {
   const m = message.toLowerCase();
-  if (m.includes('invalid login credentials')) return 'Wrong email or password.';
-  if (m.includes('email not confirmed')) return 'Please confirm your email first. Check your inbox for the link.';
-  if (m.includes('already registered') || m.includes('already been registered')) return 'This email already has an account. Try signing in.';
-  if (m.includes('password') && m.includes('at least')) return 'Use a password with at least 6 characters.';
-  if (m.includes('rate limit') || m.includes('too many')) return 'Too many tries. Please wait a few minutes and try again.';
-  if (m.includes('valid email') || m.includes('invalid email')) return 'That email address doesn’t look right.';
-  if (m.includes('provider is not enabled') || m.includes('unsupported provider')) return 'Google sign-in isn’t switched on yet.';
-  return message || 'Something went wrong. Please try again.';
+  if (m.includes('invalid login credentials')) return 'authErrors.wrongPassword';
+  if (m.includes('email not confirmed')) return 'authErrors.notConfirmed';
+  if (m.includes('already registered') || m.includes('already been registered')) return 'authErrors.exists';
+  if (m.includes('password') && m.includes('at least')) return 'authErrors.shortPassword';
+  if (m.includes('rate limit') || m.includes('too many')) return 'authErrors.tooMany';
+  if (m.includes('valid email') || m.includes('invalid email')) return 'authErrors.badEmail';
+  if (m.includes('provider is not enabled') || m.includes('unsupported provider')) return 'authErrors.googleOff';
+  return message || 'authErrors.generic';
 }

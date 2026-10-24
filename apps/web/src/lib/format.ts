@@ -13,12 +13,3 @@ export function maskNumber(n: string): string {
   return n.length > 4 ? `••••${n.slice(-4)}` : n;
 }
 
-export const STATUS_TEXT: Record<string, string> = {
-  created: 'Not connected',
-  ringing: 'Not answered',
-  connected: 'In progress',
-  ended: 'Completed',
-  failed: 'Did not connect',
-  no_answer: 'No answer',
-  busy: 'Busy',
-};

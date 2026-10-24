@@ -20,6 +20,17 @@ describe('applyEvent', () => {
     expect(s.feed.filter((i) => i.kind === 'note')).toHaveLength(1);
   });
 
+  it('keeps translations per caption and the chosen caption language', () => {
+    const s = run([
+      { t: 'read.updated', lang: 'ta' },
+      { t: 'caption.final', turn: 2, text: 'हाँ जी', lang: 'hi', confidence: 0.9, entities: [] },
+      { t: 'caption.translation', turn: 2, lang: 'ta', text: 'சரி' },
+      { t: 'caption.translation', turn: 2, lang: 'en', text: 'Yes' },
+    ]);
+    expect(s.readLang).toBe('ta');
+    expect(s.feed[0]).toMatchObject({ kind: 'them', lang: 'hi', translations: { ta: 'சரி', en: 'Yes' } });
+  });
+
   it('replaces a partial caption with the final one for the same turn', () => {
     const s = run([
       { t: 'caption.partial', turn: 2, text: 'हाँ जी' },
@@ -56,7 +67,7 @@ describe('applyEvent', () => {
     const s = run([{ t: 'say.blocked', reason: 'scam_digits' }, { t: 'scam.warning', reason: 'otp_request' }]);
     expect(s.scam).toBe(true);
     expect(s.scamReason).toBe('otp_request');
-    expect(JSON.stringify(s.feed)).toContain('OTP');
+    expect(s.feed[0]).toMatchObject({ kind: 'note', key: 'call.blocked.scam_digits' });
   });
 });
 
