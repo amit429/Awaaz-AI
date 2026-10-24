@@ -5,6 +5,7 @@ base_url registered in Bolna = {PUBLIC_BASE_URL}/v1/llm. Auth: Authorization: Be
 
 import json
 import logging
+import re
 import time
 from collections.abc import AsyncIterator
 
@@ -66,6 +67,25 @@ def current_turn(messages: list[dict]) -> tuple[int, str]:
     return assistants, " ".join(reversed([t for t in tail if t]))
 
 
+_DIGITS = re.compile(r"\d(?=\d{4})")
+
+
+def _probe(body: dict) -> None:
+    """Log what Bolna sends on a request that matches no outbound call (an inbound call, or a
+    console test): the request's top-level keys, the system prompt and any call metadata.
+    Phone numbers are masked to their last 4 digits."""
+    messages = body.get("messages", [])
+    system = next((_text(m.get("content")) for m in messages if m.get("role") == "system"), "")
+    extra = {k: v for k, v in body.items() if k not in ("messages", "stream", "model")}
+    log.info(
+        "INBOUND-PROBE keys=%s system=%r extra=%s roles=%s",
+        sorted(body),
+        _DIGITS.sub("*", system)[:300],
+        _DIGITS.sub("*", json.dumps(extra, ensure_ascii=False, default=str))[:600],
+        [m.get("role") for m in messages][-6:],
+    )
+
+
 @router.get("/v1/llm/models", dependencies=[Depends(require_bearer)])
 async def models() -> dict:
     return {
@@ -80,6 +100,8 @@ async def chat(request: Request) -> StreamingResponse:
     messages = body.get("messages", [])
     turn, heard = current_turn(messages)
     leg = bolna_registry.for_messages(messages)
+    if leg is None:
+        _probe(body)
     if leg is None and heard:  # no relay call matches: the spike console bridge
         bridge.hear(turn, heard)
         log.info("CAPTION turn=%d: %s", turn, heard)

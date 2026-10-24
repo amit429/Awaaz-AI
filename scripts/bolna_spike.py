@@ -74,8 +74,13 @@ TRANSCRIBERS = {
     },
 }
 
+INBOUND_WELCOME = (
+    "Namaste, yeh Amit ki line hai. Amit ko sunne mein dikkat hoti hai, isliye ek assistant "
+    "unke likhe jawab padh kar sunata hai. Kripya thoda ruk kar boliye."
+)
 
-def agent(stt: str = "sarvam", live: bool = False) -> None:
+
+def agent(stt: str = "sarvam", live: bool = False, inbound: bool = False) -> None:
     cfg = {
         "agent_config": {
             "agent_name": f"Awaaz relay spike ({stt})",
@@ -138,8 +143,17 @@ def agent(stt: str = "sarvam", live: bool = False) -> None:
         cfg["agent_prompts"] = {
             "task_1": {"system_prompt": "[[awaaz:call={call_id}]] Relay agent."}
         }
+    if inbound:  # a line that people call: fixed welcome, prompt token names the line, not a call
+        cfg["agent_config"]["agent_name"] = "Awaaz inbound test"
+        cfg["agent_config"]["agent_welcome_message"] = INBOUND_WELCOME
+        cfg["agent_config"].pop("webhook_url", None)
+        cfg["agent_prompts"] = {
+            "task_1": {"system_prompt": "[[awaaz:line=probe]] Relay agent for an incoming call."}
+        }
     out = show(httpx.post(f"{BASE}/v2/agent", headers=HEAD, json=cfg, timeout=60))
-    if live and os.environ.get("PRINT_ONLY"):
+    if inbound:
+        print("INBOUND_AGENT_ID", out["agent_id"])
+    elif live and os.environ.get("PRINT_ONLY"):
         print("RELAY_AGENT_ID", out["agent_id"])  # production: set it on the server, not in .env
     elif live:
         env_path = Path(".env")
@@ -171,5 +185,6 @@ if __name__ == "__main__":
         "register": register,
         "agent": lambda: agent(sys.argv[2] if len(sys.argv) > 2 else "sarvam"),
         "relay-agent": lambda: agent("sarvam", live=True),
+        "inbound-agent": lambda: agent("sarvam", live=True, inbound=True),
         "call": lambda: call(sys.argv[2], arg),
     }[cmd]()
