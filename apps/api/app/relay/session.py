@@ -453,7 +453,7 @@ class RelaySession:
         if self._reply_task:
             self._reply_task.cancel()
         self._convo.append(("user", text))
-        if source == "typed":
+        if source in ("typed", "voice"):
             self.reply_ctx.typed.append(original or text)
         await self._you(text, source, original=original)
         await self.leg.speak(text)

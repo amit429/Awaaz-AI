@@ -4,7 +4,7 @@ import type { ServerEvent } from './feed';
 
 export type ClientEvent =
   | { t: 'user.typing' }
-  | { t: 'user.say'; text: string; source: 'typed' | 'reply' | 'phrase' | 'draft'; preview_id?: string }
+  | { t: 'user.say'; text: string; source: 'typed' | 'reply' | 'phrase' | 'draft' | 'voice'; preview_id?: string }
   | { t: 'say.confirm'; preview_id: string }
   | { t: 'draft.request'; words: string }
   | { t: 'read.set'; lang: string }

@@ -7,6 +7,7 @@ from app.routers import (
     calls,
     dev_auth,
     dev_console,
+    stt,
     twilio_voice,
     webhooks_bolna,
     webhooks_wa,
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
 
     app.include_router(twilio_voice.router)
     app.include_router(calls.router)
+    app.include_router(stt.router)
     app.include_router(settings_router.router)
     app.include_router(dev_auth.router)
     app.include_router(webhooks_bolna.router)

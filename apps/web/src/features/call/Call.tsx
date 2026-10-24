@@ -1,4 +1,4 @@
-import { ChevronLeft, Globe, Grid3x3, Keyboard, Languages, Loader2, MessageSquare, Mic, PhoneOff, Repeat, Send, ShieldAlert, Sparkles, Square } from 'lucide-react';
+import { ChevronLeft, Globe, Grid3x3, Keyboard, Languages, MessageSquare, Mic, PhoneOff, Repeat, Send, ShieldAlert, Sparkles, Square } from 'lucide-react';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { Person } from '@/components/Person';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import starterPhrases from '@/data/phrases.json';
@@ -14,7 +15,7 @@ import { useMe, usePhrases } from '@/hooks/useData';
 import { api } from '@/lib/api';
 import { applyEvent, initialState, splitByEntities, type FeedItem } from '@/lib/feed';
 import { nativeName } from '@/i18n';
-import { buzz, speak, stopSpeaking, useRecorder } from '@/lib/speech';
+import { buzz, speak, stopSpeaking, useLiveVoice } from '@/lib/speech';
 import { toast } from 'sonner';
 import { RelayClient } from '@/lib/relay';
 import { cn } from '@/lib/utils';
@@ -104,29 +105,34 @@ export function Call() {
 
   const talkModes = me.data?.profile.talk_modes ?? [];
   const hearModes = me.data?.profile.hear_modes ?? [];
-  const mic = useRecorder();
-  const [transcribing, setTranscribing] = useState(false);
+  const [autoSend, setAutoSend] = useState(() => {
+    try { return localStorage.getItem('awaaz-voice-auto') !== 'off'; } catch { return true; }
+  });
+  const [heard, setHeard] = useState('');
+  const voice = useLiveVoice(typeLang === 'hi-Latn' ? 'hi' : typeLang, {
+    // The other person is not left in silence while the user is mid-sentence.
+    onSpeechStart: () => client.current?.send({ t: 'user.typing' }),
+    onText: (spoken) => {
+      setHeard(spoken);
+      if (autoSend) client.current?.send({ t: 'user.say', text: spoken, source: 'voice' });
+      else { setMode('type'); setText(spoken); }
+    },
+    onError: (code) => toast.error(t(code === 'denied' ? 'call.micDenied' : 'call.voiceFailed')),
+  });
 
-  async function toggleMic() {
-    if (mic.recording) {
-      const audio = await mic.stop();
-      if (!audio || audio.size < 1000) return;
-      setTranscribing(true);
-      try {
-        const r = await api.transcribe(audio, typeLang === 'hi-Latn' ? 'hi' : typeLang);
-        if (r.text) { setMode('type'); setText(r.text); } else toast.error(t('call.micNothing'));
-      } catch {
-        toast.error(t('call.micFailed'));
-      } finally {
-        setTranscribing(false);
-      }
-    } else {
-      stopSpeaking();
-      mic.start().catch(() => toast.error(t('call.micDenied')));
-    }
+  function toggleVoice() {
+    if (voice.active) return voice.stop();
+    stopSpeaking();
+    void voice.start();
+  }
+  function changeAutoSend(on: boolean) {
+    setAutoSend(on);
+    try { localStorage.setItem('awaaz-voice-auto', on ? 'on' : 'off'); } catch { /* ignore */ }
   }
 
   // Clear voice and vibration cues react to what the other person says.
+  const voiceOn = useRef(false);
+  voiceOn.current = voice.active;
   const lastCue = useRef<{ turn: number; final: boolean }>({ turn: 0, final: false });
   useEffect(() => {
     const last = [...state.feed].reverse().find((i): i is Extract<FeedItem, { kind: 'them' }> => i.kind === 'them');
@@ -136,7 +142,7 @@ export function Call() {
     if (hearModes.includes('vibe') && isNew) buzz(80);
     if (!last.partial && !(seen.turn === last.turn && seen.final)) {
       if (hearModes.includes('vibe')) buzz([120, 60, 120]);
-      if (hearModes.includes('clear')) speak(last.text, (last.lang ?? 'hi').split('-')[0] ?? 'hi');
+      if (hearModes.includes('clear') && !voiceOn.current) speak(last.text, (last.lang ?? 'hi').split('-')[0] ?? 'hi');
       lastCue.current = { turn: last.turn, final: true };
     } else if (isNew) {
       lastCue.current = { turn: last.turn, final: false };
@@ -146,6 +152,9 @@ export function Call() {
 
   const preview = state.feed.find((i): i is Extract<FeedItem, { kind: 'preview' }> => i.kind === 'preview');
   const live = state.status === 'connected' || state.status === 'ringing';
+  useEffect(() => {
+    if (!live && voice.active) voice.stop();
+  }, [live]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -272,12 +281,22 @@ export function Call() {
             <span className="ml-auto shrink-0 text-sm font-medium text-accent">{t('call.useThis')}</span>
           </button>
         )}
+        {live && voice.active && (
+          <div className="mb-2 flex items-center gap-3 rounded-2xl bg-white/[0.07] px-4 py-2 text-sm" aria-live="polite">
+            <span className="size-2.5 shrink-0 animate-pulse rounded-full bg-destructive" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{heard ? t('call.voiceHeard', { text: heard }) : t('call.voiceListening')}</span>
+            <label className="flex shrink-0 items-center gap-2 text-muted-foreground">
+              {t('call.autoSend')}
+              <Switch checked={autoSend} onCheckedChange={changeAutoSend} aria-label={t('call.autoSend')} />
+            </label>
+          </div>
+        )}
         {live ? (
           <form className="flex items-center gap-2" onSubmit={submit}>
             <Input value={text} onChange={(e) => onType(e.target.value)} autoFocus aria-label={mode === 'help' ? t('call.helpPlaceholder') : t('call.typePlaceholder')} placeholder={mode === 'help' ? t('call.helpPlaceholder') : t('call.typePlaceholder')} className="h-12 rounded-full border-0 bg-white/10 px-5 text-base" />
             {talkModes.includes('voice') && (
-              <Button type="button" size="icon" variant={mic.recording ? 'destructive' : 'secondary'} disabled={transcribing} onClick={() => void toggleMic()} aria-pressed={mic.recording} aria-label={mic.recording ? t('call.micStop') : t('call.micStart')} className="size-12 shrink-0 rounded-full">
-                {transcribing ? <Loader2 className="size-5 animate-spin" /> : mic.recording ? <Square className="size-5" /> : <Mic className="size-5" />}
+              <Button type="button" size="icon" variant={voice.active ? 'destructive' : 'secondary'} onClick={toggleVoice} aria-pressed={voice.active} aria-label={voice.active ? t('call.micStop') : t('call.micStart')} className={cn('size-12 shrink-0 rounded-full', voice.active && 'animate-pulse')}>
+                {voice.active ? <Square className="size-5" /> : <Mic className="size-5" />}
               </Button>
             )}
             <Button type="submit" size="icon" aria-label={mode === 'help' ? 'Draft' : 'Speak'} className="size-12 shrink-0 rounded-full bg-accent text-accent-foreground hover:bg-accent/90">{mode === 'help' ? <Sparkles className="size-5" /> : <Send className="size-5" />}</Button>

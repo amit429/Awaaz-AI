@@ -72,3 +72,9 @@ Clear voice: Bulbul `pace` 0.5-2.0 replaces Cartesia speed control. Voice clonin
 - **Normal audio** (live call audio into the app) is not possible for the same reason: Awaaz never receives the other person's audio on a Bolna leg, only the transcript. Removed.
 - **Sign language interpreter** needs a partner service; removed until there is one.
 - Older profiles holding `clarity`, `sign` or `audio` still load; the app ignores them.
+
+## 2026-10-25: live voice for people who can talk but not hear
+- **Built:** the microphone streams to our server (`/v1/stt/ws`), which streams to Sarvam Saaras (WebSocket) and returns each finished sentence about 0.1 s after the speaker stops. The app sends it as `user.say` with source `voice`; Bolna speaks it with its text-to-speech. Captions of the other person come back as before. The user sees each sentence, can switch to "check before sending", and the scam shield, the "please hold" line and the disclosure still apply.
+- **Sarvam facts learned:** the WebSocket accepts the key in the `api-subscription-key` header (the query-parameter form in their guide returns 403); audio goes in as `{"audio": {"data": base64, "encoding": "audio/wav", "sample_rate": 16000}}`; raw PCM needs `input_audio_codec=pcm_s16le`; `vad_signals=true` gives start and end of speech.
+- **Not possible through Bolna:** passing the user's raw voice audio into the call. Bolna's agent is speech to text, our server, then text to speech; its docs show no audio input and no way to bridge a human in. Options for real voice: (1) a phone line we control (Twilio Voice SDK or Plivo browser calling, with the call audio forked to speech to text for captions; needs a paid, verified telephony account); (2) a consented clone of the user's voice used as Bolna's text-to-speech voice (ElevenLabs-type voices; rule 8 in CLAUDE.md applies).
+- Read-aloud is paused while live voice is on, so the phone's speaker is not picked up by the microphone.

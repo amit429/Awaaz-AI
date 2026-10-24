@@ -306,7 +306,8 @@
             "typed",
             "reply",
             "phrase",
-            "draft"
+            "draft",
+            "voice"
           ]
         },
         "preview_id": {

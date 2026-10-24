@@ -93,7 +93,7 @@ The app is also available in Tamil (below) and ten other languages.
 - **Type, and Awaaz speaks.** Typing in Hindi, Marathi or English works; text in the call’s own script is spoken straight away.
 - **Phrases and smart replies.** Saved phrases, plus one-tap suggested answers after the other person speaks.
 - **Help me say it.** A few words in, a clear sentence out. The user approves it before it is spoken.
-- **Speak, Awaaz says it.** Speak into the mic; speech becomes text in the message box, the user checks it, and Awaaz says it clearly.
+- **Live voice: speak, Awaaz says it.** Tap the mic and talk normally. Each sentence is turned into text within a fraction of a second and spoken on the call by Awaaz’s voice, and the user sees every sentence in the chat. A switch lets the user check each sentence before it is sent instead.
 - Typing in any Indian script with the phone’s own keyboard. If the user types in English letters, Awaaz offers the same text in their own script.
 - Text typed in a different language than the call’s is translated, shown, and spoken only after the user confirms.
 
@@ -267,7 +267,7 @@ These are designed or planned but **not built or not testable yet**.
 - **Calendar reminders** from the summary (a time agreed on a call becomes a reminder).
 - **Call for me**: Awaaz makes a simple task call (booking a cylinder, confirming an appointment) by itself, with approval for anything outside set limits, and reports back.
 - **Clearer speech recognition for numbers**: confidence marks, “did you mean” chips, and automatic read-back.
-- **Your own voice**: speaking in the user’s own voice, with consent, where they want it.
+- **The user’s own voice on the call.** Live voice speaks with Awaaz’s voice today. Carrying the user’s real voice needs a phone line we control end to end, or a consented voice clone; see the decision notes.
 - **Callee simulator** for testing speech features without a phone.
 - **Family helper**: a relative can set up the profile and see (with consent) the call summaries.
 - **Accessible helpline for businesses** such as pharmacies, banks and clinics.
@@ -276,7 +276,7 @@ These are designed or planned but **not built or not testable yet**.
 
 **Not possible with the current phone line, and left out on purpose**
 - **Live audio of the other person into the app.** The phone line returns text, not audio.
-- **Passing the user’s own voice straight through.** The phone line speaks text we give it, so speech is converted to text first.
+- **Passing the user’s raw voice audio into the call through Bolna.** Bolna’s agent speaks text we give it and has no audio input for us, so speech is converted to text first (this is what Live voice does).
 - **Sign language interpreter by video.** This needs a partner service.
 
 ## Credits and licence

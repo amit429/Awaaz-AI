@@ -157,7 +157,7 @@
   "talk": {
     "voice": {
       "title": "Speak, Awaaz says it",
-      "hint": "I speak into the mic. Awaaz turns it into text, I check it, and Awaaz says it clearly."
+      "hint": "I talk into the mic. Awaaz says each sentence on the call, and shows it to me."
     },
     "type": {
       "title": "Type, Awaaz speaks",
@@ -259,11 +259,13 @@
       "empty": "Nothing to send.",
       "too_long": "That message is too long. Please shorten it."
     },
-    "micStart": "Speak",
-    "micStop": "Stop and use what I said",
-    "micNothing": "Nothing was heard. Try again, closer to the phone.",
-    "micFailed": "Could not turn your voice into text. Try again or type.",
-    "micDenied": "Allow the microphone to speak."
+    "micStart": "Start live voice",
+    "micStop": "Stop live voice",
+    "micDenied": "Allow the microphone to use live voice.",
+    "voiceListening": "Listening. Speak, and Awaaz says it.",
+    "voiceHeard": "Said: {{text}}",
+    "autoSend": "Send automatically",
+    "voiceFailed": "Live voice isn’t available right now. You can type instead."
   },
   "scam": {
     "otp_request": {

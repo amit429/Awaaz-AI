@@ -17,7 +17,7 @@ class UserTyping(BaseModel):
 class UserSay(BaseModel):
     t: Literal["user.say"]
     text: str = Field(min_length=1, max_length=500)
-    source: Literal["typed", "reply", "phrase", "draft"]
+    source: Literal["typed", "reply", "phrase", "draft", "voice"]
     preview_id: str | None = None
 
 

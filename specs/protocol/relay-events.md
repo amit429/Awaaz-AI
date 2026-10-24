@@ -35,7 +35,7 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 | t | Fields | Effect |
 |---|---|---|
 | `user.typing` | — | Resets keeper timer |
-| `user.say` | `text`, `source` (`typed`, `reply`, `phrase`, `draft`), `preview_id?` | Speak to the other person |
+| `user.say` | `text`, `source` (`typed`, `reply`, `phrase`, `draft`, `voice`), `preview_id?` | Speak to the other person |
 | `say.confirm` | `preview_id` | Confirm a translated preview |
 | `draft.request` | `words` | Help me say |
 | `user.ask_repeat` | — | Politely ask the other person to repeat |

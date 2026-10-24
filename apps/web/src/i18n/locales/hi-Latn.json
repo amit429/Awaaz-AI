@@ -8,271 +8,273 @@
     "loading": "Chalu ho raha hai…",
     "save": "Save karein",
     "cancel": "Radd karein",
-    "back": "Wapas",
+    "back": "Peeche",
     "edit": "Badlein",
-    "delete": "Hatayein",
+    "delete": "Hataayein",
     "call": "Call karein",
     "tryAgain": "Phir se koshish karein",
-    "serverDown": "Awaaz se baat nahi ho pa rahi. Server chalu hone mein ek minute lag sakta hai.",
+    "serverDown": "Awaaz se connect nahi ho pa raha. Server chalu ho raha hai, ek minute lag sakta hai.",
     "saved": "Save ho gaya",
-    "couldNotSave": "Save nahi ho paaya. Kripya phir se koshish karein.",
-    "practice": "Practice karein",
+    "couldNotSave": "Save nahi ho paya. Phir se koshish karein.",
+    "practice": "Practice",
     "language": "Bhasha"
   },
   "login": {
-    "headline": "Aise logon ke liye phone call jo sun ya bol nahi sakte.",
-    "subhead": "Aap likhein, Awaaz aapki jagah bolega. Wahan se jo bola jayega woh likha hua dikhega, paise aur time alag se dikhenge.",
-    "footnote": "Awaaz har call ke shuru mein doosre insaan ko bata deta hai ki ek assistant madad kar raha hai.",
-    "welcomeBack": "Aapka wapas swagat hai",
+    "headline": "Un logo ke liye phone calls jo sun ya bol nahi sakte.",
+    "subhead": "Aap likhein aur Awaaz aapki jagah bolega. Samne wala jo bolega wo likha hua dikhega, daam aur time ke saath.",
+    "footnote": "Har call ke shuru mein Awaaz samne wale ko batata hai ki ek assistant help kar raha hai.",
+    "welcomeBack": "Wapas aane par swagat hai",
     "signInHint": "Call karne aur uthane ke liye sign in karein.",
     "createTitle": "Apna account banayein",
-    "createHint": "Bas ek minute lagega. Phir aap chuna sakte hain ki kaise bolna aur sunna hai.",
-    "signIn": "Sign in karein",
+    "createHint": "Bas ek minute lagta hai. Iske baad aap chunein ki aap kaise baat karenge aur sunenge.",
+    "signIn": "Sign in",
     "createAccount": "Account banayein",
     "google": "Google ke saath aage badhein",
-    "orEmail": "ya apna email istemal karein",
+    "orEmail": "ya apna email use karein",
     "email": "Email",
     "password": "Password",
     "passwordHint": "Kam se kam 6 akshar.",
     "forgot": "Password bhool gaye?",
     "devUser": "Dev user ki tarah aage badhein (sirf local)",
-    "accountCreated": "Account ban gaya. Mail check karein aur link par click karke confirm karein, phir sign in karein.",
-    "resetSent": "Agar is email se account hai, toh humne password badalne ka link bhej diya hai.",
-    "typeEmailFirst": "Pehle upar apna email likhein, phir \"Password bhool gaye\" par dabayein."
+    "accountCreated": "Account ban gaya. Email par aaya link check karein aur confirm karke sign in karein.",
+    "resetSent": "Agar is email ka account hai, toh humne password reset karne ka link bhej diya hai.",
+    "typeEmailFirst": "Pehle upar apna email likhein, phir “Password bhool gaye?” dabayein."
   },
   "authErrors": {
     "wrongPassword": "Galat email ya password.",
-    "notConfirmed": "Pehle apna email confirm karein. Apne inbox mein link check karein.",
+    "notConfirmed": "Pehle apna email confirm karein. Link ke liye inbox check karein.",
     "exists": "Is email par pehle se account hai. Sign in karne ki koshish karein.",
-    "shortPassword": "Kam se kam 6 aksharon ka password istemal karein.",
-    "tooMany": "Bohot baar koshish ho gayi. Kuch minute ruk kar phir koshish karein.",
-    "badEmail": "Yeh email address sahi nahi lag raha.",
+    "shortPassword": "Kam se kam 6 akshar ka password banayein.",
+    "tooMany": "Bahut baar koshish ho gayi. Kuch minute ruk kar phir koshish karein.",
+    "badEmail": "Yeh email address sahi nahi lag raha hai.",
     "googleOff": "Google sign-in abhi chalu nahi hai.",
-    "generic": "Kuch gadbad ho gayi. Kripya phir se koshish karein."
+    "generic": "Kuch galti ho gayi. Phir se koshish karein."
   },
   "onboarding": {
-    "languageTitle": "Apni bhasha chuniye",
-    "languageHint": "Awaaz iska istemal sabhi jagah karega, likhe hue shabdon mein bhi. Aap ise kabhi bhi badal sakte hain.",
-    "title": "Aaiye aapki calls set karein",
-    "hint": "Do chote sawal. Baad mein aap Main (Me) mein sab badal sakte hain.",
-    "nameLabel": "Aapka naam kya hai?",
-    "nameHint": "Yeh naam har call ke shuru mein doosre insaan ko bataya jata hai.",
-    "howPhone": "Aap phone ka istemal kaise karte hain?",
+    "languageTitle": "Apni bhasha chunein",
+    "languageHint": "Awaaz har jagah iska istemaal karega. Aap ise kabhi bhi badal sakte hain.",
+    "title": "Aaiye aapki calls ki setting karein",
+    "hint": "Do chhote sawaal. Aap baad mein Main section mein sab badal sakte hain.",
+    "nameLabel": "Hum aapko kis naam se bulayein?",
+    "nameHint": "Har call ke shuru mein samne wale ko yeh naam bataya jayega.",
+    "howPhone": "Aap phone ka istemaal kaise karte hain?",
     "continue": "Aage badhein",
-    "fineTune": "Aur thik karein",
-    "fineTuneHint": "Koi bhi tarika chuniye. Bolne ka pehla tarika calls par aapka main tarika hoga.",
+    "fineTune": "Apne hisaab se set karein",
+    "fineTuneHint": "Koi bhi tarika chunein. Baat karne ka pehla tarika calls par default rahega.",
     "finish": "Poora karein",
     "step": "Step {{n}} / {{total}}"
   },
   "home": {
     "title": "Calls",
     "newCall": "Nayi call",
-    "favourites": "Khaas log",
-    "recent": "Puraani calls",
+    "favourites": "Khaas number",
+    "recent": "Haal hi ke call",
     "noCallsTitle": "Abhi koi call nahi hai",
-    "noCallsBody": "Call shuru karein, ya neeche ek practice call karke dekhein ki baatein kaise likhkar aati hain aur jawab kaise jaate hain.",
-    "practiceTitle": "Practice call",
-    "practiceHint": "Nakli call, sikhne ke liye",
-    "newCallHint": "Jise call karna hai unka number dalei. Awaaz unhe batayega ki ek assistant madad kar raha hai.",
+    "noCallsBody": "Call shuru karein, ya niche practice call karke dekhein ki likha hua text aur jawab kaise kaam karte hain.",
+    "practiceTitle": "Practice calls",
+    "practiceHint": "Nakli call, asli phone call nahi hai",
+    "newCallHint": "Wo number dalein jise call karna hai. Awaaz unhein batayega ki ek assistant madad kar raha hai.",
     "phoneNumber": "Phone number",
-    "theySpeak": "Woh bolte hain",
+    "theySpeak": "Wo bolte hain",
     "callButton": "Call karein",
-    "couldNotStart": "Call shuru nahi ho paayi",
+    "couldNotStart": "Call shuru nahi ho payi",
     "checkNumber": "Phone number check karein",
-    "practiceSharma": "Dawa ki dukaan, Hindi",
+    "practiceSharma": "Medical shop, Hindi",
     "practiceNetra": "Clinic, Marathi",
-    "practiceScam": "Ek bank ka nakli (scam) call",
+    "practiceScam": "Bank ki nakli call",
     "unknownNumber": "Anjaan number"
   },
   "status": {
     "created": "Connect nahi hua",
-    "ringing": "Uthaya nahi",
+    "ringing": "Jawab nahi mila",
     "connected": "Baat ho rahi hai",
-    "ended": "Khatam hua",
-    "failed": "Call nahi lag payi",
+    "ended": "Poora hua",
+    "failed": "Connect nahi ho paya",
     "no_answer": "Koi jawab nahi",
-    "busy": "Busy hai"
+    "busy": "Line busy hai"
   },
   "contacts": {
     "title": "Contacts",
     "add": "Contact jodein",
     "addFirst": "Apna pehla contact jodein",
     "emptyTitle": "Abhi koi contact nahi hai",
-    "emptyBody": "Jin logon ya dukaan par aap baar-baar call karte hain, unhe save karein. Kuch note bhi likh sakte hain, jaise \"meri BP ki dawa Telma 40 hai\", aur Awaaz ise jawab mein istemal kar sakta hai.",
+    "emptyBody": "Jin logon ko aap baar baar call karte hain unka number save karein. Note jodein, jaise “meri BP ki dawai Telma 40 hai”, aur Awaaz iska jawab mein use kar sakta hai.",
     "newTitle": "Naya contact",
     "editTitle": "Contact badlein",
-    "sheetHint": "Awaaz jawabo ke sujhav mein notes ka istemal kar sakta hai.",
+    "sheetHint": "Jawab sujhane ke liye Awaaz in notes ka istemaal kar sakta hai.",
     "name": "Naam",
     "phone": "Phone number",
     "notes": "Notes",
-    "notesPlaceholder": "Jaise: meri BP ki dawa Telma 40 hai",
-    "favourite": "Khaas logon mein dikhayein",
+    "notesPlaceholder": "Jaise: meri BP ki dawai Telma 40 hai",
+    "favourite": "Khaas list mein dikhayein",
     "saveContact": "Contact save karein",
     "added": "Contact jod diya gaya",
     "savedToast": "Contact save ho gaya",
     "deleted": "Contact hata diya gaya",
     "saveFailed": "Save nahi ho paya. Number check karein.",
-    "deleteTitle": "{{name}} ko hatayein?",
-    "deleteBody": "Isse yeh contact aur iske notes hat jayenge. Puraani calls ka hisab rahega.",
+    "deleteTitle": "{{name}} ko hataayein?",
+    "deleteBody": "Isse yeh contact aur iske notes hat jayenge. Purani calls aapki history mein rahengi.",
     "keep": "Rakhne dein",
-    "theySpeak": "Woh bolte hain"
+    "theySpeak": "Wo bolte hain"
   },
   "me": {
     "title": "Main",
     "yourName": "Aapka naam",
-    "nameHint": "Har call ke shuru mein doosre insaan ko bataya jata hai.",
-    "phrases": "Mere tayar vakya",
-    "phrasesHint": "Call par jaldi bolne ke liye chote vakya",
-    "saveChanges": "Badlav save karein",
-    "signedInAs": "{{email}} ke naam se sign in hai",
+    "nameHint": "Har call ke shuru mein samne wale ko bataya jayega.",
+    "phrases": "Mere tay waakya",
+    "phrasesHint": "Call par jaldi bolne wali baatein",
+    "saveChanges": "Badlaav save karein",
+    "signedInAs": "{{email}} ke naam se signed in hain",
     "signOut": "Sign out karein",
     "appLanguage": "App ki bhasha"
   },
   "profile": {
     "startFrom": "Yahan se shuru karein",
-    "startFromHint": "Pehle se bane option sirf aasan karne ke liye hain. Aap neeche sab badal sakte hain.",
-    "howTalk": "Main kaise bolta hoon",
-    "howTalkHint": "Jo jo aap istemal karte hain sab chuniye. Pehla wala aapka main tarika hoga.",
+    "startFromHint": "Yeh bas ek basic setting hai. Aap niche sab kuch badal sakte hain.",
+    "howTalk": "Main kaise baat karta hoon",
+    "howTalkHint": "Jo bhi aap use karte hain sab chunein. Pehla waala aapka main tarika hoga.",
     "howHear": "Main unki baat kaise sunta hoon",
-    "howHearHint": "Aap mila kar chun sakte hain, jaise likhe shabd aur saaf awaaz dono ek saath.",
+    "howHearHint": "Koi bhi jod sakte hain, jaise likha hua text aur saaf aawaz ek saath.",
     "languages": "Bhasha aur padhna",
-    "iRead": "Baatein is bhasha mein likhi hui aayein",
+    "iRead": "Text is bhasha mein dikhe",
     "iType": "Main likhta hoon",
-    "largerText": "Bade akshar",
-    "disclosure": "Doosre insaan ko batayein ki ek assistant madad kar raha hai",
-    "default": "Pehle se tay",
+    "largerText": "Bada akshar",
+    "disclosure": "Samne wale ko batayein ki assistant help kar raha hai",
+    "default": "Default",
     "summary": "Aap bolte hain: {{talk}}{{also}}. Aap sunte hain: {{hear}}.",
-    "summaryAlso": " (aur {{list}})",
-    "summaryNone": "kuch chun nahi gaya hai",
-    "chooseTalk": "Aap kaise bolenge woh chuniye"
+    "summaryAlso": " (saath mein {{list}})",
+    "summaryNone": "kuch bhi chuna nahi hai",
+    "chooseTalk": "Chunein aap kaise baat karenge"
   },
   "presets": {
     "mute": "Main bol nahi sakta",
-    "deafspeak": "Sunaayi nahi deta, par bol sakta hoon",
-    "deaftype": "Sunaayi nahi deta, likhna pasand hai",
-    "hoh": "Ooncha sunaayi deta hai",
-    "speech": "Meri awaaz saaf nahi hai",
-    "lowread": "Mujhe ziada padhna nahi aata"
+    "deafspeak": "Sun nahi sakta, par bol sakta hoon",
+    "deaftype": "Sun nahi sakta, likhna pasand hai",
+    "hoh": "Kam sunayi deta hai",
+    "speech": "Meri aawaz saaf nahi hai",
+    "lowread": "Main zyada padh nahi paata"
   },
   "talk": {
     "voice": {
-      "title": "Aap bolein, Awaaz use sunayega",
-      "hint": "Main mic mein bolunga. Awaaz use likh dega, main check karunga, aur Awaaz saaf bol kar sunayega."
+      "title": "Aap bolein, Awaaz bolega",
+      "hint": "Main mic mein bolunga. Awaaz har waakya call par bolega aur mujhe dikhayega."
     },
     "type": {
       "title": "Aap likhein, Awaaz bolega",
-      "hint": "Mere chune hue awaaz mein."
+      "hint": "Meri chuni hui aawaz mein."
     },
     "replies": {
-      "title": "Tay vakya aur aasan jawab",
-      "hint": "Ek baar dabate hi jawab chala jayega."
+      "title": "Tay waakya aur smart jawab",
+      "hint": "Ek baar dabane par jawab chala jayega."
     },
     "help": {
-      "title": "Sahi vakya banane mein madad",
-      "hint": "Kuch shabd likhein, poora saaf sentence ban jayega. Pehle aap dekhein, phir jayega."
+      "title": "Bolne mein meri madad karein",
+      "hint": "Thode se shabd likhein, poora saaf waakya ban jayega. Pehle main check karunga."
     }
   },
   "hear": {
     "captions": {
-      "title": "Saath-saath likha hua (Live captions)",
-      "hint": "Bade akshar, numbers alag se chamkenge."
+      "title": "Live likha hua text",
+      "hint": "Bade akshar, number saaf dikhenge."
     },
     "clear": {
-      "title": "Mujhe padh kar sunayein",
-      "hint": "Jo woh bolenge use dheere aur tez awaaz mein padh kar sunaya jayega."
+      "title": "Mujhe bol kar sunayein",
+      "hint": "Samne wale ki har baat dheere aur poori aawaz mein padh kar sunayi jayegi."
     },
     "summary": {
-      "title": "Call ke baad ki baatein (Summary)",
-      "hint": "Kya tay hua, kitne paise ya time tha, jo aap padh ya sun sakte hain."
+      "title": "Call ke baad ki summary",
+      "hint": "Kya baat hui, number ke saath, jise main padh ya sun sakta hoon."
     },
     "vibe": {
-      "title": "Vibration se pata chale",
-      "hint": "Jab woh bolna shuru aur khatam karenge toh phone vibrate hoga."
+      "title": "Vibration ka ishara",
+      "hint": "Samne wale ke bolne aur rukne par phone vibrate hoga."
     },
     "translate": {
       "title": "Mere liye translate karein",
-      "hint": "Woh chahe koi bhi bhasha bolein, mere liye meri bhasha mein padhein aur likhein."
+      "hint": "Wo chahe kisi bhi bhasha mein bolein, meri bhasha mein padhein aur likhein."
     }
   },
   "phrases": {
-    "title": "Mere tayar vakya",
-    "shortName": "Chota naam",
+    "title": "Mere tay waakya",
+    "shortName": "Chhota naam",
     "shortNamePlaceholder": "Mera pata",
     "said": "Call par kya bola jayega",
-    "add": "Naya vakya jodein",
-    "added": "Vakya jod diya gaya",
-    "saveFailed": "Vakya save nahi ho paya.",
-    "emptyTitle": "Abhi koi tayar vakya nahi hai",
-    "emptyBody": "Jab tak aap apna vakya nahi jodte, call screen par shuruati vakya dikhenge."
+    "add": "Naya waakya jodein",
+    "added": "Waakya jod diya gaya",
+    "saveFailed": "Waakya save nahi ho paya.",
+    "emptyTitle": "Abhi koi tay waakya nahi hai",
+    "emptyBody": "Jab tak aap apna waakya nahi jodte, call screen par kuch bane-banaye waakya dikhenge."
   },
   "history": {
-    "transcript": "Puri baat (Transcript)",
+    "transcript": "Poori baat-cheet",
     "nothingSaid": "Is call par koi baat nahi hui.",
-    "loadFailed": "Yeh call nahi khul payi.",
-    "them": "Woh",
+    "loadFailed": "Yeh call load nahi ho payi.",
+    "them": "Samne wala",
     "you": "Aap",
-    "opening": "Awaaz, shuruati baat",
-    "hold": "Awaaz, ruko thoda",
-    "summarise": "Is call ki mukhya baatein batayein",
-    "listen": "Suniye",
-    "stop": "Rokiye",
+    "opening": "Awaaz, shuruat ki baat",
+    "hold": "Awaaz, kripya hold karein",
+    "summarise": "Is call ki summary banayein",
+    "listen": "Sunein",
+    "stop": "Rokein",
     "nextSteps": "Aage kya karna hai",
     "summaryFailed": "Abhi summary nahi ban payi."
   },
   "call": {
     "connecting": "Connect ho raha hai…",
-    "ringing": "Call ja rahi hai…",
-    "connected": "Call lag gayi",
+    "ringing": "Call ja raha hai…",
+    "connected": "Connect ho gaya",
     "ended": "Call khatam ho gayi",
-    "failed": "Call nahi lagi",
-    "reconnecting": "Dobara connect ho raha hai…",
-    "connectingCall": "Call jodi ja rahi hai…",
+    "failed": "Call nahi lag paya",
+    "reconnecting": "Phir se connect ho raha hai…",
+    "connectingCall": "Call connect ho raha hai…",
     "waiting": "Unke bolne ka intezar hai.",
     "back": "Calls par wapas jayein",
-    "toldThem": "Awaaz ne unhe bataya: {{text}}",
+    "toldThem": "Awaaz ne unhein bataya: {{text}}",
     "youTyped": "Aapne likha: {{text}}",
-    "original": "Asli baat: {{text}}",
-    "draftTitle": "Aapke liye likha gaya. Bolne se pehle dekh lein",
-    "draftUnclear": "Aapke shabd thode ulajh gaye the. Check kar lein ki kya matlab sahi hai.",
-    "previewTitle": "Bolne se pehle check karein",
+    "original": "Asli text: {{text}}",
+    "draftTitle": "Aapke liye banaya gaya. Bole jaane se pehle check karein",
+    "draftUnclear": "Aapke shabd thode ulajh gaye the. Check karein ki kya aap yahi kehna chahte hain.",
+    "previewTitle": "Bole jaane se pehle check karein",
     "sayIt": "Bolein",
     "type": "Likhein",
     "helpMeSay": "Bolne mein madad",
-    "typePlaceholder": "Likhein, woh sunenge",
-    "helpPlaceholder": "Kuch shabd likhein, main sentence bana dunga",
-    "phrases": "Tayar vakya",
-    "phrasesHint": "Bolne ke liye ek par dabayein.",
+    "typePlaceholder": "Likhein, wo sunenge",
+    "helpPlaceholder": "Thode shabd likhein, main poora waakya bana doonga",
+    "phrases": "Tay waakya",
+    "phrasesHint": "Bolne ke liye ek baar dabayein.",
     "keypad": "Keypad",
-    "keypadHint": "Phone menu ke liye number dabayein, jaise \"1 dabayein…\".",
-    "askAgain": "Dobara poochhein",
+    "keypadHint": "Phone menu ke liye number dabayein, jaise “1 dabayein…”.",
+    "askAgain": "Phir se poochein",
     "end": "Khatam karein",
     "endTitle": "Call khatam karein?",
-    "endBody": "{{name}} se call kat jayegi.",
+    "endBody": "{{name}} ka call kat jayega.",
     "stay": "Call par bane rahein",
-    "endCall": "Call kaat dein",
+    "endCall": "Call kaatein",
     "continue": "Aage badhein",
-    "captionsIn": "Likha hua is bhasha mein",
+    "captionsIn": "Text ki bhasha",
     "inScript": "{{lang}} mein: {{text}}",
-    "useThis": "Ise bhejein",
+    "useThis": "Ise istemaal karein",
     "blocked": {
       "scam_digits": "Nahi bheja gaya: Awaaz is call par OTP ya PIN ke number nahi bolega.",
-      "empty": "Bhejney ke liye kuch nahi hai.",
-      "too_long": "Yeh msg bohot bada hai. Kripya chota karein."
+      "empty": "Bhejne ke liye kuch nahi hai.",
+      "too_long": "Message bahut bada hai. Kripya ise chhota karein."
     },
-    "micStart": "Bolein",
-    "micStop": "Rukie aur meri baat bhejiyen",
-    "micNothing": "Kuch sunaayi nahi diya. Phone ke paas aakar phir se koshish karein.",
-    "micFailed": "Aapki awaaz ko shabd mein nahi badal paaye. Phir koshish karein ya likhein.",
-    "micDenied": "Mic ka istemal karne ki permission dein."
+    "micStart": "Live voice chalu karein",
+    "micStop": "Live voice band karein",
+    "micDenied": "Live voice ke liye microphone ki permission dein.",
+    "voiceListening": "Sun raha hai. Aap bolein, Awaaz kahega.",
+    "voiceHeard": "Kaha: {{text}}",
+    "autoSend": "Apne aap bhej dein",
+    "voiceFailed": "Live voice abhi kaam nahi kar raha hai. Aap likh kar baat kar sakte hain."
   },
   "scam": {
     "otp_request": {
       "title": "Unhone aapka OTP maanga hai",
-      "body": "Bank kabhi call par OTP nahi maangte. Awaaz is call par OTP ya PIN padh kar nahi sunayega."
+      "body": "Bank kabhi bhi call par OTP nahi maangte. Awaaz is call par OTP ya PIN padh kar nahi sunayega."
     },
     "pin_request": {
       "title": "Unhone aapka PIN maanga hai",
-      "body": "Kisi bank ya dukaan ko call par aapke PIN ki zaroorat nahi hoti. Awaaz is call par PIN ya code padh kar nahi sunayega."
+      "body": "Kisi bhi bank ya dukaan ko call par aapke PIN ki zaroorat nahi hoti. Awaaz is call par PIN ya code padh kar nahi sunayega."
     },
     "upi_pin": {
       "title": "Unhone aapka UPI PIN maanga hai",
@@ -280,23 +282,23 @@
     },
     "cvv_request": {
       "title": "Unhone aapke card ka CVV maanga hai",
-      "body": "Call par CVV kabhi mat batayein. Awaaz is call par card ke baare mein nahi bolega."
+      "body": "Call par kabhi bhi CVV mat batayein. Awaaz is call par card ki details padh kar nahi sunayega."
     },
     "remote_app": {
-      "title": "Unhone koi app install karne ko kaha hai",
-      "body": "Phone par kehne par koi bhi app install mat karein. Isse woh aapka phone aur bank dekh sakte hain."
+      "title": "Unhone aapko app install karne ko kaha",
+      "body": "Kisi ke kehne par kabhi bhi app install mat karein. Isse wo aapka phone aur bank account dekh sakte hain."
     },
     "other": {
-      "title": "Yeh nakli (scam) call ho sakti hai",
-      "body": "Saavdhan rahein. Awaaz is call par OTP, PIN ya card ki jankari nahi bolega."
+      "title": "Yeh ek nakli ya scam call ho sakti hai",
+      "body": "Saavdhan rahein. Awaaz is call par OTP, PIN ya card ki details padh kar nahi sunayega."
     }
   },
   "errors": {
-    "draft_failed": "Main yeh nahi bana paaya. Kuch aur shabd likhkar try karein.",
+    "draft_failed": "Yeh waakya nahi ban paya. Dusre shabd use karke dekhein.",
     "not_available": "Bolne mein madad ke liye live AI service chahiye.",
-    "unknown_preview": "Ab check karne ke liye kuch nahi hai.",
+    "unknown_preview": "Ab confirm karne ke liye kuch nahi hai.",
     "call_ended": "Call khatam ho gayi hai.",
-    "not_implemented": "Yeh feature abhi chalu nahi hai.",
-    "bad_event": "Kuch gadbad ho gayi. Phir se koshish karein."
+    "not_implemented": "Yeh abhi chalu nahi hai.",
+    "bad_event": "Kuch galti ho gayi. Phir se koshish karein."
   }
 }

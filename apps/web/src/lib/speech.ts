@@ -1,4 +1,6 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getToken } from './auth';
+import { WS_BASE } from './config';
 
 /** Browser voices by language code; Hinglish is Latin text, so an English (India) voice reads it best. */
 const VOICE_LANG: Record<string, string> = {
@@ -28,36 +30,75 @@ export function buzz(pattern: number | number[]): void {
   if (canVibrate) navigator.vibrate(pattern);
 }
 
-/** Record from the microphone; `stop()` resolves with the audio. */
-export function useRecorder() {
-  const [recording, setRecording] = useState(false);
-  const rec = useRef<MediaRecorder | null>(null);
-  const chunks = useRef<Blob[]>([]);
+export interface LiveVoiceHandlers {
+  onSpeechStart: () => void;
+  onText: (text: string) => void;
+  onError: (code: 'denied' | 'unavailable' | 'failed') => void;
+}
 
-  const start = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const r = new MediaRecorder(stream);
-    chunks.current = [];
-    r.ondataavailable = (e) => e.data.size > 0 && chunks.current.push(e.data);
-    r.start();
-    rec.current = r;
-    setRecording(true);
+/**
+ * Live voice: the microphone is streamed to the server, which streams it to speech to text and
+ * returns each finished sentence. Nothing here speaks on the call; the caller decides what to do
+ * with the text.
+ */
+export function useLiveVoice(lang: string, handlers: LiveVoiceHandlers) {
+  const [active, setActive] = useState(false);
+  const h = useRef(handlers);
+  h.current = handlers;
+  const parts = useRef<{ ws?: WebSocket; ctx?: AudioContext; stream?: MediaStream }>({});
+
+  const stop = useCallback(() => {
+    const { ws, ctx, stream } = parts.current;
+    parts.current = {};
+    stream?.getTracks().forEach((t) => t.stop());
+    void ctx?.close().catch(() => undefined);
+    if (ws && ws.readyState <= 1) ws.close();
+    setActive(false);
   }, []);
 
-  const stop = useCallback(
-    () =>
-      new Promise<Blob | null>((resolve) => {
-        const r = rec.current;
-        if (!r) return resolve(null);
-        r.onstop = () => {
-          r.stream.getTracks().forEach((t) => t.stop());
-          setRecording(false);
-          resolve(new Blob(chunks.current, { type: r.mimeType || 'audio/webm' }));
-        };
-        r.stop();
-      }),
-    [],
-  );
+  const start = useCallback(async () => {
+    try {
+      const token = await getToken();
+      const ws = new WebSocket(`${WS_BASE}/v1/stt/ws?token=${encodeURIComponent(token)}&lang=${encodeURIComponent(lang)}`);
+      ws.binaryType = 'arraybuffer';
+      parts.current.ws = ws;
+      await new Promise<void>((resolve, reject) => {
+        ws.onopen = () => resolve();
+        ws.onerror = () => reject(new Error('unavailable'));
+      });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
+      } catch {
+        stop();
+        return h.current.onError('denied');
+      }
+      parts.current.stream = stream;
+      const ctx = new AudioContext();
+      parts.current.ctx = ctx;
+      await ctx.audioWorklet.addModule('/pcm-worklet.js');
+      const node = new AudioWorkletNode(ctx, 'pcm-worklet');
+      node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => ws.readyState === WebSocket.OPEN && ws.send(e.data);
+      ctx.createMediaStreamSource(stream).connect(node);
+      ws.onmessage = (e: MessageEvent<string>) => {
+        const m = JSON.parse(e.data) as { t: string; signal?: string; text?: string; code?: string };
+        if (m.t === 'vad' && m.signal === 'start') h.current.onSpeechStart();
+        else if (m.t === 'transcript' && m.text) h.current.onText(m.text);
+        else if (m.t === 'error') {
+          h.current.onError('unavailable');
+          stop();
+        }
+      };
+      ws.onclose = () => {
+        if (parts.current.ws === ws) stop();
+      };
+      setActive(true);
+    } catch {
+      stop();
+      h.current.onError('failed');
+    }
+  }, [lang, stop]);
 
-  return { recording, start, stop };
+  useEffect(() => stop, [stop]);
+  return { active, start, stop };
 }
