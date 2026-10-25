@@ -266,7 +266,23 @@
     "voiceHeard": "କୁହାଗଲା: {{text}}",
     "autoSend": "ଆପେ ଆପେ ପଠାନ୍ତୁ",
     "voiceFailed": "ଲାଇଭ୍ ସ୍ଵର ଏବେ ଉପଲବ୍ଧ ନାହିଁ। ଆପଣ ଲେଖିପାରିବେ।",
-    "sending": "ପଠାଉଛି…"
+    "sending": "ପଠାଉଛି…",
+    "today": "ଆଜି",
+    "speaking": "କହୁଛନ୍ତି…",
+    "copy": "କପି",
+    "copied": "କପି ହେଲା",
+    "readAloud": "ପଢ଼ି ଶୁଣାନ୍ତୁ",
+    "sayAgain": "ଆଉଥରେ କୁହନ୍ତୁ",
+    "newMessages": "{{count}} ଟି ନୂଆ",
+    "scrollDown": "ସବୁଠୁ ନୂଆ ମେସେଜ୍‌କୁ ଯାଆନ୍ତୁ",
+    "more": "ଅଧିକ",
+    "helpOn": "କହିବାରେ ସାହାଯ୍ୟ",
+    "helpOff": "ସାହାଯ୍ୟ ବନ୍ଦ କରନ୍ତୁ",
+    "saidOnCall": "କଲ୍‌ରେ କୁହାଯାଇଥିବା କଥା",
+    "awaaz": "Awaaz",
+    "seeSummary": "ସାରାଂଶ ଦେଖନ୍ତୁ",
+    "captionsTitle": "ଲେଖା ଭାଷା",
+    "captionsHint": "ସେମାନେ କହୁଥିବା କଥା ଏହି ଭାଷାରେ ଦେଖାଯିବ। ଶେଷ କିଛି ଧାଡ଼ି ଆଉଥରେ ଅନୁବାଦ ହୋଇଯିବ।"
   },
   "scam": {
     "otp_request": {

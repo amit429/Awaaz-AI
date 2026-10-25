@@ -266,7 +266,23 @@
     "voiceHeard": "म्हटले: {{text}}",
     "autoSend": "आपोआप पाठवा",
     "voiceFailed": "सध्या आवाज उपलब्ध नाही. तुम्ही टाईप करू शकता.",
-    "sending": "पाठवत आहे…"
+    "sending": "पाठवत आहे…",
+    "today": "आज",
+    "speaking": "बोलत आहेत…",
+    "copy": "कॉपी करा",
+    "copied": "कॉपी झाले",
+    "readAloud": "वाचून दाखवा",
+    "sayAgain": "परत सांगा",
+    "newMessages": "{{count}} नवीन",
+    "scrollDown": "शेवटच्या मेसेजवर जा",
+    "more": "अजून",
+    "helpOn": "बोलायला मदत",
+    "helpOff": "बोलायला मदत बंद करा",
+    "saidOnCall": "कॉलवर बोललेले",
+    "awaaz": "Awaaz",
+    "seeSummary": "सारांश पहा",
+    "captionsTitle": "कॅप्शनची भाषा",
+    "captionsHint": "ते काय बोलत आहेत ते या भाषेत दिसेल. शेवटच्या काही ओळी पुन्हा भाषांतरित केल्या जातील."
   },
   "scam": {
     "otp_request": {

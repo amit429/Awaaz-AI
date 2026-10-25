@@ -93,3 +93,29 @@
 /* Safe areas on phones with notches */
 .pb-safe { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
 .pt-safe { padding-top: max(0.5rem, env(safe-area-inset-top)); }
+
+/* Call chat: a WhatsApp-style dark palette, scoped to the call screen. */
+.chat {
+  --chat-bg: #0b141a;
+  --chat-bar: #202c33;
+  --chat-fg: #e9edef;
+  --chat-muted: #8696a0;
+  --bubble-in: #202c33;
+  --bubble-out: #005c4b;
+  --chat-composer: #2a3942;
+  --chat-action: #00a884;
+  --chat-note: #182229;
+  --chat-tick: #53bdeb;
+  --chat-danger: #f15c6d;
+  background-color: var(--chat-bg);
+  color: var(--chat-fg);
+}
+.chat-wallpaper {
+  background-image: radial-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+@keyframes chat-dot { 0%, 80%, 100% { opacity: .25; transform: translateY(0) } 40% { opacity: 1; transform: translateY(-2px) } }
+.chat-dot { animation: chat-dot 1.2s infinite ease-in-out; }
+@media (prefers-reduced-motion: reduce) { .chat-dot { animation: none; } }

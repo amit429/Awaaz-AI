@@ -30,3 +30,12 @@ Phones: one column with a bottom tab bar (Calls, Contacts, Me). Wider screens: t
 - Live captions arrive at once in the language the other person speaks; the translation follows (`caption.translation`) with the original underneath. The caption language can be switched during the call (`read.set`); the last 5 captions are translated again.
 - Typing: any Indian script works with the phone keyboard. Text in another script than the call's is translated and confirmed once. People typing English letters see a suggestion in their own script.
 - The other person's language comes from the contact (or the "They speak" choice when starting a call).
+
+## Call screen (WhatsApp-style chat)
+- Dark chat palette scoped to `.chat` in `index.css` (background #0b141a, bars #202c33, their bubbles #202c33, yours #005c4b, action green #00a884, read-tick blue #53bdeb). Numbers, prices and times keep the amber highlight.
+- The screen is sized to the *visible* viewport (`useVisualViewport`), and the page uses `interactive-widget=resizes-content`, so the on-screen keyboard never covers the input bar (iOS and Android).
+- Header: back, avatar, name, status ("Connected · 0:42", "speaking…" while they talk, "Reconnecting…"), captions language, red end-call button.
+- Bubbles: tail on the first of a run, time and status inside the bubble (clock while sending, double tick once said on the call), "Today" divider, Awaaz notes as centred pills. Tap a bubble for Copy, Read aloud (theirs) or Say again (yours).
+- Scrolling follows the conversation only when you are at the latest message or have just sent something; otherwise a jump button shows the number of new captions.
+- Input bar: phrases on the left, growing text box (up to five lines), "+" for keypad, ask again, Help me say and captions language; the round button is the mic when the box is empty and send when it has text. Enter sends on a computer and adds a line on a phone. The keyboard stays open after sending.
+- Quick replies and the "in your script" suggestion are a scrolling row above the input bar, part of the layout (never overlapping it).

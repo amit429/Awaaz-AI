@@ -266,7 +266,23 @@
     "voiceHeard": "Said: {{text}}",
     "autoSend": "Send automatically",
     "voiceFailed": "Live voice isn’t available right now. You can type instead.",
-    "sending": "Sending…"
+    "sending": "Sending…",
+    "today": "Today",
+    "speaking": "speaking…",
+    "copy": "Copy",
+    "copied": "Copied",
+    "readAloud": "Read aloud",
+    "sayAgain": "Say again",
+    "newMessages": "{{count}} new",
+    "scrollDown": "Go to the latest message",
+    "more": "More",
+    "helpOn": "Help me say",
+    "helpOff": "Turn off Help me say",
+    "saidOnCall": "Said on the call",
+    "awaaz": "Awaaz",
+    "seeSummary": "See summary",
+    "captionsTitle": "Captions language",
+    "captionsHint": "What they say is shown in this language. The last few lines are translated again."
   },
   "scam": {
     "otp_request": {

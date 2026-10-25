@@ -266,7 +266,23 @@
     "voiceHeard": "ਬੋਲਿਆ ਗਿਆ: {{text}}",
     "autoSend": "ਆਪਣੇ ਆਪ ਭੇਜੋ",
     "voiceFailed": "ਲਾਈਵ ਆਵਾਜ਼ ਇਸ ਸਮੇਂ ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਤੁਸੀਂ ਲਿਖ ਸਕਦੇ ਹੋ।",
-    "sending": "ਭੇਜ ਰਹੇ ਹਾਂ…"
+    "sending": "ਭੇਜ ਰਹੇ ਹਾਂ…",
+    "today": "ਅੱਜ",
+    "speaking": "ਬੋਲ ਰਹੇ ਨੇ…",
+    "copy": "ਕਾਪੀ ਕਰੋ",
+    "copied": "ਕਾਪੀ ਹੋ ਗਿਆ",
+    "readAloud": "ਉੱਚੀ ਪੜ੍ਹੋ",
+    "sayAgain": "ਦੁਬਾਰਾ ਬੋਲੋ",
+    "newMessages": "{{count}} ਨਵੇਂ",
+    "scrollDown": "ਸਭ ਤੋਂ ਨਵੇਂ ਸੁਨੇਹੇ 'ਤੇ ਜਾਓ",
+    "more": "ਹੋਰ",
+    "helpOn": "ਬੋਲਣ 'ਚ ਮਦਦ",
+    "helpOff": "ਬੋਲਣ ਦੀ ਮਦਦ ਬੰਦ ਕਰੋ",
+    "saidOnCall": "ਕਾਲ 'ਚ ਕਿਹਾ ਗਿਆ",
+    "awaaz": "Awaaz",
+    "seeSummary": "ਸਾਰ ਵੇਖੋ",
+    "captionsTitle": "ਲਿਖਤ ਦੀ ਭਾਸ਼ਾ",
+    "captionsHint": "ਉਨ੍ਹਾਂ ਦਾ ਬੋਲਿਆ ਇਸ ਭਾਸ਼ਾ ਵਿੱਚ ਦਿਸੇਗਾ। ਪਿਛਲੀਆਂ ਕੁੱਝ ਲਾਈਨਾਂ ਦੁਬਾਰਾ ਅਨੁਵਾਦ ਹੁੰਦੀਆਂ ਹਨ।"
   },
   "scam": {
     "otp_request": {

@@ -266,7 +266,23 @@
     "voiceHeard": "Kaha: {{text}}",
     "autoSend": "Apne aap bhej dein",
     "voiceFailed": "Live voice abhi kaam nahi kar raha hai. Aap likh kar baat kar sakte hain.",
-    "sending": "Bhej rahe hain…"
+    "sending": "Bhej rahe hain…",
+    "today": "Aaj",
+    "speaking": "bol rahe hain…",
+    "copy": "Copy",
+    "copied": "Copy ho gaya",
+    "readAloud": "Bol kar sunayein",
+    "sayAgain": "Phir se bolein",
+    "newMessages": "{{count}} naye",
+    "scrollDown": "Aakhri message par jaayein",
+    "more": "Aur",
+    "helpOn": "Bolne mein madad",
+    "helpOff": "Bolne mein madad band karein",
+    "saidOnCall": "Call par bola gaya",
+    "awaaz": "Awaaz",
+    "seeSummary": "Summary dekhein",
+    "captionsTitle": "Captions ki bhasha",
+    "captionsHint": "Wo jo bolenge wo is bhasha mein likha aayega. Aakhri kuch lines phir se translate hongi."
   },
   "scam": {
     "otp_request": {

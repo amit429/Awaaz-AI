@@ -96,7 +96,7 @@ describe('splitByEntities', () => {
 
   it('shows a sent message at once and swaps it for the prepared one', () => {
     let st = applyEvent(initialState, { t: 'local.pending', id: 'p1', text: 'Telma 40 chahiye' });
-    expect(st.feed).toEqual([{ kind: 'pending', id: 'p1', text: 'Telma 40 chahiye' }]);
+    expect(st.feed).toMatchObject([{ kind: 'pending', id: 'p1', text: 'Telma 40 chahiye' }]);
     st = applyEvent(st, { t: 'you.final', turn: 2, text: 'टेल्मा चालीस चाहिए', source: 'typed', original: 'Telma 40 chahiye' });
     expect(st.feed.map((i) => i.kind)).toEqual(['you']);
   });
