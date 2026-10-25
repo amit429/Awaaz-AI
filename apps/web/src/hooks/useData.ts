@@ -12,6 +12,11 @@ export function useSaveMe() {
   return useMutation({ mutationFn: (p: Profile) => api.saveMe(p), onSuccess: (me) => qc.setQueryData(['me'], me) });
 }
 
+export function useConsent() {
+  const qc = useQueryClient();
+  return useMutation({ mutationFn: (phone?: string) => api.consent(phone), onSuccess: (me) => qc.setQueryData(['me'], me) });
+}
+
 export function useSaveContact() {
   const qc = useQueryClient();
   return useMutation({

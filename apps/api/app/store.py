@@ -26,6 +26,7 @@ class Profile:
     easy_font: bool = False
     speech_rate: float = 0.75
     onboarded: bool = False
+    phone: str | None = None
 
 
 class Store(Protocol):
@@ -50,6 +51,11 @@ class Store(Protocol):
     async def add_scam_event(
         self, call_id: str, turn_seq: int | None, reason: str, action: str
     ) -> None: ...
+    async def has_consent(self, user_id: str, kind: str = "terms") -> bool: ...
+    async def add_consent(
+        self, user_id: str, kind: str, text: str, evidence: dict[str, Any]
+    ) -> None: ...
+    async def set_phone(self, user_id: str, phone: str) -> None: ...
     async def get_summary(self, call_id: str) -> dict[str, Any] | None: ...
     async def save_summary(self, call_id: str, user_id: str, summary: dict[str, Any]) -> None: ...
     async def dev_user(self, email: str = "dev@awaaz.local") -> str: ...
@@ -64,6 +70,7 @@ class InMemoryStore:
     calls: dict[str, dict[str, Any]] = field(default_factory=dict)
     turns: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
     summaries: dict[str, dict[str, Any]] = field(default_factory=dict)
+    consents: list[dict[str, Any]] = field(default_factory=list)
 
     async def get_profile(self, user_id: str) -> Profile:
         return self.profiles.get(user_id) or Profile(user_id=user_id)
@@ -145,6 +152,19 @@ class InMemoryStore:
     async def list_calls(self, user_id: str, limit: int = 30) -> list[dict[str, Any]]:
         mine = [c for c in self.calls.values() if c["user_id"] == user_id]
         return sorted(mine, key=lambda c: c["created_at"], reverse=True)[:limit]
+
+    async def has_consent(self, user_id: str, kind: str = "terms") -> bool:
+        return any(c["user_id"] == user_id and c["kind"] == kind for c in self.consents)
+
+    async def add_consent(
+        self, user_id: str, kind: str, text: str, evidence: dict[str, Any]
+    ) -> None:
+        self.consents.append({"user_id": user_id, "kind": kind, "text": text, "evidence": evidence})
+
+    async def set_phone(self, user_id: str, phone: str) -> None:
+        p = self.profiles.get(user_id) or Profile(user_id=user_id)
+        p.phone = phone
+        self.profiles[user_id] = p
 
     async def get_summary(self, call_id: str) -> dict[str, Any] | None:
         return self.summaries.get(call_id)

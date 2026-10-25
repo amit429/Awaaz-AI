@@ -301,5 +301,29 @@
     "call_ended": "Call khatam ho gayi hai.",
     "not_implemented": "Yeh abhi chalu nahi hai.",
     "bad_event": "Kuch galti ho gayi. Phir se koshish karein."
+  },
+  "consent": {
+    "title": "Shuru karne se pehle",
+    "intro": "Awaaz aapke liye phone call karta hai, isliye isey aapki kuch jaankari ki zaroorat hoti hai. Yeh kya-kya use karta hai, yahan dekhein.",
+    "emailTitle": "Aapka email aur naam",
+    "emailBody": "Aapke Google ya email sign-in se. Yeh aapka account aur call history safe rakhne ke liye hai.",
+    "phoneTitle": "Aapka phone number (chahein toh dein)",
+    "phoneBody": "Sirf tabhi jab aap daalna chahein. Isse baad mein incoming calls set up karne mein madad milti hai. Aap isey khaali bhi chhod sakte hain.",
+    "phoneLabel": "Aapka phone number",
+    "phoneHint": "Country code ke saath, jaise +91 98765 43210",
+    "phoneInvalid": "Yeh number sahi nahi lag raha. Sahi digits daalein, +91 ke saath ya bina uske.",
+    "callsTitle": "Jinko aap call karte hain",
+    "callsBody": "Jo number aap dial karte hain aur save karte hain, taaki Awaaz call laga sake aur aapko history dikha sake.",
+    "textTitle": "Call par jo baat hoti hai",
+    "textBody": "Har call ki baatein (captions, aapka bheja hua text, aur summary) save hoti hain taaki aap baad mein padh sakein. Audio save nahi hota.",
+    "micTitle": "Microphone",
+    "micBody": "Sirf tabhi use hota hai jab aap live voice on karte hain. Aapki boli hui baat text ban jaati hai aur save nahi hoti.",
+    "shareTitle": "Kaunse tools help karte hain",
+    "shareBody": "Bolna call lagata hai, Sarvam aawaz aur translation dekhta hai, Google Gemini suggestions aur summary likhta hai, aur Supabase aapka account save rakhta hai.",
+    "otherTitle": "Saamne wale ko bataya jaata hai",
+    "otherBody": "Har call ke shuru mein saamne wale ko sunai deta hai ki ek assistant aapki madad kar raha hai. Isey band nahi kiya ja sakta.",
+    "agree": "Manein aur aage badhein",
+    "decline": "Nahi chahiye, sign out karein",
+    "failed": "Aapka choice save nahi ho paya. Kripya phir se koshish karein."
   }
 }

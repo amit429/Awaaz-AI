@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from app.auth import current_user
 from app.config import Settings, get_settings
-from app.models.api import ContactIn, PhraseIn, ProfileIn
+from app.models.api import ConsentIn, ContactIn, PhraseIn, ProfileIn
 from app.providers import sarvam
 from app.services.languages import SPOKEN
 from app.specs import load_json
@@ -16,6 +16,7 @@ router = APIRouter(tags=["settings"])
 def profile_json(p: Profile) -> dict:
     return {
         "display_name": p.display_name if p.onboarded else "",
+        "phone": p.phone,
         "preset": p.preset,
         "talk_modes": p.talk_modes,
         "hear_modes": p.hear_modes,
@@ -32,6 +33,7 @@ async def get_me(user_id: str = Depends(current_user), store: Store = Depends(ge
     p = await store.get_profile(user_id)
     return {
         "onboarded": p.onboarded,
+        "consented": await store.has_consent(user_id),
         "profile": profile_json(p),
         "presets": load_json("data/presets.json"),
     }
@@ -172,3 +174,31 @@ async def transcribe(
     except Exception as exc:
         raise HTTPException(status_code=502, detail="transcribe_failed") from exc
     return {"text": text}
+
+
+CONSENT_VERSION = "2026-10"
+# The notice the user agrees to, kept with their consent record (the app shows it translated).
+CONSENT_TEXT = (
+    "Awaaz uses your email and name from sign-in, your phone number if you add it, the numbers "
+    "you call and save, and the text of your calls (captions, what you send, summaries). Audio is "
+    "not stored. The microphone is used only for live voice. Calls, speech, language and storage "
+    "are handled by Bolna, Sarvam, Google Gemini and Supabase. The other person hears that an "
+    "assistant is helping on every call."
+)
+
+
+@router.post("/v1/consent", status_code=201)
+async def give_consent(
+    body: ConsentIn, user_id: str = Depends(current_user), store: Store = Depends(get_store)
+) -> dict:
+    """Record that the user has read and agreed to what Awaaz collects."""
+    if body.phone:
+        await store.set_phone(user_id, body.phone)
+    if not await store.has_consent(user_id):
+        await store.add_consent(
+            user_id,
+            "terms",
+            CONSENT_TEXT,
+            {"version": body.version, "phone_given": bool(body.phone)},
+        )
+    return await get_me(user_id, store)

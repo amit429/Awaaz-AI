@@ -21,3 +21,11 @@
 
 ## Free-plan limits to remember
 A deploy or restart ends calls in progress. Render's free plan allows about 750 instance hours a month, enough for one always-on service.
+
+## Google sign-in sends people to localhost
+Symptom: after choosing a Google account on the live site, the browser lands on `http://localhost:3000`. Cause: the app asks Supabase to return to the site's own address (`redirectTo = window.location.origin`), and Supabase only honours addresses on its allow-list; anything else falls back to the project's **Site URL**, which defaults to `http://localhost:3000`.
+Fix, in the Supabase dashboard (Authentication, URL Configuration):
+- **Site URL:** `https://awaaz-web-sigma.vercel.app`
+- **Redirect URLs:** `https://awaaz-web-sigma.vercel.app/**` and, for local work, `http://localhost:5173/**`
+The Google provider's own redirect (`https://<project>.supabase.co/auth/v1/callback`) stays as it is in Google Cloud Console.
+Google's own permission screen is configured in Google Cloud Console (APIs and Services, OAuth consent screen): app name, support email, and the scopes email and profile. While its publishing status is "Testing", only listed test users can sign in. Awaaz additionally shows its own "Before you start" screen once per account; the consent is stored in the `consents` table (kind `terms`, with a version).

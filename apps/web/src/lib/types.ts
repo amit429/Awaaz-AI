@@ -9,6 +9,7 @@ export interface Profile {
   read_lang: string;
   type_lang: string;
   app_lang: string;
+  phone?: string | null;
   easy_font: boolean;
   speech_rate: number;
 }
@@ -22,6 +23,7 @@ export interface PresetDef {
 
 export interface Me {
   onboarded: boolean;
+  consented: boolean;
   profile: Profile;
   presets: Record<string, PresetDef>;
 }

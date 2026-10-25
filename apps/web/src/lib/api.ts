@@ -7,6 +7,9 @@ export interface CreatedCall {
   ws_url: string;
 }
 
+/** Bump when what the app collects changes, so people are asked again. */
+export const CONSENT_VERSION = '2026-10';
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -39,6 +42,7 @@ const send = (method: string, body?: unknown): RequestInit => ({ method, body: b
 
 export const api = {
   me: () => request<Me>('/me'),
+  consent: (phone?: string) => request<Me>('/consent', send('POST', { version: CONSENT_VERSION, phone: phone || undefined })),
   saveMe: (p: Profile) => request<Me>('/me', send('PUT', p)),
   contacts: () => request<Contact[]>('/contacts'),
   saveContact: (c: Omit<Contact, 'id'>, id?: string) =>

@@ -1,7 +1,8 @@
 """Machine-translate the app's English strings (apps/web/src/i18n/locales/en.json) into the other
 languages. Output is a starting point: native speakers should review it before launch.
 
-Run from apps/api:  uv run python ../../scripts/translate_locales.py [lang ...]
+Run from apps/api:  uv run python ../../scripts/translate_locales.py [--new] [lang ...]
+--new translates only the keys missing from each language file (existing wording is kept).
 """
 
 import asyncio
@@ -93,11 +94,61 @@ async def translate(client: httpx.AsyncClient, lang: str, source: dict) -> None:
     print(lang, "FAILED")
 
 
+def missing(source: dict, have: dict) -> dict:
+    """The part of `source` that `have` does not contain yet (nested)."""
+    out: dict = {}
+    for k, v in source.items():
+        if isinstance(v, dict):
+            sub = missing(v, have.get(k, {}) if isinstance(have.get(k), dict) else {})
+            if sub:
+                out[k] = sub
+        elif k not in have:
+            out[k] = v
+    return out
+
+
+def merge(base: dict, extra: dict) -> dict:
+    for k, v in extra.items():
+        if isinstance(v, dict):
+            base[k] = merge(base.get(k, {}) if isinstance(base.get(k), dict) else {}, v)
+        else:
+            base[k] = v
+    return base
+
+
+async def translate_new(client: httpx.AsyncClient, lang: str, source: dict) -> None:
+    path = LOCALES / f"{lang}.json"
+    have = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    todo = missing(source, have)
+    if not todo:
+        return print(lang, "nothing new")
+    body = {
+        "contents": [{"parts": [{"text": PROMPT.format(target=TARGETS[lang], source=json.dumps(todo, ensure_ascii=False, indent=1))}]}],
+        "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
+    }
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL}:generateContent?key={ENV['LLM_API_KEY']}"
+    for attempt in range(2):
+        r = await client.post(url, json=body)
+        if r.status_code != 200:
+            print(lang, "HTTP", r.status_code)
+            continue
+        try:
+            got = json.loads(r.json()["candidates"][0]["content"]["parts"][0]["text"])
+        except (KeyError, ValueError):
+            continue
+        if not problems(todo, got):
+            path.write_text(json.dumps(merge(have, got), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            return print(lang, "ok", f"({len(flatten(todo))} new strings)")
+    print(lang, "FAILED")
+
+
 async def main() -> None:
     source = json.loads((LOCALES / "en.json").read_text(encoding="utf-8"))
-    langs = sys.argv[1:] or list(TARGETS)
+    args = [a for a in sys.argv[1:] if a != "--new"]
+    langs = args or list(TARGETS)
+    run = translate_new if "--new" in sys.argv else translate
     async with httpx.AsyncClient(timeout=180) as client:
-        await asyncio.gather(*(translate(client, lang, source) for lang in langs))
+        await asyncio.gather(*(run(client, lang, source) for lang in langs))
 
 
 asyncio.run(main())

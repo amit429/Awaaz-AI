@@ -53,3 +53,8 @@ class PhraseIn(BaseModel):
     text: str = Field(min_length=1, max_length=300)
     group_name: str | None = Field(default=None, max_length=40)
     contact_id: str | None = None
+
+
+class ConsentIn(BaseModel):
+    version: str = Field(min_length=1, max_length=20)
+    phone: str | None = Field(default=None, pattern=r"^\+[1-9]\d{7,14}$")  # optional, E.164

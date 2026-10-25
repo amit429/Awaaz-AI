@@ -301,5 +301,29 @@
     "call_ended": "The call has ended.",
     "not_implemented": "That isn’t available yet.",
     "bad_event": "Something went wrong. Please try again."
+  },
+  "consent": {
+    "title": "Before you start",
+    "intro": "Awaaz makes phone calls for you, so it needs to handle some of your information. Here is exactly what it uses.",
+    "emailTitle": "Your email and name",
+    "emailBody": "From your Google or email sign-in. Used to keep your account and your call history.",
+    "phoneTitle": "Your phone number (optional)",
+    "phoneBody": "Only if you add it. It lets you get help setting up incoming calls later. You can leave it empty.",
+    "phoneLabel": "Your phone number",
+    "phoneHint": "With country code, for example +91 98765 43210",
+    "phoneInvalid": "That number does not look right. Use digits, with +91 first or without it.",
+    "callsTitle": "People you call",
+    "callsBody": "The numbers you dial and the contacts you save, so Awaaz can place the call and show your history.",
+    "textTitle": "What is said on calls",
+    "textBody": "The words of each call (captions, what you send, and summaries) are saved so you can read them later. Audio is not stored.",
+    "micTitle": "Microphone",
+    "micBody": "Used only when you turn on live voice. Your speech is turned into text and not kept.",
+    "shareTitle": "Who helps run it",
+    "shareBody": "Bolna places the call, Sarvam handles speech and translation, Google Gemini writes suggestions and summaries, and Supabase stores your account.",
+    "otherTitle": "The other person is told",
+    "otherBody": "At the start of every call they hear that an assistant is helping you. This cannot be turned off.",
+    "agree": "Agree and continue",
+    "decline": "No thanks, sign out",
+    "failed": "Could not save your choice. Please try again."
   }
 }

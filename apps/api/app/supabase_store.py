@@ -80,6 +80,7 @@ class SupabaseStore:
         p = Profile(user_id=user_id)
         if prof:
             p.display_name = prof[0]["display_name"]
+            p.phone = prof[0].get("phone_e164")
         if comm:
             c = comm[0]
             p.onboarded = True
@@ -237,6 +238,39 @@ class SupabaseStore:
     async def create_call(self, call: dict[str, Any]) -> None:
         self._call_owner[call["id"]] = call["user_id"]
         await self._rest("POST", "calls", json=call)
+
+    async def has_consent(self, user_id: str, kind: str = "terms") -> bool:
+        rows = await self._rest(
+            "GET",
+            "consents",
+            params={"user_id": f"eq.{user_id}", "kind": f"eq.{kind}", "select": "id", "limit": "1"},
+        )
+        return bool(rows)
+
+    async def add_consent(
+        self, user_id: str, kind: str, text: str, evidence: dict[str, Any]
+    ) -> None:
+        await self._rest(
+            "POST",
+            "consents",
+            json={"user_id": user_id, "kind": kind, "text": text, "evidence": evidence},
+        )
+
+    async def set_phone(self, user_id: str, phone: str) -> None:
+        """Save the user's own number without touching their name."""
+        rows = await self._rest(
+            "GET", "profiles", params={"user_id": f"eq.{user_id}", "select": "user_id"}
+        )
+        if rows:
+            await self._rest(
+                "PATCH", "profiles", params={"user_id": f"eq.{user_id}"}, json={"phone_e164": phone}
+            )
+        else:  # before onboarding there is no name yet; the real one replaces it at onboarding
+            await self._rest(
+                "POST",
+                "profiles",
+                json={"user_id": user_id, "display_name": "Friend", "phone_e164": phone},
+            )
 
     async def get_summary(self, call_id: str) -> dict[str, Any] | None:
         rows = await self._rest(

@@ -27,7 +27,8 @@ export function Onboarding() {
   const [profile, setProfile] = useState<Profile>(() => withLanguage(emptyProfile(), initialLanguage()));
 
   useEffect(() => {
-    if (me.data?.onboarded) nav('/', { replace: true });
+    if (me.data && !me.data.consented) nav('/consent', { replace: true });
+    else if (me.data?.onboarded) nav('/', { replace: true });
   }, [me.data, nav]);
 
   if (!me.data) {

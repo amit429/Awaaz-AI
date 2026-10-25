@@ -6,6 +6,7 @@ import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { Centered } from '@/components/AppShell';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Login } from './features/auth/Login';
+import { Consent } from './features/consent/Consent';
 import { Call } from './features/call/Call';
 import { Contacts } from './features/contacts/Contacts';
 import { CallDetail } from './features/history/CallDetail';
@@ -36,6 +37,7 @@ function Gate() {
     );
   }
   if (!me.data) return <Centered><Skeleton className="h-8 w-40" /><Skeleton className="mt-6 h-40 w-full" /></Centered>;
+  if (!me.data.consented) return <Navigate to="/consent" replace />;
   if (!me.data.onboarded) return <Navigate to="/onboarding" replace />;
   return <Outlet />;
 }
@@ -51,6 +53,7 @@ export function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route element={<RequireAuth />}>
+      <Route path="/consent" element={<Consent />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route element={<Gate />}>
         <Route path="/" element={<Home />} />

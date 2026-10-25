@@ -64,9 +64,13 @@ It is not a chatbot and it does not talk for the user. Nothing is said on the ca
 
 ## Screens
 
-| Language first | Pick how you talk | Choose your options |
+| What we collect | Language first | Pick how you talk |
 |---|---|---|
-| <img src="docs/screenshots/02-onboarding-language.png" width="220"> | <img src="docs/screenshots/03-onboarding-preset.png" width="220"> | <img src="docs/screenshots/04-onboarding-options.png" width="220"> |
+| <img src="docs/screenshots/12-consent.png" width="220"> | <img src="docs/screenshots/02-onboarding-language.png" width="220"> | <img src="docs/screenshots/03-onboarding-preset.png" width="220"> |
+
+| Choose your options |
+|---|
+| <img src="docs/screenshots/04-onboarding-options.png" width="220"> |
 
 | Calls home | Live call | Scam warning |
 |---|---|---|
@@ -117,7 +121,7 @@ The app is also available in Tamil (below) and ten other languages.
 - The 11 non-English translations are machine-made and still need a native-speaker review.
 
 **Account and settings**
-- Sign in with Google or with email and password.
+- Sign in with Google or with email and password, followed by a one-time screen that says what is collected and asks for consent (stored with a version, so people are asked again if it changes).
 - Six starting profiles (for example “Deaf, I prefer typing”, “Hard of hearing”, “I can’t speak”), then fine-tune each option.
 - Contacts with favourites and notes that smart replies can use (“my BP medicine is Telma 40”).
 - Call history with transcripts, installable as a web app, light and dark themes, larger-text option.
@@ -126,7 +130,7 @@ The app is also available in Tamil (below) and ten other languages.
 
 ### Practice calls (everyone, no phone needed)
 1. Open **https://awaaz-web-sigma.vercel.app**. The first load can take up to a minute, because the free server sleeps when idle.
-2. Sign in with Google, or create an account with email and password.
+2. Sign in with Google, or create an account with email and password. The first time, a **“Before you start”** screen lists exactly what Awaaz collects (email and name, an optional phone number, the numbers you call, call text; audio is not stored) and asks you to agree.
 3. Choose your language, enter your name, and pick a starting profile.
 4. On the home screen, scroll to **Practice calls** and tap one:
    - **Sharma Medical** (Hindi pharmacy): type “Telma 40 chahiye”, then try the caption-language switcher in the header.
