@@ -7,9 +7,28 @@ export const useContacts = () => useQuery({ queryKey: ['contacts'], queryFn: api
 export const usePhrases = () => useQuery({ queryKey: ['phrases'], queryFn: api.phrases });
 export const useCalls = () => useQuery({ queryKey: ['calls'], queryFn: api.calls });
 
+/** The settings that matter for "was it saved?" (the server may add fields such as phone). */
+const SAVED_FIELDS = ['display_name', 'preset', 'talk_modes', 'hear_modes', 'read_lang', 'type_lang', 'app_lang', 'easy_font', 'speech_rate'] as const;
+export const sameSettings = (a: Profile, b: Profile) => SAVED_FIELDS.every((k) => JSON.stringify(a[k]) === JSON.stringify(b[k]));
+
 export function useSaveMe() {
   const qc = useQueryClient();
-  return useMutation({ mutationFn: (p: Profile) => api.saveMe(p), onSuccess: (me) => qc.setQueryData(['me'], me) });
+  return useMutation({
+    mutationFn: async (p: Profile) => {
+      try {
+        return await api.saveMe(p);
+      } catch (err) {
+        // The reply can be lost (a server restart, a dropped connection) after the save went through.
+        // Ask the server what it has before telling the user it failed.
+        const now = await api.me().catch(() => null);
+        if (now && sameSettings(now.profile, p)) return now;
+        throw err;
+      }
+    },
+    retry: 1, // saving the same settings twice is harmless
+    retryDelay: 1500,
+    onSuccess: (me) => qc.setQueryData(['me'], me),
+  });
 }
 
 export function useConsent() {

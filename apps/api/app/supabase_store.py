@@ -97,6 +97,7 @@ class SupabaseStore:
                 c.get("read_lang", p.read_lang),
                 c.get("type_lang", p.type_lang),
             )
+            p.app_lang = c.get("app_lang") or p.app_lang
         return p
 
     async def put_profile(self, profile: Profile) -> None:
@@ -113,6 +114,8 @@ class SupabaseStore:
             "read_lang": profile.read_lang,
             "type_lang": profile.type_lang,
             "app_lang": profile.app_lang,
+            "easy_font": profile.easy_font,
+            "speech_rate": profile.speech_rate,
         }
         if profile.talk_modes:
             comm["talk_modes"] = profile.talk_modes

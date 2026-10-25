@@ -65,6 +65,27 @@ async def test_put_profile_upserts_both_tables():
     assert body(seen[1])["talk_modes"] == ["voice"]
 
 
+async def test_every_setting_is_saved_and_read_back():
+    """Larger text, speech rate and app language were silently dropped before."""
+    store, seen = make_store(lambda req: httpx.Response(201))
+    p = Profile("u1", "Amit", "hoh", ["voice"], ["clear"], "hi", "hi", app_lang="ta")
+    p.easy_font, p.speech_rate = True, 0.9
+    await store.put_profile(p)
+    comm = body(seen[1])
+    assert (comm["easy_font"], comm["speech_rate"], comm["app_lang"]) == (True, 0.9, "ta")
+
+    row = {**comm, "talk_modes": ["voice"], "hear_modes": ["clear"]}
+
+    def reader(req):
+        if req.url.path.endswith("/profiles"):
+            return httpx.Response(200, json=[{"display_name": "Amit"}])
+        return httpx.Response(200, json=[row])
+
+    store2, _ = make_store(reader)
+    back = await store2.get_profile("u1")
+    assert (back.easy_font, back.speech_rate, back.app_lang) == (True, 0.9, "ta")
+
+
 async def test_turns_are_saved_in_the_background_with_the_calls_owner():
     store, seen = make_store(lambda req: httpx.Response(201))
     await store.create_call({"id": "c1", "user_id": "u1", "kind": "relay"})

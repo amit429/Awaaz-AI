@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useMe, useSaveMe } from '@/hooks/useData';
+import { sameSettings, useMe, useSaveMe } from '@/hooks/useData';
 import { useSession } from '@/hooks/useSession';
 import { setDevLogin } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
@@ -29,7 +29,7 @@ export function Me() {
     if (me.data && !draft) setDraft(me.data.profile);
   }, [me.data, draft]);
 
-  const dirty = Boolean(draft && me.data && JSON.stringify(draft) !== JSON.stringify(me.data.profile));
+  const dirty = Boolean(draft && me.data && !sameSettings(draft, me.data.profile));
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -59,7 +59,7 @@ export function Me() {
           </Link>
 
           <div className="pb-safe sticky bottom-20 z-20 md:bottom-4">
-            <Button size="lg" className="w-full shadow-lg" disabled={!dirty || save.isPending || !draft.display_name.trim()} onClick={() => save.mutate(draft, { onSuccess: () => toast.success(t('common.saved')), onError: () => toast.error(t('common.couldNotSave')) })}>
+            <Button size="lg" className="w-full shadow-lg" disabled={!dirty || save.isPending || !draft.display_name.trim()} onClick={() => save.mutate(draft, { onSuccess: (saved) => { setDraft(saved.profile); toast.success(t('common.saved')); }, onError: (e) => toast.error(t('common.couldNotSave'), { description: e instanceof Error ? e.message : undefined }) })}>
               {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} {dirty ? t('me.saveChanges') : t('common.saved')}
             </Button>
           </div>
