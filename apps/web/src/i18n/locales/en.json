@@ -282,7 +282,8 @@
     "awaaz": "Awaaz",
     "seeSummary": "See summary",
     "captionsTitle": "Captions language",
-    "captionsHint": "What they say is shown in this language. The last few lines are translated again."
+    "captionsHint": "What they say is shown in this language. The last few lines are translated again.",
+    "translating": "Translating to {{lang}}"
   },
   "scam": {
     "otp_request": {

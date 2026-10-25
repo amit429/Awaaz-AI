@@ -282,7 +282,8 @@
     "awaaz": "Awaaz",
     "seeSummary": "Summary dekhein",
     "captionsTitle": "Captions ki bhasha",
-    "captionsHint": "Wo jo bolenge wo is bhasha mein likha aayega. Aakhri kuch lines phir se translate hongi."
+    "captionsHint": "Wo jo bolenge wo is bhasha mein likha aayega. Aakhri kuch lines phir se translate hongi.",
+    "translating": "{{lang}} mein translate ho raha hai"
   },
   "scam": {
     "otp_request": {

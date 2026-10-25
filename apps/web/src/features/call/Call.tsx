@@ -3,7 +3,6 @@ import { useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { LanguageSelect } from '@/components/LanguageSelect';
 import { Person } from '@/components/Person';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import starterPhrases from '@/data/phrases.json';
 import { useMe, usePhrases } from '@/hooks/useData';
 import { useVisualViewport } from '@/hooks/useVisualViewport';
-import { nativeName } from '@/i18n';
+import { LANGUAGES, nativeName } from '@/i18n';
 import { api } from '@/lib/api';
 import { applyEvent, initialState, type FeedItem } from '@/lib/feed';
 import { RelayClient } from '@/lib/relay';
@@ -134,8 +133,11 @@ export function Call() {
     el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
   }, [text]);
 
+  // When the caption language last changed: lines without a translation yet show "Translating…" for a while.
+  const [switchedAt, setSwitchedAt] = useState(0);
   function changeCaptionLanguage(code: string) {
     setReadLang(code);
+    setSwitchedAt(Date.now());
     client.current?.send({ t: 'read.set', lang: code });
   }
 
@@ -326,7 +328,7 @@ export function Call() {
               case 'them':
                 return (
                   <div key={key}>
-                    <TheirBubble item={item} readLang={caption} first={first} locale={locale} active={active} onTap={() => setActiveBubble(active ? null : key)} />
+                    <TheirBubble item={item} readLang={caption} first={first} locale={locale} active={active} onTap={() => setActiveBubble(active ? null : key)} waiting={now - Math.max(item.at ?? 0, switchedAt) < 10_000} />
                     {active && <BubbleActions side="in" onCopy={() => copy(item.translations?.[caption] ?? item.text)} onRead={() => { speak(item.text, (item.lang ?? 'hi').split('-')[0] ?? 'hi'); setActiveBubble(null); }} />}
                   </div>
                 );
@@ -453,7 +455,24 @@ export function Call() {
           {sheet === 'captions' ? (
             <>
               <SheetHeader><SheetTitle>{t('call.captionsTitle')}</SheetTitle><SheetDescription>{t('call.captionsHint')}</SheetDescription></SheetHeader>
-              <div className="px-4"><LanguageSelect value={caption} onChange={(c) => { changeCaptionLanguage(c); setSheet(null); }} /></div>
+              <div role="radiogroup" aria-label={t('call.captionsTitle')} className="grid max-h-[55dvh] gap-1 overflow-y-auto px-2">
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l.code}
+                    type="button"
+                    role="radio"
+                    aria-checked={caption === l.code}
+                    onClick={() => { changeCaptionLanguage(l.code); setSheet(null); }}
+                    className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-white/5"
+                  >
+                    <span className={cn('grid size-5 shrink-0 place-items-center rounded-full border-2', caption === l.code ? 'border-[var(--chat-action)]' : 'border-[var(--chat-muted)]')}>
+                      {caption === l.code && <span className="size-2.5 rounded-full bg-[var(--chat-action)]" />}
+                    </span>
+                    <span className="text-[17px]">{l.native}</span>
+                    {l.native !== l.english && <span className="text-sm text-[var(--chat-muted)]">{l.english}</span>}
+                  </button>
+                ))}
+              </div>
             </>
           ) : (
             <>

@@ -1,5 +1,6 @@
 import { CheckCheck, Clock, Copy, RotateCcw, ShieldCheck, Sparkles, Volume2, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { nativeName } from '@/i18n';
 import { splitByEntities, type FeedItem } from '@/lib/feed';
 import { cn } from '@/lib/utils';
 
@@ -67,7 +68,7 @@ function Bubble({ side, first, meta, onClick, active, children }: { side: 'in' |
 /** Space reserved at the end of the text so the time never sits on top of a word. */
 const Spacer = ({ wide }: { wide?: boolean }) => <span aria-hidden="true" className={cn('inline-block', wide ? 'w-[4.5rem]' : 'w-14')} />;
 
-export function TheirBubble({ item, readLang, first, locale, active, onTap }: { item: Them; readLang: string; first: boolean; locale: string; active: boolean; onTap: () => void }) {
+export function TheirBubble({ item, readLang, first, locale, active, onTap, waiting }: { item: Them; readLang: string; first: boolean; locale: string; active: boolean; onTap: () => void; waiting: boolean }) {
   const { t } = useTranslation();
   const spoken = (item.lang ?? '').split('-')[0];
   const translation = spoken === readLang ? undefined : item.translations?.[readLang];
@@ -82,11 +83,16 @@ export function TheirBubble({ item, readLang, first, locale, active, onTap }: { 
           <p className="mt-1 text-sm leading-snug text-[var(--chat-muted)]">{t('call.original', { text: item.text })}<Spacer /></p>
         </>
       ) : (
-        <p className={cn('text-lg leading-snug', item.partial && 'opacity-70')}>
-          {original}
-          {item.partial && <Dots />}
-          <Spacer />
-        </p>
+        <>
+          <p className={cn('text-lg leading-snug', item.partial && 'opacity-70')}>
+            {original}
+            {item.partial && <Dots />}
+            {!(waiting && !item.partial && spoken !== readLang) && <Spacer />}
+          </p>
+          {waiting && !item.partial && spoken !== readLang && (
+            <p className="mt-1 text-sm text-[var(--chat-muted)]">{t('call.translating', { lang: nativeName(readLang) })}<Dots /><Spacer /></p>
+          )}
+        </>
       )}
     </Bubble>
   );

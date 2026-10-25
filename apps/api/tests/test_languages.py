@@ -172,6 +172,47 @@ async def test_switching_caption_language_mid_call_retranslates_recent_captions(
     await s.end()
 
 
+async def test_rapid_switching_keeps_every_translation_with_its_language():
+    """Switching faster than a translation takes must not lose it or file it under the wrong language."""
+
+    async def translate(text, call_lang, read_lang, notes):
+        await asyncio.sleep(0.15)
+        return f"[{read_lang}] {text}"
+
+    s, q = await _session(translate, "en")
+    await _collect(q, lambda e: e["t"] == "caption.translation")
+    for lang in ("mr", "ta", "gu"):  # each switch comes before the previous translation is ready
+        await s.handle({"t": "read.set", "lang": lang})
+        await asyncio.sleep(0.03)
+    got: dict[str, str] = {}
+    while set(got) != {"mr", "ta", "gu"}:
+        e = await asyncio.wait_for(q.get(), 2)
+        if e["t"] == "caption.translation":
+            got[e["lang"]] = e["text"]
+    assert all(text.startswith(f"[{lang}]") for lang, text in got.items())
+    await s.end()
+
+
+async def test_switching_back_is_instant_and_not_translated_twice():
+    calls = []
+
+    async def translate(text, call_lang, read_lang, notes):
+        calls.append(read_lang)
+        await asyncio.sleep(0.05)
+        return f"[{read_lang}] {text}"
+
+    s, q = await _session(translate, "en")
+    await _collect(q, lambda e: e["t"] == "caption.translation")
+    await s.handle({"t": "read.set", "lang": "ta"})
+    await _collect(q, lambda e: e["t"] == "caption.translation" and e["lang"] == "ta")
+    before = calls.count("en")
+    await s.handle({"t": "read.set", "lang": "en"})
+    e = await _collect(q, lambda e: e["t"] == "caption.translation" and e["lang"] == "en")
+    assert e[-1]["text"].startswith("[en]")
+    assert calls.count("en") == before  # served from what was already translated
+    await s.end()
+
+
 @pytest.fixture
 def client(monkeypatch):
     monkeypatch.setenv("MOCK_PROVIDERS", "true")

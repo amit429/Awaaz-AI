@@ -95,6 +95,8 @@ class RelaySession:
         self.read_lang = read_lang or short_lang(call_lang)
         self.translate = translate
         self._captions: list[tuple[int, str]] = []  # (turn, text) for re-translation
+        self._translated: dict[tuple[int, str], str] = {}  # (turn, lang) -> translation
+        self._translating: set[tuple[int, str]] = set()
         self._recent_other: list[str] = []
         self._pending: dict[str, tuple[str, str, str]] = {}  # preview_id -> (spoken, source, typed)
         self.max_seconds, self.idle_seconds = max_seconds, idle_seconds
@@ -198,25 +200,48 @@ class RelaySession:
         self._schedule_suggestions(turn)
         return turn
 
-    def _spawn_translation(self, turn: int, text: str) -> None:
-        """Captions go out at once in the spoken language; the translation follows."""
+    def _spawn_translation(self, turn: int, text: str, lang: str | None = None) -> None:
+        """Captions go out at once in the spoken language; the translation follows.
+
+        Every translation is kept and sent with its language, even if the user has switched again
+        meanwhile: the app files it under that language, and switching back is then instant.
+        """
         if not self.translate:
             return
-        translate, lang = self.translate, self.read_lang
+        lang = lang or self.read_lang
+        key = (turn, lang)
+        if key in self._translated:
+            self.emit(
+                {
+                    "t": "caption.translation",
+                    "turn": turn,
+                    "lang": lang,
+                    "text": self._translated[key],
+                }
+            )
+            return
+        if key in self._translating:  # already on its way
+            return
+        translate = self.translate
 
         async def run() -> None:
-            out = await translate(text, self.call_lang, lang, self.reply_ctx.contact_notes)
-            if out and lang == self.read_lang and not self.ended:
+            try:
+                out = await translate(text, self.call_lang, lang, self.reply_ctx.contact_notes)
+            finally:
+                self._translating.discard(key)
+            if out and not self.ended:
+                self._translated[key] = out
                 self.emit({"t": "caption.translation", "turn": turn, "lang": lang, "text": out})
 
+        self._translating.add(key)
         self._spawn(run())
 
     async def set_read_lang(self, lang: str) -> None:
-        """Switch the caption language mid-call and re-translate the last few captions."""
+        """Switch the caption language mid-call and translate the last few captions into it."""
         self.read_lang = lang
         self.emit({"t": "read.updated", "lang": lang})
         for turn, text in self._captions[-5:]:
-            self._spawn_translation(turn, text)
+            self._spawn_translation(turn, text, lang)
 
     def _schedule_suggestions(self, turn: int) -> None:
         """Three one-tap replies for this turn; dropped if the user or the other person moves on."""
