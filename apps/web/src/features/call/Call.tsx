@@ -105,6 +105,8 @@ export function Call() {
 
   const talkModes = me.data?.profile.talk_modes ?? [];
   const hearModes = me.data?.profile.hear_modes ?? [];
+  // The mic is for anyone who can speak: shown unless they said they can't (so it can be found).
+  const canUseVoice = talkModes.includes('voice') || me.data?.profile.preset !== 'mute';
   const [autoSend, setAutoSend] = useState(() => {
     try { return localStorage.getItem('awaaz-voice-auto') !== 'off'; } catch { return true; }
   });
@@ -316,7 +318,7 @@ export function Call() {
         {live ? (
           <form className="flex items-center gap-2" onSubmit={submit}>
             <Input value={text} onChange={(e) => onType(e.target.value)} autoFocus aria-label={mode === 'help' ? t('call.helpPlaceholder') : t('call.typePlaceholder')} placeholder={mode === 'help' ? t('call.helpPlaceholder') : t('call.typePlaceholder')} className="h-12 rounded-full border-0 bg-white/10 px-5 text-base" />
-            {talkModes.includes('voice') && (
+            {canUseVoice && (
               <Button type="button" size="icon" variant={voice.active ? 'destructive' : 'secondary'} onClick={toggleVoice} aria-pressed={voice.active} aria-label={voice.active ? t('call.micStop') : t('call.micStart')} className={cn('size-12 shrink-0 rounded-full', voice.active && 'animate-pulse')}>
                 {voice.active ? <Square className="size-5" /> : <Mic className="size-5" />}
               </Button>
