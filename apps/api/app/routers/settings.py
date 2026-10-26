@@ -23,6 +23,7 @@ def profile_json(p: Profile) -> dict:
         "read_lang": p.read_lang,
         "type_lang": p.type_lang,
         "app_lang": p.app_lang,
+        "gender": p.gender,
         "easy_font": p.easy_font,
         "speech_rate": p.speech_rate,
     }
@@ -53,6 +54,7 @@ async def put_me(
             read_lang=body.read_lang,
             type_lang=body.type_lang,
             app_lang=body.app_lang,
+            gender=body.gender,
             easy_font=body.easy_font,
             speech_rate=body.speech_rate,
         )

@@ -46,6 +46,9 @@ export function useLiveVoice(lang: string, handlers: LiveVoiceHandlers) {
   const h = useRef(handlers);
   h.current = handlers;
   const parts = useRef<{ ws?: WebSocket; ctx?: AudioContext; stream?: MediaStream }>({});
+  // Reconnects in a row without hearing anything; reset whenever a sentence comes back.
+  const retries = useRef(0);
+  const startRef = useRef<() => Promise<void>>(async () => undefined);
 
   const stop = useCallback(() => {
     const { ws, ctx, stream } = parts.current;
@@ -83,14 +86,26 @@ export function useLiveVoice(lang: string, handlers: LiveVoiceHandlers) {
       ws.onmessage = (e: MessageEvent<string>) => {
         const m = JSON.parse(e.data) as { t: string; signal?: string; text?: string; code?: string };
         if (m.t === 'vad' && m.signal === 'start') h.current.onSpeechStart();
-        else if (m.t === 'transcript' && m.text) h.current.onText(m.text);
+        else if (m.t === 'transcript' && m.text) {
+          retries.current = 0;
+          h.current.onText(m.text);
+        }
         else if (m.t === 'error') {
           h.current.onError('unavailable');
           stop();
         }
       };
       ws.onclose = () => {
-        if (parts.current.ws === ws) stop();
+        if (parts.current.ws !== ws) return; // the user stopped it
+        stop();
+        // Closed without the user stopping it (network blip, server restart): reconnect quietly.
+        if (retries.current < 2) {
+          retries.current += 1;
+          window.setTimeout(() => void startRef.current(), 600);
+        } else {
+          retries.current = 0;
+          h.current.onError('failed');
+        }
       };
       setActive(true);
     } catch {
@@ -98,7 +113,8 @@ export function useLiveVoice(lang: string, handlers: LiveVoiceHandlers) {
       h.current.onError('failed');
     }
   }, [lang, stop]);
+  startRef.current = start;
 
-  useEffect(() => stop, [stop]);
+  useEffect(() => () => { retries.current = 99; stop(); }, [stop]);
   return { active, start, stop };
 }

@@ -18,7 +18,7 @@ def type_until(c: Clock, k: Keeper, end: float, step: float = 1.0) -> None:
         k.typing()
 
 
-def test_keeper_fires_after_5s_of_typing_and_at_most_every_8s():
+def test_keeper_fires_after_5s_of_typing_and_then_waits_20s():
     c = Clock()
     k = Keeper(clock=c)
     k.typing()
@@ -27,9 +27,9 @@ def test_keeper_fires_after_5s_of_typing_and_at_most_every_8s():
     type_until(c, k, 5)
     assert k.due()
     k.mark_spoken()
-    type_until(c, k, 12)
-    assert not k.due()  # within 8 s of the last keeper line
-    type_until(c, k, 13)
+    type_until(c, k, 24)
+    assert not k.due()  # within 20 s of the last keeper line, however much they type
+    type_until(c, k, 25)
     assert k.due()
 
 
@@ -76,3 +76,26 @@ def test_resolution_order_request_contact_profile_preset():
 
 def test_disability_phrase():
     assert disability_phrase("hoh") == "does not hear well"
+
+
+def test_spoken_lines_follow_the_users_gender_and_are_neutral_when_unknown():
+    from app.relay.disclosure import disclosure_line, keeper_line
+
+    neutral = disclosure_line("deafspeak", "hi-IN", "Amit")
+    assert "sakti" not in neutral and "sakta" not in neutral and "Mujhe sunai nahi deta" in neutral
+    assert "bol raha hoon" in disclosure_line("mute", "hi-IN", "Amit", "male")
+    assert "bol rahi hoon" in disclosure_line("mute", "hi-IN", "Asha", "female")
+    assert "Mujhe bolne mein dikkat hai" in disclosure_line("mute", "hi-IN", "Sam")
+    assert keeper_line("hi-IN", "Amit", "male").startswith("Amit type kar rahe hain")
+    assert keeper_line("hi-IN", "Asha", "female").startswith("Asha type kar rahi hain")
+    assert "type ho raha hai" in keeper_line("hi-IN", "Sam")
+    assert keeper_line("en-IN", "Sam", "female") == "Sam is typing, please hold."
+
+
+def test_drafts_and_translations_are_told_the_users_gender():
+    from app.services.languages import gender_note
+    from app.services.say_prep import _translate_prompt
+
+    assert "masculine" in gender_note("male") and "feminine" in gender_note("female")
+    assert "avoid gendered" in gender_note("unspecified")
+    assert "feminine" in _translate_prompt("I am coming", "hi-IN", "female")

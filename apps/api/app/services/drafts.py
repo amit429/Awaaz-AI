@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from app.providers.base import Llm
+from app.services.languages import gender_note
 from app.services.replies import TYPE_LANG_DESCRIPTION
 
 DIGIT_RUN = re.compile(r"(?<!\d)\d{4,8}(?!\d)")
@@ -23,6 +24,7 @@ SCHEMA = {
 
 PROMPT = """Turn the user's few words into ONE short, polite sentence to say on a phone call.
 - Language: {call_lang}; script/style: {type_lang_description}.
+- {gender_note}
 - Keep the user's meaning exactly. Do not add facts, numbers, dates, names or requests they didn't give, except facts from CONTACT NOTES that the words clearly refer to (e.g. "my medicine" -> the medicine in the notes).
 - If the words are ambiguous, still draft the most likely sentence and set changed_meaning_risk=true.
 - Never include OTPs, PINs, card numbers or passwords.
@@ -55,7 +57,14 @@ class Draft:
 
 
 async def make_draft(
-    llm: Llm, *, words: str, call_lang: str, type_lang: str, last_caption: str, contact_notes: str
+    llm: Llm,
+    *,
+    words: str,
+    call_lang: str,
+    type_lang: str,
+    last_caption: str,
+    contact_notes: str,
+    gender: str = "unspecified",
 ) -> Draft | None:
     """One validated draft, one retry on bad output, otherwise None."""
     prompt = PROMPT.format(
@@ -66,6 +75,7 @@ async def make_draft(
         last_caption=last_caption or "(nothing yet)",
         contact_notes=contact_notes or "none",
         words=words,
+        gender_note=gender_note(gender),
     )
     for _ in range(2):
         try:

@@ -14,6 +14,7 @@ import { initialLanguage, LANGUAGES, setAppLanguage } from '@/i18n';
 import { emptyProfile, withLanguage } from '@/lib/profile';
 import type { Profile } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { GenderChoice } from '@/components/GenderChoice';
 import { PresetChips, ProfileForm } from '../profile/ProfileForm';
 
 const TOTAL = 3;
@@ -89,6 +90,7 @@ export function Onboarding() {
             <Input id="name" autoFocus className="h-12 text-base" value={profile.display_name} onChange={(e) => setProfile({ ...profile, display_name: e.target.value })} />
             <p className="text-sm text-muted-foreground">{t('onboarding.nameHint')}</p>
           </div>
+          <GenderChoice value={profile.gender ?? 'unspecified'} onChange={(g) => setProfile({ ...profile, gender: g })} />
           <div className="grid gap-3">
             <h2 className="text-base font-medium">{t('onboarding.howPhone')}</h2>
             <PresetChips value={profile} presets={presets} onChange={setProfile} />

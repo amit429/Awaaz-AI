@@ -8,6 +8,7 @@ from typing import Any
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from app.providers.base import Llm
+from app.services.languages import gender_note
 
 DIGIT_RUN = re.compile(r"(?<!\d)\d{4,8}(?!\d)")
 
@@ -27,6 +28,7 @@ SCHEMA: dict[str, Any] = {
 SYSTEM = """You suggest replies for {user_name}, who {disability_phrase} and is on a phone call using Awaaz.
 Write exactly 3 short replies (max 10 words each) that {user_name} could send next.
 - Write in {type_lang_description}.
+- {gender_note}
 - Match how {user_name} writes (examples below). Be polite and natural for an Indian phone call.
 - Reply 1: the most likely answer. Reply 2: a useful follow-up question. Reply 3: "Please repeat" in the same language, unless the last caption is clear and complete, in which case another useful option.
 - Use facts from CONTACT NOTES only if relevant. Never invent prices, dates, numbers or personal data.
@@ -62,6 +64,7 @@ class ReplyContext:
     type_lang: str = "hi-Latn"
     contact_name: str = "the other person"
     contact_notes: str = "none"
+    gender: str = "unspecified"
     typed: list[str] = field(default_factory=list)  # what the user typed on this call
 
 
@@ -70,6 +73,7 @@ def build_prompt(ctx: ReplyContext, turns: list[tuple[str, str]]) -> str:
         user_name=ctx.user_name,
         disability_phrase=ctx.disability_phrase,
         type_lang_description=TYPE_LANG_DESCRIPTION.get(ctx.type_lang, "Hindi in English letters"),
+        gender_note=gender_note(ctx.gender),
     )
     convo = "\n".join(f"{'them' if who == 'other' else 'you'}: {text}" for who, text in turns[-6:])
     user = USER.format(

@@ -8,7 +8,7 @@ export const usePhrases = () => useQuery({ queryKey: ['phrases'], queryFn: api.p
 export const useCalls = () => useQuery({ queryKey: ['calls'], queryFn: api.calls });
 
 /** The settings that matter for "was it saved?" (the server may add fields such as phone). */
-const SAVED_FIELDS = ['display_name', 'preset', 'talk_modes', 'hear_modes', 'read_lang', 'type_lang', 'app_lang', 'easy_font', 'speech_rate'] as const;
+const SAVED_FIELDS = ['display_name', 'preset', 'talk_modes', 'hear_modes', 'read_lang', 'type_lang', 'app_lang', 'gender', 'easy_font', 'speech_rate'] as const;
 export const sameSettings = (a: Profile, b: Profile) => SAVED_FIELDS.every((k) => JSON.stringify(a[k]) === JSON.stringify(b[k]));
 
 export function useSaveMe() {

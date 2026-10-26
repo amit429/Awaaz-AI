@@ -8,7 +8,7 @@ from app.config import get_settings
 from app.main import app
 from app.providers.bolna import BolnaError
 from app.relay import bolna_registry, registry
-from app.relay.bolna_leg import BolnaLeg
+from app.relay.bolna_leg import BolnaLeg, end_sentence
 from app.relay.session import as_is
 from app.store import InMemoryStore
 
@@ -81,7 +81,7 @@ async def test_fragments_become_partials_then_one_final_after_settle():
     finals = [e for e in h.events if e[1]]
     assert finals == [("हाँ जी। शर्मा मेडिकल।", True)]
     await leg.speak("Namaste")
-    assert await task2 == ["Namaste"]
+    assert await task2 == ["Namaste. "]
 
 
 async def test_reply_goes_to_newest_request_and_finalises_the_caption_first():
@@ -89,7 +89,7 @@ async def test_reply_goes_to_newest_request_and_finalises_the_caption_first():
     task = asyncio.create_task(collect(leg, 1, "Telma 40 hai"))
     await asyncio.sleep(0.02)
     await leg.speak("Theek hai")  # typed before the settle timer fired
-    assert await task == ["Theek hai"]
+    assert await task == ["Theek hai. "]
     assert ("Telma 40 hai", True) in h.events
 
 
@@ -99,13 +99,46 @@ async def test_keeper_line_then_reply_in_one_response():
     await asyncio.sleep(0.02)
     await leg.speak("Ek minute", final=False)
     await leg.speak("Haan ji", final=True)
-    assert await task == ["Ek minute", "Haan ji"]
+    assert await task == ["Ek minute. ", "Haan ji. "]
 
 
 async def test_reply_typed_before_next_request_is_held():
     leg, _ = await started_leg()
     await leg.speak("Pehle se")
-    assert await collect(leg, 2, "naya") == ["Pehle se"]
+    assert await collect(leg, 2, "naya") == ["Pehle se. "]
+
+
+async def test_several_messages_in_a_row_are_all_spoken_on_the_open_request():
+    """The other person waits silently while the user sends two messages: both must be spoken
+    (before, only the first was; the second waited for them to speak again)."""
+    leg, _ = await started_leg()
+    task = asyncio.create_task(collect(leg, 1, "Boliye"))
+    await asyncio.sleep(0.02)
+    assert leg.listening
+    await leg.speak("Pehli baat")
+    await asyncio.sleep(0.3)
+    await leg.speak("Doosri baat")
+    assert await task == ["Pehli baat. ", "Doosri baat. "]
+    assert not leg.listening  # closed after max_wait with nothing more to say
+
+
+async def test_a_late_fragment_of_a_finished_sentence_is_still_shown():
+    """Bolna can send the rest of a sentence after the first part was shown as final."""
+    leg, h = await started_leg()
+    first = asyncio.create_task(collect(leg, 3, "ऐसे तो नहीं हो सकता।"))
+    await asyncio.sleep(0.3)  # settles: the first part is final
+    second = asyncio.create_task(collect(leg, 3, "ऐसे तो नहीं हो सकता। कार तो है आपके।"))
+    await asyncio.sleep(0.3)
+    finals = [t for t, final in h.events if final]
+    assert finals == ["ऐसे तो नहीं हो सकता।", "कार तो है आपके।"]
+    await first
+    await second
+
+
+def test_every_reply_ends_a_sentence():
+    assert end_sentence("Haan ji") == "Haan ji. "
+    assert end_sentence("नहीं है") == "नहीं है। "
+    assert end_sentence("Kya hua?") == "Kya hua? "
 
 
 async def test_terminal_status_hangs_up_once():
@@ -192,6 +225,7 @@ async def test_live_call_flow_captions_reply_and_hangup(env, monkeypatch):
         call_id = r.json()["session_id"]
         session = registry.get(call_id)
         session.prepare = as_is  # no real conversion calls in tests
+        session.leg.max_wait = 0.5  # the reply stream stays open this long for more messages
         q = session.subscribe()
         await session.start()
         assert fake.started[0][2]["call_id"] == call_id

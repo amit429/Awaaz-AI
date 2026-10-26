@@ -1,7 +1,8 @@
 """The "please hold" keeper timer.
 
 The keeper line is spoken only while the user is typing: after `after` seconds of continuous
-typing (typing events keep arriving, gaps under `stale`), and at most every `every` seconds.
+typing (typing events keep arriving, gaps under `stale`), and at most once every `every` seconds
+(20 s: repeating it every few seconds annoyed people on real calls).
 Pure logic with an injectable clock; the session (or dev bridge) polls `due()`.
 """
 
@@ -9,7 +10,7 @@ import time
 from collections.abc import Callable
 
 AFTER = 5.0
-EVERY = 8.0
+EVERY = 20.0
 STALE = 4.0
 
 

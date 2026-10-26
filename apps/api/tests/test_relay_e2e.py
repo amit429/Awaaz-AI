@@ -262,9 +262,8 @@ def test_digit_block_checks_what_was_typed_not_the_converted_text():
 def test_bank_scam_call_warns_logs_and_blocks_digits():
     call = create(callee="bank_scam")
     with connect(call["session_id"]) as ws:
-        recv(
-            ws, is_("caption.final")
-        )  # "I'm calling from SBI, your card will be blocked": vague, no alarm yet
+        # "I'm calling from SBI, your card will be blocked": a scam opener is warned at once
+        assert recv(ws, is_("scam.warning"))[-1]["reason"] == "suspicious"
         ws.send_json({"t": "user.say", "text": "Kyon?", "source": "typed"})
         got = recv(ws, is_("scam.warning"))
         assert got[-1]["reason"] == "otp_request"
@@ -273,7 +272,10 @@ def test_bank_scam_call_warns_logs_and_blocks_digits():
         ws.send_json({"t": "user.say", "text": "nahi, main branch aa jaunga", "source": "typed"})
         assert recv(ws, is_("you.final"))[-1]["text"] == "nahi, main branch aa jaunga"
     events = store_module.get_store().scam_events
-    assert [(e["reason"], e["action"]) for e in events] == [("otp_request", "warned")]
+    assert [(e["reason"], e["action"]) for e in events] == [
+        ("suspicious", "warned"),
+        ("otp_request", "warned"),
+    ]
 
 
 def test_normal_pharmacy_call_never_warns():

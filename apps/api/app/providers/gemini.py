@@ -3,11 +3,8 @@
 import json
 from typing import Any
 
-import httpx
-
-from app.providers.http import shared
-
 from app.config import Settings
+from app.providers.http import shared
 
 API = "https://generativelanguage.googleapis.com/v1beta/models"
 

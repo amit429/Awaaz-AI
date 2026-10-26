@@ -96,7 +96,7 @@ async def test_commands_again_hold_and_busy():
     await bot.handle(text("again"))
     await until(sender, "Maaf kijiye")
     await bot.handle(text("hold"))
-    await until(sender, "type kar rahe hain")
+    await until(sender, "type ho raha hai")
     await bot.handle(text("help"))
     assert "again" in sender.texts()[-1]
     await bot.handle(text("end"))

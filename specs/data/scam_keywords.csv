@@ -17,3 +17,7 @@ otp_request,hi-Latn,\b(code|otp)\b.{0,25}\b(bata|batao|bataiye|bolo|boliye|dijiy
 otp_request,hi-Latn,\b(bata|batao|bataiye|bolo|boliye|dijiye|de do|dedo|share|bhej)\b.{0,20}\b(code|otp)\b,2
 pin_request,hi,(एटीएम|ATM)\s?पिन|पिन\s?(नंबर|बताइए|बताओ|क्या)|कार्ड\s?पिन,2
 pin_request,hi-Latn,\b(atm|card)\s?pin\b|\bpin\s?(batao|bataiye|bolo|boliye)\b,2
+other,hi,(बैंक से बोल रह|कार्ड ब्लॉक|अकाउंट ब्लॉक|खाता बंद|खाता ब्लॉक|केवाईसी|KYC|डिजिटल अरेस्ट|गिरफ्तार|सीबीआई|कस्टम|पार्सल में|लॉटरी|इनाम जीत|रिफंड|बिजली कट|बिजली का कनेक्शन|सिम बंद|लिंक पर क्लिक|आधार अपडेट|पैन अपडेट|क्रेडिट कार्ड),1
+other,hi-Latn,\b(card block|account block|khata band|kyc|digital arrest|giraftar|lottery|inaam|refund|bijli kat|sim band|link pe click|link par click|aadhaar update|pan update|bank se bol)\w*,1
+other,mr,(कार्ड ब्लॉक|खाते बंद|केवायसी|लॉटरी|बक्षीस लागल|वीज कापली|वीज कनेक्शन|लिंकवर क्लिक|बँकेतून बोलत),1
+other,en,\b(card (will be|is being|has been) blocked|account (will be|has been) (blocked|suspended)|kyc (update|expired|pending)|digital arrest|you have won|lottery|refund (is|of)|electricity (will be )?(cut|disconnected)|click (on )?(the|this) link|calling from (the |your )?bank)\b,1

@@ -19,6 +19,7 @@ export type ServerEvent =
   | { t: 'draft.ready'; draft_id: string; text: string; from_words?: string; changed_meaning_risk?: boolean }
   | { t: 'say.preview'; preview_id: string; text: string; original?: string }
   | { t: 'say.blocked'; reason: 'scam_digits' | 'empty' | 'too_long' }
+  | { t: 'say.queued' }
   | { t: 'scam.warning'; reason: string; turn?: number }
   | { t: 'keeper.spoken' }
   | { t: 'mode.updated'; talk_modes?: string[]; hear_modes?: string[] }
@@ -106,6 +107,8 @@ export function applyEvent(state: CallState, ev: ServerEvent): CallState {
       return { ...state, feed: [...state.feed.filter((i) => i.kind !== 'draft'), { kind: 'draft', id: ev.draft_id, text: ev.text, fromWords: ev.from_words, risk: Boolean(ev.changed_meaning_risk), at: Date.now() }] };
     case 'say.preview':
       return { ...state, feed: [...settleOne(state.feed).filter((i) => i.kind !== 'preview'), { kind: 'preview', id: ev.preview_id, text: ev.text, original: ev.original, at: Date.now() }] };
+    case 'say.queued':
+      return { ...state, feed: [...state.feed, note('call.queued')] };
     case 'say.blocked':
       return { ...state, feed: [...settleOne(state.feed), note(`call.blocked.${ev.reason}`)] };
     case 'scam.warning':

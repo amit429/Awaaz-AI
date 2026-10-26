@@ -1,6 +1,8 @@
 export type TalkMode = 'voice' | 'type' | 'replies' | 'help' | 'clarity' | 'sign';
 export type HearMode = 'captions' | 'clear' | 'audio' | 'summary' | 'vibe' | 'translate';
 
+export type Gender = 'male' | 'female' | 'unspecified';
+
 export interface Profile {
   display_name: string;
   preset: string | null;
@@ -10,6 +12,7 @@ export interface Profile {
   type_lang: string;
   app_lang: string;
   phone?: string | null;
+  gender?: Gender;
   easy_font: boolean;
   speech_rate: number;
 }

@@ -19,6 +19,7 @@ class ProfileIn(BaseModel):
     read_lang: ReadLang = "hi"
     type_lang: str = "hi-Latn"
     app_lang: ReadLang = "en"
+    gender: Literal["male", "female", "unspecified"] = "unspecified"
     easy_font: bool = False
     speech_rate: float = Field(default=0.75, ge=0.5, le=1.2)
 

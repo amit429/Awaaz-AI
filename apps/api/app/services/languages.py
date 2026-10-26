@@ -106,3 +106,24 @@ def make_translator(settings: Settings, llm: Llm) -> Translator:
         return None
 
     return translate
+
+
+GENDERS = ("male", "female", "unspecified")
+
+
+def gender_note(gender: str) -> str:
+    """How to write the user's own sentences in Hindi and Marathi, where "I" verbs are gendered."""
+    if gender == "male":
+        return (
+            "The user is a man: use masculine first-person forms in Hindi and Marathi "
+            "(main aa raha hoon, mi yeto)."
+        )
+    if gender == "female":
+        return (
+            "The user is a woman: use feminine first-person forms in Hindi and Marathi "
+            "(main aa rahi hoon, mi yete)."
+        )
+    return (
+        "The user's gender is not known: avoid gendered first-person verbs in Hindi and "
+        "Marathi (prefer 'mujhe chahiye', 'mujhe aana hai')."
+    )

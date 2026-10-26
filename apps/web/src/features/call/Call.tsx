@@ -49,7 +49,8 @@ export function Call() {
   const [online, setOnline] = useState(false);
   const [text, setText] = useState('');
   const [sheet, setSheet] = useState<'phrases' | 'more' | 'captions' | 'keypad' | null>(null);
-  const [scamSeen, setScamSeen] = useState(false);
+  // Which warning was dismissed: a new, more serious one (e.g. an OTP request after a scam opener) shows again.
+  const [scamSeen, setScamSeen] = useState<string | null>(null);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [activeBubble, setActiveBubble] = useState<string | null>(null);
   const client = useRef<RelayClient | null>(null);
@@ -264,7 +265,7 @@ export function Call() {
   }
 
   const name = who.name ?? who.number ?? t('common.call');
-  const scamKey = state.scamReason && ['otp_request', 'pin_request', 'upi_pin', 'cvv_request', 'remote_app'].includes(state.scamReason) ? state.scamReason : 'other';
+  const scamKey = state.scamReason && ['otp_request', 'pin_request', 'upi_pin', 'cvv_request', 'remote_app', 'suspicious'].includes(state.scamReason) ? state.scamReason : 'other';
   const send = (e: Parameters<NonNullable<typeof client.current>['send']>[0]) => client.current?.send(e);
   const lastItem = state.feed[state.feed.length - 1];
   const theySpeaking = lastItem?.kind === 'them' && lastItem.partial;
@@ -298,7 +299,7 @@ export function Call() {
         )}
       </header>
 
-      {state.scam && !scamSeen && state.status !== 'ended' && (
+      {state.scam && scamSeen !== state.scamReason && state.status !== 'ended' && (
         <div role="alert" className="z-10 flex shrink-0 gap-3 bg-[#5c1f27] px-4 py-3 text-white shadow-md">
           <ShieldAlert className="mt-0.5 size-5 shrink-0" />
           <div className="min-w-0 flex-1">
@@ -306,7 +307,7 @@ export function Call() {
             <p className="text-sm text-white/85">{t(`scam.${scamKey}.body`)}</p>
             <div className="mt-2 flex gap-2">
               <Button size="sm" className="bg-white text-[#5c1f27] hover:bg-white/90" onClick={() => send({ t: 'call.end' })}>{t('call.endCall')}</Button>
-              <Button size="sm" variant="ghost" className="text-white hover:bg-white/15 hover:text-white" onClick={() => setScamSeen(true)}>{t('call.continue')}</Button>
+              <Button size="sm" variant="ghost" className="text-white hover:bg-white/15 hover:text-white" onClick={() => setScamSeen(state.scamReason ?? 'other')}>{t('call.continue')}</Button>
             </div>
           </div>
         </div>

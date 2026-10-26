@@ -72,9 +72,9 @@ async def test_weak_match_needs_the_llm_to_confirm_and_fails_safe():
 
     assert await scam.second_opinion(weak, ["otp"], Broken()) == weak  # fail safe: warn
     assert await scam.second_opinion(weak, ["otp"], None) == weak
-    vague = scam.Match("other", 1)  # "your card will be blocked" alone is not worth a siren
-    assert await scam.second_opinion(vague, ["x"], None) is None
-    assert await scam.second_opinion(vague, ["x"], Broken()) is None
+    opener = scam.Match("other", 1)  # "your card will be blocked": warned as a likely scam
+    assert await scam.second_opinion(opener, ["x"], None) == scam.Match("suspicious", 2)
+    assert await scam.second_opinion(opener, ["x"], Broken()) == scam.Match("suspicious", 2)
 
 
 def test_normal_conversation_is_quiet():
@@ -84,3 +84,38 @@ def test_normal_conversation_is_quiet():
         "Delivery Thursday, 950 rupees",
     ]:
         assert scam.check(text) is None
+
+
+async def test_scam_openers_from_real_calls_are_flagged():
+    """Captions from a real call on 26 October: the caller never asked for an OTP."""
+    for text in [
+        "आपका कार्ड ब्लॉक होने वाला है।",
+        "आपका आईसीआईसीआई बैंक क्रेडिट कार्ड।",
+        "Your KYC update is pending, click this link",
+        "Aapka sim band ho jayega",
+    ]:
+        m = scam.check(text)
+        assert m is not None and m.reason == "other", text
+
+    class No:
+        async def complete_json(self, prompt, *, schema):
+            return {"is_scam": False, "confidence": 0.9}
+
+    class Yes:
+        async def complete_json(self, prompt, *, schema):
+            return {"is_scam": True, "confidence": 0.8}
+
+    m = scam.check("आपका कार्ड ब्लॉक होने वाला है।")
+    assert await scam.second_opinion(m, ["आपका कार्ड ब्लॉक होने वाला है।"], Yes()) == scam.Match(
+        "suspicious", 2
+    )
+    assert await scam.second_opinion(m, ["Sharma Medical, credit card chalega"], No()) is None
+
+
+def test_ordinary_shop_talk_is_not_an_opener():
+    for text in [
+        "हाँ जी, शर्मा मेडिकल। बोलिए?",
+        "₹420 होंगे, शाम 6 बजे तक तैयार।",
+        "Kal subah 10 baje aa jaiye",
+    ]:
+        assert scam.check(text) is None, text

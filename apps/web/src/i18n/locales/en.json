@@ -54,7 +54,7 @@
     "languageTitle": "Choose your language",
     "languageHint": "Awaaz will use it everywhere, including captions. You can change it any time.",
     "title": "Let’s set up your calls",
-    "hint": "Two quick questions. You can change everything later in Me.",
+    "hint": "A few quick questions. You can change everything later in Me.",
     "nameLabel": "What should we call you?",
     "nameHint": "This name is said to the other person at the start of every call.",
     "howPhone": "How do you use the phone?",
@@ -144,7 +144,14 @@
     "summary": "You talk with: {{talk}}{{also}}. You hear with: {{hear}}.",
     "summaryAlso": " (also {{list}})",
     "summaryNone": "nothing selected",
-    "chooseTalk": "Choose how you talk"
+    "chooseTalk": "Choose how you talk",
+    "genderLabel": "How should Awaaz speak for you?",
+    "genderHint": "In Hindi and Marathi, “I am coming” is said differently by men and women. Awaaz uses this for what it says and writes for you.",
+    "gender": {
+      "male": "As a man",
+      "female": "As a woman",
+      "unspecified": "Prefer not to say"
+    }
   },
   "presets": {
     "mute": "I can’t speak",
@@ -283,7 +290,8 @@
     "seeSummary": "See summary",
     "captionsTitle": "Captions language",
     "captionsHint": "What they say is shown in this language. The last few lines are translated again.",
-    "translating": "Translating to {{lang}}"
+    "translating": "Translating to {{lang}}",
+    "queued": "Waiting for them to speak. Your message will be said as soon as they do."
   },
   "scam": {
     "otp_request": {
@@ -309,6 +317,10 @@
     "other": {
       "title": "This may be a scam call",
       "body": "Be careful. Awaaz won’t read out OTPs, PINs or card details on this call."
+    },
+    "suspicious": {
+      "title": "This call may be a scam",
+      "body": "They say your card or account will be blocked, or that you have won something. Banks and offices never ask for codes or payments like this. Awaaz won’t read out numbers on this call."
     }
   },
   "errors": {

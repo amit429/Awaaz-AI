@@ -7,6 +7,7 @@ Us to browser: {"t": "vad", "signal": "start" | "end"} and {"t": "transcript", "
 
 import asyncio
 import base64
+import contextlib
 import json
 import logging
 import time
@@ -64,6 +65,9 @@ def sarvam_url(language: str) -> str:
     return f"{SARVAM_WS}?{urlencode(query)}"
 
 
+RECONNECTS = 5  # Sarvam sometimes drops a long stream (seen: close 1011); reopen it this often
+
+
 @router.websocket("/v1/stt/ws")
 async def stt(ws: WebSocket, token: str | None = Query(None), lang: str = Query("hi")) -> None:
     settings = get_settings()
@@ -79,16 +83,32 @@ async def stt(ws: WebSocket, token: str | None = Query(None), lang: str = Query(
         return
     language = SPOKEN.get(lang, SPOKEN["hi"])[1]
     deadline = time.monotonic() + settings.max_call_minutes * 60
-    try:
+    audio: asyncio.Queue[bytes] = asyncio.Queue(maxsize=200)
+    client_gone = asyncio.Event()
+
+    async def from_app() -> None:
+        """Microphone audio from the app, kept in a queue so a Sarvam reconnect loses nothing."""
+        try:
+            while time.monotonic() < deadline:
+                pcm = await ws.receive_bytes()
+                if audio.full():
+                    audio.get_nowait()  # never let a stalled upstream build up a backlog
+                audio.put_nowait(pcm)
+        except (WebSocketDisconnect, RuntimeError):
+            pass
+        finally:
+            client_gone.set()
+
+    async def one_stream() -> None:
+        """One Sarvam connection; returns (or raises) when Sarvam closes it."""
         async with websockets.connect(
             sarvam_url(language),
             additional_headers={"api-subscription-key": settings.sarvam_api_key},
         ) as upstream:
 
             async def up() -> None:
-                while time.monotonic() < deadline:
-                    pcm = await ws.receive_bytes()
-                    await upstream.send(audio_message(pcm))
+                while True:
+                    await upstream.send(audio_message(await audio.get()))
 
             async def down() -> None:
                 async for raw in upstream:
@@ -97,27 +117,33 @@ async def stt(ws: WebSocket, token: str | None = Query(None), lang: str = Query(
                         await ws.send_json(event)
 
             tasks = [asyncio.create_task(up()), asyncio.create_task(down())]
-            done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-            log.debug(
-                "stt tasks done: %s upstream=%s %s",
-                [t.get_coro().__name__ for t in done],
-                upstream.close_code,
-                upstream.close_reason,
-            )
-            for t in done:
-                if t.exception():
-                    raise t.exception()
-            for t in tasks:
-                t.cancel()
-    except (WebSocketDisconnect, websockets.ConnectionClosed) as exc:
-        log.debug("live speech to text closed: %r", exc)
-    except Exception:
-        log.exception("live speech to text failed")
-        try:
-            await ws.send_json({"t": "error", "code": "stt_failed"})
-        except Exception:  # noqa: BLE001
-            pass
+            gone = asyncio.create_task(client_gone.wait())
+            try:
+                await asyncio.wait([*tasks, gone], return_when=asyncio.FIRST_COMPLETED)
+            finally:
+                for t in [*tasks, gone]:
+                    t.cancel()
+                await asyncio.gather(*tasks, gone, return_exceptions=True)
+
+    reader = asyncio.create_task(from_app())
+    failures = 0
     try:
-        await ws.close()
-    except Exception:  # noqa: BLE001
-        pass
+        while not client_gone.is_set() and time.monotonic() < deadline:
+            started = time.monotonic()
+            try:
+                await one_stream()
+            except Exception as exc:  # noqa: BLE001 - Sarvam dropped the stream: reopen it
+                log.warning("live speech to text stream closed (%s); reconnecting", exc)
+            if client_gone.is_set():
+                break
+            # A stream that ran a while was fine; only quick repeated failures count.
+            failures = failures + 1 if time.monotonic() - started < 5 else 1
+            if failures > RECONNECTS:
+                await ws.send_json({"t": "error", "code": "stt_failed"})
+                break
+            await asyncio.sleep(min(0.25 * failures, 2))
+    finally:
+        reader.cancel()
+        await asyncio.gather(reader, return_exceptions=True)
+        with contextlib.suppress(Exception):
+            await ws.close()

@@ -21,6 +21,7 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 | `draft.ready` | `draft_id`, `text`, `from_words`, `changed_meaning_risk?` | Help me say result; shown to the user, spoken only after they send `user.say` with source `draft` |
 | `say.preview` | `preview_id`, `text`, `original` | Translation shown before speaking |
 | `say.blocked` | `reason` (`scam_digits`, `empty`, `too_long`) | A say was refused |
+| `say.queued` | — | The phone line is not listening right now (Bolna only asks after the other person speaks): the message is said when they speak next |
 | `scam.warning` | `reason`, `turn` | OTP/PIN/CVV/remote-app request detected |
 | `ivr.menu` | `options[]` (`digit`, `label`) | Phone menu parsed from captions |
 | `keeper.spoken` | — | “Please hold” line was said to the other person |

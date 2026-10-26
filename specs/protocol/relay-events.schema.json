@@ -225,12 +225,13 @@
         },
         "reason": {
           "enum": [
+            "cvv_request",
+            "other",
             "otp_request",
             "pin_request",
-            "cvv_request",
-            "upi_pin",
             "remote_app",
-            "other"
+            "suspicious",
+            "upi_pin"
           ]
         },
         "turn": {
@@ -528,6 +529,18 @@
           "type": "string"
         }
       }
+    },
+    {
+      "type": "object",
+      "required": [
+        "t"
+      ],
+      "properties": {
+        "t": {
+          "const": "say.queued"
+        }
+      },
+      "description": "Nothing is waiting to carry speech right now: the message is said when the other person speaks next."
     }
   ],
   "$defs": {

@@ -68,7 +68,9 @@ async def create_relay_call(
             agent_id=settings.bolna_relay_agent_id,
             to=to,
             call_id=call_id,
-            disclosure=disclosure_line(profile.preset, call_lang, profile.display_name),
+            disclosure=disclosure_line(
+                profile.preset, call_lang, profile.display_name, profile.gender
+            ),
         )
         bolna_registry.add(leg)
     await store.create_call(
@@ -96,6 +98,7 @@ async def create_relay_call(
         type_lang=profile.type_lang,
         contact_name=(contact or {}).get("name") or "the other person",
         contact_notes=(contact or {}).get("notes") or "none",
+        gender=profile.gender,
     )
     session = RelaySession(
         call_id=call_id,
@@ -107,7 +110,7 @@ async def create_relay_call(
         modes=modes,
         leg=leg,
         max_seconds=settings.max_call_minutes * 60,
-        prepare=make_preparer(settings, call_lang, GeminiLlm(settings)),
+        prepare=make_preparer(settings, call_lang, GeminiLlm(settings), profile.gender),
         on_end=cleanup,
         llm=None if settings.mock_providers else GeminiLlm(settings),
         reply_ctx=reply_ctx,

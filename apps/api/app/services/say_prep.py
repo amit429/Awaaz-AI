@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from app.config import Settings
 from app.providers import sarvam
 from app.providers.base import Llm
-from app.services.languages import SPOKEN, short
+from app.services.languages import SPOKEN, gender_note, short
 
 # Unicode blocks of Indian scripts, and the script each spoken language is written in
 _BLOCKS = [
@@ -129,16 +129,18 @@ def _detect_prompt(text: str) -> str:
     )
 
 
-def _translate_prompt(text: str, call_lang: str) -> str:
+def _translate_prompt(text: str, call_lang: str, gender: str = "unspecified") -> str:
     name = CALL_LANG_NAME.get(call_lang, "Hindi")
     return (
         f"Translate this text faithfully into {name}, in its native script, to be spoken aloud on a "
-        "phone call. Keep every number, name and medicine name exactly; do not add or remove "
-        "information.\n\nText: " + text
+        "phone call. It is the user speaking about themself. Keep every number, name and medicine "
+        f"name exactly; do not add or remove information. {gender_note(gender)}\n\nText: " + text
     )
 
 
-async def prepare_say(text: str, call_lang: str, settings: Settings, llm: Llm) -> Prepared:
+async def prepare_say(
+    text: str, call_lang: str, settings: Settings, llm: Llm, gender: str = "unspecified"
+) -> Prepared:
     text = text.strip()
     if not text:
         return Prepared("", False, "as_is")
@@ -151,7 +153,7 @@ async def prepare_say(text: str, call_lang: str, settings: Settings, llm: Llm) -
         # Typed in another Indian script (for example Tamil on a Hindi call): translate, confirm.
         try:
             out = await llm.complete_json(
-                _translate_prompt(text, call_lang), schema=TRANSLATE_SCHEMA
+                _translate_prompt(text, call_lang, gender), schema=TRANSLATE_SCHEMA
             )
             return Prepared(out["translation"], True, "translated", script)
         except Exception:  # noqa: BLE001 - never speak something unreviewed
@@ -184,18 +186,20 @@ async def prepare_say(text: str, call_lang: str, settings: Settings, llm: Llm) -
         if translit_ok:
             return Prepared(translit, False, "same_language", language)
     try:
-        out = await llm.complete_json(_translate_prompt(text, call_lang), schema=TRANSLATE_SCHEMA)
+        out = await llm.complete_json(
+            _translate_prompt(text, call_lang, gender), schema=TRANSLATE_SCHEMA
+        )
         return Prepared(out["translation"], True, "translated", language)
     except Exception:  # noqa: BLE001 - provider failure must not speak anything unreviewed
         return Prepared(translit if translit_ok else text, True, "same_language", language)
 
 
-def make_preparer(settings: Settings, call_lang: str, llm: Llm):
+def make_preparer(settings: Settings, call_lang: str, llm: Llm, gender: str = "unspecified"):
     """The session's preparer: conversion in live mode, pass-through in mock mode."""
 
     async def prepare(text: str) -> Prepared:
         if settings.mock_providers:
             return Prepared(text, False, "as_is")
-        return await prepare_say(text, call_lang, settings, llm)
+        return await prepare_say(text, call_lang, settings, llm, gender)
 
     return prepare

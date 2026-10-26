@@ -2,11 +2,8 @@
 
 import re
 
-import httpx
-
-from app.providers.http import shared
-
 from app.config import Settings
+from app.providers.http import shared
 
 API = "https://api.sarvam.ai"
 _LATIN = re.compile(r"[A-Za-z]")

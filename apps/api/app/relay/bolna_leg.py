@@ -14,7 +14,8 @@ from typing import Protocol
 from app.relay.legs import HangupCallback, HeardCallback
 
 SETTLE = 1.2  # seconds without new fragments before a turn counts as finished
-MAX_WAIT = 60.0
+MAX_WAIT = 60.0  # an open request is kept this long after the last thing said on it
+ENDS = ".!?।॥"
 TICK = 0.3
 
 TERMINAL = {
@@ -57,7 +58,8 @@ class BolnaLeg:
         self._replies: asyncio.Queue[tuple[str, bool]] = asyncio.Queue()
         self._generation = 0
         self._turn_text: dict[int, str] = {}
-        self._final_sent: set[int] = set()
+        self._final_text: dict[int, str] = {}  # what of each turn is already shown as final
+        self._open = 0  # requests from Bolna currently waiting for something to say
         self._settle_task: asyncio.Task[None] | None = None
 
     # ---------- OtherLeg ----------
@@ -67,6 +69,12 @@ class BolnaLeg:
             self.agent_id, self.to, {"call_id": self.call_id, "disclosure": self.disclosure}
         )
         self.active = True
+
+    @property
+    def listening(self) -> bool:
+        """True while Bolna is waiting on us, so anything said now is spoken at once. Otherwise it
+        waits until the other person speaks again (Bolna only asks after they speak)."""
+        return self._open > 0
 
     async def speak(self, text: str, *, final: bool = True) -> None:
         self._replies.put_nowait((text, final))
@@ -86,29 +94,38 @@ class BolnaLeg:
             await self._on_hangup("callee_hung_up" if status == "call-disconnected" else status)
 
     async def on_request(self, turn: int, heard: str) -> AsyncIterator[str]:
-        """One Bolna request = the callee spoke (maybe a fragment). Yields what to say back."""
+        """One Bolna request = the callee spoke (maybe a fragment). Yields what to say back.
+
+        The request stays open after a reply, so the user can send several messages in a row and
+        each is spoken at once. It closes when the callee speaks again (a newer request takes
+        over) or after `max_wait` seconds with nothing to say.
+        """
         self._generation += 1
         mine = self._generation
         if heard:
             self._turn_text[turn] = heard
-            if self._on_heard:
-                await self._on_heard(heard, False)
+            unsaid = self._unsaid(turn, heard)
+            if unsaid and self._on_heard:
+                await self._on_heard(unsaid, False)
             self._restart_settle(turn)
-        deadline = time.monotonic() + self.max_wait
-        while time.monotonic() < deadline:
-            if self._generation != mine:
-                return  # a newer fragment owns the reply
-            try:
-                text, final = await asyncio.wait_for(self._replies.get(), self.tick)
-            except TimeoutError:
-                continue
-            if self._generation != mine:
-                self._replies.put_nowait((text, final))
-                return
-            await self._finalize(turn)  # the user replied: the caption must be final by now
-            yield text
-            if final:
-                return
+        self._open += 1
+        try:
+            deadline = time.monotonic() + self.max_wait
+            while time.monotonic() < deadline:
+                if self._generation != mine or not self.active:
+                    return  # a newer fragment owns the reply, or the call is over
+                try:
+                    text, _final = await asyncio.wait_for(self._replies.get(), self.tick)
+                except TimeoutError:
+                    continue
+                if self._generation != mine:
+                    self._replies.put_nowait((text, _final))
+                    return
+                await self._finalize(turn)  # the user replied: the caption must be final by now
+                yield end_sentence(text)
+                deadline = time.monotonic() + self.max_wait  # stay open for the next message
+        finally:
+            self._open -= 1
 
     # ---------- internals ----------
     def _restart_settle(self, turn: int) -> None:
@@ -120,8 +137,29 @@ class BolnaLeg:
         await asyncio.sleep(self.settle)
         await self._finalize(turn)
 
+    def _unsaid(self, turn: int, text: str) -> str:
+        """The part of this turn not yet shown as final (Bolna resends earlier fragments)."""
+        done = self._final_text.get(turn, "")
+        if done and text.startswith(done):
+            return text[len(done) :].strip()
+        return text if text != done else ""
+
     async def _finalize(self, turn: int) -> None:
         text = self._turn_text.get(turn)
-        if text and turn not in self._final_sent and self._on_heard:
-            self._final_sent.add(turn)
-            await self._on_heard(text, True)
+        if not text or not self._on_heard:
+            return
+        unsaid = self._unsaid(turn, text)
+        if not unsaid:
+            return
+        self._final_text[turn] = text
+        await self._on_heard(unsaid, True)
+
+
+def end_sentence(text: str) -> str:
+    """Bolna speaks text as it streams in, sentence by sentence: a reply without a full stop could
+    wait for more text. Make sure each one ends a sentence."""
+    t = text.rstrip()
+    if not t or t[-1] in ENDS:
+        return t + " "
+    devanagari = any("\u0900" <= ch <= "\u097f" for ch in t)
+    return t + ("। " if devanagari else ". ")

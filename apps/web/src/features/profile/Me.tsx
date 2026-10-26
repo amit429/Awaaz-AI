@@ -14,6 +14,7 @@ import { useSession } from '@/hooks/useSession';
 import { setDevLogin } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/lib/types';
+import { GenderChoice } from '@/components/GenderChoice';
 import { ProfileForm } from './ProfileForm';
 
 export function Me() {
@@ -49,6 +50,7 @@ export function Me() {
             <Input id="me-name" className="h-11" value={draft.display_name} onChange={(e) => setDraft({ ...draft, display_name: e.target.value })} />
             <p className="text-sm text-muted-foreground">{t('me.nameHint')}</p>
           </div>
+          <GenderChoice value={draft.gender ?? 'unspecified'} onChange={(g) => setDraft({ ...draft, gender: g })} />
 
           <ProfileForm value={draft} presets={me.data.presets} onChange={setDraft} />
 

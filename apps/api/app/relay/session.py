@@ -98,6 +98,7 @@ class RelaySession:
         self._translated: dict[tuple[int, str], str] = {}  # (turn, lang) -> translation
         self._translating: set[tuple[int, str]] = set()
         self._recent_other: list[str] = []
+        self._warned: set[str] = set()  # scam reasons already shown, so each is shown once
         self._pending: dict[str, tuple[str, str, str]] = {}  # preview_id -> (spoken, source, typed)
         self.max_seconds, self.idle_seconds = max_seconds, idle_seconds
         self.seq = 0
@@ -268,8 +269,9 @@ class RelaySession:
         if match is None:
             return
         confirmed = await scam.second_opinion(match, self._recent_other, self.llm)
-        if confirmed is None:
+        if confirmed is None or confirmed.reason in self._warned:
             return
+        self._warned.add(confirmed.reason)
         self.scam = True
         self.emit({"t": "scam.warning", "reason": confirmed.reason, "turn": turn})
         await self.store.add_scam_event(self.call_id, turn, confirmed.reason, "warned")
@@ -284,7 +286,7 @@ class RelaySession:
         self._set_state("ringing")
         self._set_state("connected")
         await self.store.update_call(self.call_id, status="connected")
-        line = disclosure_line(self.preset, self.call_lang, self.name)
+        line = disclosure_line(self.preset, self.call_lang, self.name, self.reply_ctx.gender)
         await self._you(line, "disclosure", speaker="system")
         self._spawn(self._watchdog())
         try:
@@ -345,7 +347,7 @@ class RelaySession:
         """Tell the other person the user is typing, please hold (also used by WhatsApp's "hold")."""
         if self.ended:
             return
-        line = keeper_line(self.call_lang, self.name)
+        line = keeper_line(self.call_lang, self.name, self.reply_ctx.gender)
         await self._you(line, "keeper", speaker="system")
         self.emit({"t": "keeper.spoken"})
         await self.leg.speak(line, final=False)
@@ -512,6 +514,7 @@ class RelaySession:
             type_lang=self.reply_ctx.type_lang,
             last_caption=last,
             contact_notes=self.reply_ctx.contact_notes,
+            gender=self.reply_ctx.gender,
         )
         if draft is None:
             return self._error("draft_failed", "I couldn’t draft that. Try different words.")
@@ -541,6 +544,10 @@ class RelaySession:
         if source in ("typed", "voice"):
             self.reply_ctx.typed.append(original or text)
         await self._you(text, source, original=original)
+        if getattr(self.leg, "listening", True) is False:
+            # Bolna only asks for speech after the other person talks: say so instead of
+            # leaving the user wondering why nothing happened.
+            self.emit({"t": "say.queued"})
         await self.leg.speak(text)
 
     async def handle_text(self, data: str) -> None:

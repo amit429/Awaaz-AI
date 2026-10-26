@@ -85,13 +85,46 @@ def check(text: str) -> Match | None:
     return best
 
 
+OPENER_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {"is_scam": {"type": "boolean"}, "confidence": {"type": "number"}},
+    "required": ["is_scam", "confidence"],
+}
+OPENER_PROMPT = (
+    "You protect a deaf or speech-impaired person on a phone call with a stranger. Is the other "
+    "person likely trying a scam or fraud? Signs: pretending to be a bank, government, police, "
+    "courier or company; saying a card, account, SIM or electricity will be blocked or cut; "
+    "threatening arrest; promising prizes, refunds or loans; pushing them to click a link, pay, or "
+    "share details. An ordinary shop, clinic or friend talking normally is not a scam.\n\n"
+    "WHAT THE OTHER PERSON SAID:\n{captions}"
+)
+
+
+async def _opener_opinion(captions: list[str], llm: Llm | None) -> Match | None:
+    """Scam openers ("your card will be blocked"). Warned about even before anyone asks for a code,
+    because the user cannot hear the pressure in the caller's voice. Fails safe: warn."""
+    suspicious = Match("suspicious", 2)
+    if llm is None:
+        return suspicious
+    try:
+        out = await llm.complete_json(
+            OPENER_PROMPT.format(captions="\n".join(captions[-3:])), schema=OPENER_SCHEMA
+        )
+    except Exception:  # noqa: BLE001
+        return suspicious
+    if out.get("is_scam") and float(out.get("confidence", 0)) >= 0.5:
+        return suspicious
+    return None
+
+
 async def second_opinion(match: Match, captions: list[str], llm: Llm | None) -> Match | None:
     """Confirm a weak match. Without an answer, wording about secret codes and remote-access apps
-    still warns (a missed scam is worse than a false alarm); vague "card will be blocked" wording
-    does not."""
+    still warns (a missed scam is worse than a false alarm). Scam openers get their own check."""
     if match.weight >= 2:
         return match
-    fallback = match if match.reason != "other" else None
+    if match.reason == "other":
+        return await _opener_opinion(captions, llm)
+    fallback = match
     if llm is None:
         return fallback
     try:

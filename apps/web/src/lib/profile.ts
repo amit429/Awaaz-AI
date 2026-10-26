@@ -70,6 +70,7 @@ export const emptyProfile = (): Profile => ({
   read_lang: 'hi',
   type_lang: 'hi-Latn',
   app_lang: 'en',
+  gender: 'unspecified',
   easy_font: false,
   speech_rate: 0.75,
 });

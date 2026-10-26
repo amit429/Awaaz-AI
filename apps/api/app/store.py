@@ -27,6 +27,7 @@ class Profile:
     speech_rate: float = 0.75
     onboarded: bool = False
     phone: str | None = None
+    gender: str = "unspecified"  # male | female | unspecified: Hindi and Marathi verbs need it
 
 
 class Store(Protocol):

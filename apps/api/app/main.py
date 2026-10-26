@@ -1,3 +1,6 @@
+import logging
+import re
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,7 +18,24 @@ from app.routers import (
 from app.routers import settings as settings_router
 
 
+_SECRET = re.compile(r"((?:token|s)=)[^&\s\"']+")
+
+
+class RedactSecrets(logging.Filter):
+    """Sign-in tokens travel in WebSocket URLs (and the webhook secret in Bolna's): keep them out
+    of the server logs."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        message = record.getMessage()
+        if "token=" in message or "s=" in message:
+            record.msg, record.args = _SECRET.sub(r"\1***", message), ()
+        return True
+
+
 def create_app() -> FastAPI:
+    for name in ("uvicorn.access", "uvicorn.error"):
+        if not any(isinstance(f, RedactSecrets) for f in logging.getLogger(name).filters):
+            logging.getLogger(name).addFilter(RedactSecrets())
     settings = get_settings()
     app = FastAPI(title="Awaaz API")
     app.add_middleware(

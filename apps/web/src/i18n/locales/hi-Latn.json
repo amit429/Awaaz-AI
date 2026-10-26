@@ -54,7 +54,6 @@
     "languageTitle": "Apni bhasha chunein",
     "languageHint": "Awaaz har jagah iska istemaal karega. Aap ise kabhi bhi badal sakte hain.",
     "title": "Aaiye aapki calls ki setting karein",
-    "hint": "Do chhote sawaal. Aap baad mein Main section mein sab badal sakte hain.",
     "nameLabel": "Hum aapko kis naam se bulayein?",
     "nameHint": "Har call ke shuru mein samne wale ko yeh naam bataya jayega.",
     "howPhone": "Aap phone ka istemaal kaise karte hain?",
@@ -62,7 +61,8 @@
     "fineTune": "Apne hisaab se set karein",
     "fineTuneHint": "Koi bhi tarika chunein. Baat karne ka pehla tarika calls par default rahega.",
     "finish": "Poora karein",
-    "step": "Step {{n}} / {{total}}"
+    "step": "Step {{n}} / {{total}}",
+    "hint": "Bas kuch chhote sawal. Aap baad mein Me mein sab kuch badal sakte hain."
   },
   "home": {
     "title": "Calls",
@@ -144,7 +144,14 @@
     "summary": "Aap bolte hain: {{talk}}{{also}}. Aap sunte hain: {{hear}}.",
     "summaryAlso": " (saath mein {{list}})",
     "summaryNone": "kuch bhi chuna nahi hai",
-    "chooseTalk": "Chunein aap kaise baat karenge"
+    "chooseTalk": "Chunein aap kaise baat karenge",
+    "genderLabel": "Awaaz aapke liye kaise bole?",
+    "genderHint": "Hindi aur Marathi mein \"main aa raha hoon\" aadmi aur aurat alag tarah se bolte hain. Awaaz iska istemaal aapke bolne aur likhne mein karta hai.",
+    "gender": {
+      "male": "Aadmi ki tarah",
+      "female": "Aurat ki tarah",
+      "unspecified": "Nahi batana chahte"
+    }
   },
   "presets": {
     "mute": "Main bol nahi sakta",
@@ -283,7 +290,8 @@
     "seeSummary": "Summary dekhein",
     "captionsTitle": "Captions ki bhasha",
     "captionsHint": "Wo jo bolenge wo is bhasha mein likha aayega. Aakhri kuch lines phir se translate hongi.",
-    "translating": "{{lang}} mein translate ho raha hai"
+    "translating": "{{lang}} mein translate ho raha hai",
+    "queued": "Unke bolne ka intezar hai. Jaise hi woh bolenge, aapka message bol diya jayega."
   },
   "scam": {
     "otp_request": {
@@ -309,6 +317,10 @@
     "other": {
       "title": "Yeh ek nakli ya scam call ho sakti hai",
       "body": "Saavdhan rahein. Awaaz is call par OTP, PIN ya card ki details padh kar nahi sunayega."
+    },
+    "suspicious": {
+      "title": "Yeh call dhokha ho sakta hai",
+      "body": "Yeh keh sakte hain ki aapka card ya account band ho jayega, ya aapne kuch jeeta hai. Bank aur daftar kabhi aise code ya paise nahi maangte. Awaaz is call par number bolkar nahi batayega."
     }
   },
   "errors": {
