@@ -64,7 +64,7 @@ It is not a chatbot and it does not talk for the user. Nothing is said on the ca
 
 ## Screens
 
-| What we collect | Language first | Pick how you talk |
+| What we collect | Language first | Your name, gender and profile |
 |---|---|---|
 | <img src="docs/screenshots/12-consent.png" width="220"> | <img src="docs/screenshots/02-onboarding-language.png" width="220"> | <img src="docs/screenshots/03-onboarding-preset.png" width="220"> |
 
@@ -72,7 +72,7 @@ It is not a chatbot and it does not talk for the user. Nothing is said on the ca
 |---|
 | <img src="docs/screenshots/04-onboarding-options.png" width="220"> |
 
-| Calls home | Live call | Scam warning |
+| Calls home | Live call (WhatsApp-style chat) | Scam warning |
 |---|---|---|
 | <img src="docs/screenshots/05-home.png" width="220"> | <img src="docs/screenshots/06-call.png" width="220"> | <img src="docs/screenshots/10-scam.png" width="220"> |
 
@@ -90,29 +90,44 @@ The app is also available in Tamil (below) and ten other languages.
 - Outbound calls through a real phone line (Bolna), with a spoken opening line on every call.
 - **Practice calls**: scripted callers (a Hindi pharmacy, a Marathi clinic, a bank-scam caller) that need no phone. Smart replies, translation and drafts run live in them.
 - Keypad for phone menus (“press 1 for…”), “Ask again” to ask the other person to repeat, a confirm step before ending a call.
-- A “please hold” line while the user is typing, so the other person is not left in silence.
+- A “please hold” line while the user is typing, so the other person is not left in silence. It is said at most once every 20 seconds.
+- **Several messages in a row** are each spoken at once, even while the other person is quietly waiting. If the phone line is not ready, the chat says the message will be said as soon as they speak.
 - Daily and per-call minute limits.
 
 **Talking: choose any mix**
 - **Type, and Awaaz speaks.** Typing in Hindi, Marathi or English works; text in the call’s own script is spoken straight away.
 - **Phrases and smart replies.** Saved phrases, plus one-tap suggested answers after the other person speaks.
 - **Help me say it.** A few words in, a clear sentence out. The user approves it before it is spoken.
-- **Live voice: speak, Awaaz says it.** Tap the mic and talk normally. Each sentence is turned into text within a fraction of a second and spoken on the call by Awaaz’s voice, and the user sees every sentence in the chat. A switch lets the user check each sentence before it is sent instead.
+- **Live voice: speak, Awaaz says it.** Tap the mic and talk normally. Each sentence is turned into text within a fraction of a second and spoken on the call by Awaaz’s voice, and the user sees every sentence in the chat. A switch lets the user check each sentence before it is sent instead. If the speech service drops the connection, it reconnects by itself.
 - Typing in any Indian script with the phone’s own keyboard. If the user types in English letters, Awaaz offers the same text in their own script.
 - Text typed in a different language than the call’s is translated, shown, and spoken only after the user confirms.
+- **Sending feels instant.** A message appears the moment it is sent, and Awaaz prepares it (script conversion, translation) while the user is still typing, so it is usually ready by the time they press send.
+- **Speaks the way the user would.** Hindi and Marathi verbs change for men and women; onboarding asks how Awaaz should speak for the user (as a man, as a woman, or prefer not to say). Opening lines are gender-neutral unless the user chooses, and drafts, smart replies and translations follow the choice.
 
 **Hearing: choose any mix**
 - **Live captions** with big text, and prices, times and numbers highlighted.
 - **Translate for me.** Captions appear in the call’s language first, then the user’s language follows underneath, with the original always kept in view.
-- **Switch the caption language during the call.** The last few captions are translated again.
+- **Switch the caption language during the call** from a one-tap list. The last few captions are translated again, translations are remembered per language (switching back is instant), and lines still being translated say “Translating to …”.
 - **Read aloud.** Each thing the other person says is read out slowly in their exact words.
 - **Vibration cues** when the other person starts and stops speaking (Android and desktop Chrome).
 - **Summary after the call**: what was agreed, key numbers, next steps, and a Listen button.
 
+**The call chat (WhatsApp-style)**
+- Built to feel like WhatsApp: your messages in green bubbles on the right, theirs on the left, a pointed tail on the first bubble of each run, a “Today” divider, and the time inside every bubble.
+- Ticks show what happened to each message: a clock while it is being sent, a blue double tick once it has been said on the call.
+- The header shows the call timer (“Connected · 1:42”) and “speaking…” while the other person talks, with buttons for the caption language and ending the call.
+- The input bar grows with the message, the round button is the mic when the box is empty and send when it has text, and the keyboard stays open after sending. Enter sends on a computer and adds a line on a phone.
+- The screen sizes itself to the visible area, so the on-screen keyboard never covers the input bar, and quick replies sit above the input bar instead of over it.
+- If you scroll up to read, new captions do not pull you down; a button shows how many new lines arrived.
+- Tap a bubble to copy it, have it read aloud, or say it again.
+- Phrases are one tap from the input bar; the “+” opens the keypad, “Ask again”, Help me say it and the caption language.
+
 **Safety**
 - **Scam shield.** When someone asks for an OTP, PIN, UPI PIN, CVV or to install a remote-access app, Awaaz shows a red warning, refuses to speak any 4–8 digit number on that call, and logs the event.
+- **Scam openers are flagged too.** Calls that say a card, account, SIM or electricity will be blocked, mention KYC, a lottery or a refund, pretend to be a bank, police or courier, or push a link get a “This call may be a scam” warning before anyone asks for a code. Numbers are not read out from then on, and a later code request shows its own warning.
 - An opening line on every call says an assistant is helping. This cannot be turned off.
 - AI-drafted and translated text is shown first and spoken only after the user confirms.
+- Sign-in tokens and webhook secrets are kept out of the server logs.
 
 **Languages**
 - The whole app in **12 languages**: English, Hindi, Hinglish (Hindi in English letters), Marathi, Bengali, Tamil, Telugu, Kannada, Gujarati, Punjabi, Malayalam and Odia.
@@ -123,6 +138,7 @@ The app is also available in Tamil (below) and ten other languages.
 **Account and settings**
 - Sign in with Google or with email and password, followed by a one-time screen that says what is collected and asks for consent (stored with a version, so people are asked again if it changes).
 - Six starting profiles (for example “Deaf, I prefer typing”, “Hard of hearing”, “I can’t speak”), then fine-tune each option.
+- Profile changes (larger text, speech rate, app language, gender) save reliably and apply straight away; a save that loses its reply is checked with the server before an error is shown.
 - Contacts with favourites and notes that smart replies can use (“my BP medicine is Telma 40”).
 - Call history with transcripts, installable as a web app, light and dark themes, larger-text option.
 
@@ -131,11 +147,11 @@ The app is also available in Tamil (below) and ten other languages.
 ### Practice calls (everyone, no phone needed)
 1. Open **https://awaaz-web-sigma.vercel.app**. The first load can take up to a minute, because the free server sleeps when idle.
 2. Sign in with Google, or create an account with email and password. The first time, a **“Before you start”** screen lists exactly what Awaaz collects (email and name, an optional phone number, the numbers you call, call text; audio is not stored) and asks you to agree.
-3. Choose your language, enter your name, and pick a starting profile.
+3. Choose your language, enter your name, choose how Awaaz should speak for you, and pick a starting profile.
 4. On the home screen, scroll to **Practice calls** and tap one:
    - **Sharma Medical** (Hindi pharmacy): type “Telma 40 chahiye”, then try the caption-language switcher in the header.
    - **Netra Clinic** (Marathi clinic).
-   - **Unknown number** (bank scam): reply once and watch the scam shield appear when they ask for an OTP.
+   - **Unknown number** (bank scam): a “This call may be a scam” warning appears as soon as they say your card will be blocked; reply once and a second warning appears when they ask for an OTP.
 5. End the call, then open it from **Recent** to see the transcript and summary.
 
 ### Try a real call (verified numbers only)
@@ -175,7 +191,7 @@ The live-call protocol is documented in [`specs/protocol/`](specs/protocol/relay
 1. Every call starts with a line telling the other person an assistant is involved. It is not configurable.
 2. Nothing is said on a call without a user action, except that opening line and the “please hold” line.
 3. AI-drafted and translated text is shown to the user and spoken only after they confirm.
-4. The scam shield never speaks 4–8 digit numbers after an OTP, PIN, CVV or UPI PIN request, warns the user, and logs the event.
+4. The scam shield warns on scam openers and on any OTP, PIN, CVV, UPI PIN or remote-app request, never speaks 4–8 digit numbers after that, and logs the event.
 5. No caller-ID spoofing. Calls show the Awaaz line’s number.
 6. Audio is not stored; limits cap the minutes per call and per day.
 7. All demo names, numbers and conversations are fictional.
@@ -187,11 +203,11 @@ The live-call protocol is documented in [`specs/protocol/`](specs/protocol/relay
 | Web app | React 18, TypeScript, Vite (installable web app), Tailwind CSS v4, shadcn/ui, TanStack Query, i18next |
 | API | Python 3.12+ (3.14 in production), FastAPI, Pydantic v2, asyncio, httpx |
 | Phone calls | Bolna (custom-LLM relay agent) |
-| Speech and Indian languages | Sarvam (Saaras speech-to-text, translation, transliteration) |
+| Speech and Indian languages | Sarvam (Saaras streaming speech-to-text for live voice, translation, transliteration) |
 | AI | Gemini (smart replies, drafts, summaries, scam second opinion) |
 | Data and sign-in | Supabase (Postgres with row-level security, Auth) |
 | Hosting (all free tiers) | Vercel (web), Render (API), Supabase |
-| Tests | pytest (150 API tests), vitest (29 web tests), ruff |
+| Tests | pytest (171 API tests), vitest (34 web tests), ruff |
 
 ## Run it yourself
 
@@ -251,6 +267,7 @@ docs/             decisions, design, deploy notes, architecture for incoming cal
 - **Translations of the app are machine-made** and have not been reviewed by native speakers.
 - **Vibration cues** work on Android and desktop Chrome, not on iPhones. The read-aloud voice depends on the voices installed on the phone.
 - **Caption translation can drift on names and medicines.** The original text is always shown beneath it.
+- **The phone line only listens after the other person speaks.** Bolna asks Awaaz what to say right after the other person talks; Awaaz keeps that request open for a minute so several messages can be said in a row. After a minute of silence, a new message waits until they speak again (the chat says so).
 
 ## Future scope
 
@@ -285,4 +302,6 @@ These are designed or planned but **not built or not testable yet**.
 
 ## Credits and licence
 
-Built by Amit for the Bolna Buildathon. All names, phone numbers and conversations in the demos are fictional. No licence has been chosen yet; until one is added, all rights are reserved.
+Built by Amit Pile for the Bolna Buildathon. All names, phone numbers and conversations in the demos are fictional.
+
+Released under the [MIT License](LICENSE). Third-party services (Bolna, Sarvam, Gemini, Supabase) have their own terms; the machine-generated translations should be reviewed before use in production.
