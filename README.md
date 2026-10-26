@@ -64,25 +64,63 @@ It is not a chatbot and it does not talk for the user. Nothing is said on the ca
 
 ## Screens
 
-| What we collect | Language first | Your name, gender and profile |
-|---|---|---|
-| <img src="docs/screenshots/12-consent.png" width="220"> | <img src="docs/screenshots/02-onboarding-language.png" width="220"> | <img src="docs/screenshots/03-onboarding-preset.png" width="220"> |
+Every screenshot is one phone screen. Arrows show the order you see them in; a long screen is shown in parts as you scroll (for example *1 of 3*).
 
-| Choose your options |
-|---|
-| <img src="docs/screenshots/04-onboarding-options.png" width="220"> |
+### 1. Getting started
 
-| Calls home | Live call (WhatsApp-style chat) | Scam warning |
-|---|---|---|
-| <img src="docs/screenshots/05-home.png" width="220"> | <img src="docs/screenshots/06-call.png" width="220"> | <img src="docs/screenshots/10-scam.png" width="220"> |
+<table>
+  <tr>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/01-login.png" width="160" alt="Sign in"><br><sub>Sign in</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/12-consent-1.png" width="160" alt="Before you start (1 of 2)"><br><sub>Before you start (1 of 2)</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/12-consent-2.png" width="160" alt="Before you start (2 of 2)"><br><sub>Before you start (2 of 2)</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/02-onboarding-language.png" width="160" alt="Pick a language"><br><sub>Pick a language</sub></td>
+  </tr>
+</table>
 
-| After the call | Contacts | Settings |
-|---|---|---|
-| <img src="docs/screenshots/07-history.png" width="220"> | <img src="docs/screenshots/08-contacts.png" width="220"> | <img src="docs/screenshots/09-me.png" width="220"> |
+<table>
+  <tr>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/03-onboarding-preset.png" width="160" alt="Name, gender, profile"><br><sub>Name, gender, profile</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/04-onboarding-options-1.png" width="160" alt="Fine-tune (1 of 3)"><br><sub>Fine-tune (1 of 3)</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/04-onboarding-options-2.png" width="160" alt="Fine-tune (2 of 3)"><br><sub>Fine-tune (2 of 3)</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/04-onboarding-options-3.png" width="160" alt="Fine-tune (3 of 3)"><br><sub>Fine-tune (3 of 3)</sub></td>
+  </tr>
+</table>
 
-The app is also available in Tamil (below) and ten other languages.
+### 2. Making a call
 
-<img src="docs/screenshots/11-login-tamil.png" width="220" alt="Login screen in Tamil">
+<table>
+  <tr>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/05-home.png" width="160" alt="Calls and practice calls"><br><sub>Calls and practice calls</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/06-call.png" width="160" alt="Live call with captions"><br><sub>Live call with captions</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/10-scam.png" width="160" alt="Scam warning"><br><sub>Scam warning</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/07-history.png" width="160" alt="Summary after the call"><br><sub>Summary after the call</sub></td>
+  </tr>
+</table>
+
+### 3. Everyday use
+
+<table>
+  <tr>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/08-contacts.png" width="160" alt="Contacts"><br><sub>Contacts</sub></td>
+    <td width="16"></td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/09-me-1.png" width="160" alt="Me (1 of 2)"><br><sub>Me (1 of 2)</sub></td>
+    <td align="center" valign="middle">→</td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/09-me-2.png" width="160" alt="Me (2 of 2)"><br><sub>Me (2 of 2)</sub></td>
+    <td width="16"></td>
+    <td align="center" valign="top" width="170"><img src="docs/screenshots/11-login-tamil.png" width="160" alt="The app in Tamil"><br><sub>The app in Tamil</sub></td>
+  </tr>
+</table>
+
+The app is available in 12 languages; Tamil is shown above.
 
 ## Features
 

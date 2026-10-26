@@ -60,11 +60,14 @@ export function Me() {
             <ChevronRight className="size-4 text-muted-foreground" />
           </Link>
 
+          {/* Shown only while there is something to save, so it never sits over the settings. */}
+          {(dirty || save.isPending) && (
           <div className="pb-safe sticky bottom-20 z-20 md:bottom-4">
-            <Button size="lg" className="w-full shadow-lg" disabled={!dirty || save.isPending || !draft.display_name.trim()} onClick={() => save.mutate(draft, { onSuccess: (saved) => { setDraft(saved.profile); toast.success(t('common.saved')); }, onError: (e) => toast.error(t('common.couldNotSave'), { description: e instanceof Error ? e.message : undefined }) })}>
-              {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} {dirty ? t('me.saveChanges') : t('common.saved')}
+            <Button size="lg" className="w-full shadow-lg" disabled={save.isPending || !draft.display_name.trim()} onClick={() => save.mutate(draft, { onSuccess: (saved) => { setDraft(saved.profile); toast.success(t('common.saved')); }, onError: (e) => toast.error(t('common.couldNotSave'), { description: e instanceof Error ? e.message : undefined }) })}>
+              {save.isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} {t('me.saveChanges')}
             </Button>
           </div>
+          )}
 
           <div className="flex items-center justify-between gap-4 border-t pt-6">
             <p className="min-w-0 truncate text-sm text-muted-foreground">{t('me.signedInAs', { email: session.email ?? '' })}</p>
