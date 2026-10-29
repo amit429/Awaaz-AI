@@ -4,8 +4,6 @@
 
 Awaaz lets someone who is deaf, hard of hearing, or unable to speak make a normal phone call. They type (or speak into the mic, or tap a phrase) and Awaaz says it aloud on the call. What the other person says appears on screen as live captions, in the language the user reads. The person on the other end just hears an ordinary call, with a short opening line telling them an assistant is helping.
 
-Built for the **Bolna Buildathon** (deadline 31 October 2026, noon IST).
-
 | | |
 |---|---|
 | **Live demo** | https://awaaz-web-sigma.vercel.app |
