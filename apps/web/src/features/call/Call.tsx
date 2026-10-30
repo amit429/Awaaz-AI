@@ -198,7 +198,7 @@ export function Call() {
   useEffect(() => stopSpeaking, []);
 
   const preview = state.feed.find((i): i is Extract<FeedItem, { kind: 'preview' }> => i.kind === 'preview');
-  const live = state.status === 'connected' || state.status === 'ringing';
+  const live = state.status === 'connecting' || state.status === 'ringing' || state.status === 'connected';
   useEffect(() => {
     if (!live && voice.active) voice.stop();
   }, [live]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -272,11 +272,15 @@ export function Call() {
   const lastItem = state.feed[state.feed.length - 1];
   const theySpeaking = lastItem?.kind === 'them' && lastItem.partial;
 
+  // Why a call ended or did not connect (busy, no answer, declined), shown next to the state.
+  const ended = state.status === 'ended' || state.status === 'failed';
+  const reasonText = ended && state.endReason ? t(`call.reasons.${state.endReason}`, { defaultValue: state.status === 'failed' ? state.endReason : '' }) : '';
+
   const status = !online && state.status !== 'ended'
     ? t('call.reconnecting')
     : state.status === 'connected'
       ? theySpeaking ? t('call.speaking') : `${t('call.connected')}${connectedAt ? ` · ${clock(Math.max(0, Math.floor((now - connectedAt) / 1000)))}` : ''}`
-      : t(`call.${state.status}`);
+      : `${t(`call.${state.status}`)}${reasonText ? ` · ${reasonText}` : ''}`;
 
   const hasText = text.trim().length > 0;
   const showMic = canUseVoice && !hasText && mode === 'type';
@@ -320,7 +324,7 @@ export function Call() {
         <div ref={list} onScroll={onScroll} onPointerDown={(e) => !(e.target as Element).closest('[role=button], button') && setActiveBubble(null)} className="chat-wallpaper h-full overflow-y-auto overscroll-contain px-3 pb-2 pt-1" aria-live="polite">
           <DayDivider label={t('call.today')} />
           {state.feed.length === 0 && (
-            <p className="mt-10 text-center text-[15px] text-[var(--chat-muted)]">{state.status === 'connecting' ? t('call.connectingCall') : t('call.waiting')}</p>
+            <p className="mt-10 text-center text-[15px] text-[var(--chat-muted)]">{state.status === 'connecting' || state.status === 'ringing' ? t('call.connectingCall') : state.status === 'failed' ? (reasonText || t('call.failed')) : t('call.waiting')}</p>
           )}
           {state.feed.map((item, idx) => {
             const prev = state.feed[idx - 1];

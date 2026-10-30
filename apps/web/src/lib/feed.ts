@@ -9,7 +9,7 @@ export interface Entity {
 }
 
 export type ServerEvent =
-  | { t: 'call.state'; state: 'ringing' | 'connected' | 'ended' | 'failed'; reason?: string }
+  | { t: 'call.state'; state: 'connecting' | 'ringing' | 'connected' | 'ended' | 'failed'; reason?: string }
   | { t: 'caption.partial'; turn: number; text: string }
   | { t: 'caption.final'; turn: number; text: string; lang?: string; translated?: string | null; confidence: number; entities: Entity[] }
   | { t: 'caption.translation'; turn: number; lang: string; text: string }

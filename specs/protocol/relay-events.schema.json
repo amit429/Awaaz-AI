@@ -15,6 +15,7 @@
         },
         "state": {
           "enum": [
+            "connecting",
             "ringing",
             "connected",
             "ended",

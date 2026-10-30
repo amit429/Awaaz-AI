@@ -38,7 +38,20 @@ class RedactSecrets(logging.Filter):
         return _SECRET.sub(r"\1***", value) if isinstance(value, str) else value
 
 
+def _log_app_events() -> None:
+    """Show our own INFO logs (call status webhooks, stop attempts) in the server output: only
+    uvicorn's loggers had a handler, so everything under awaaz.* was silently dropped."""
+    app_log = logging.getLogger("awaaz")
+    if not app_log.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+        app_log.addHandler(handler)
+        app_log.setLevel(logging.INFO)
+        app_log.propagate = False
+
+
 def create_app() -> FastAPI:
+    _log_app_events()
     for name in ("uvicorn.access", "uvicorn.error"):
         if not any(isinstance(f, RedactSecrets) for f in logging.getLogger(name).filters):
             logging.getLogger(name).addFilter(RedactSecrets())

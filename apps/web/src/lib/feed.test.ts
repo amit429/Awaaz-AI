@@ -109,4 +109,14 @@ describe('splitByEntities', () => {
     st = applyEvent(st, { t: 'call.state', state: 'ended' });
     expect(st.feed.some((i) => i.kind === 'pending')).toBe(false);
   });
+
+  it('shows connecting and ringing until the call is picked up, and why it did not connect', () => {
+    let st = applyEvent(initialState, { t: 'call.state', state: 'connecting' });
+    expect(st.status).toBe('connecting');
+    st = applyEvent(st, { t: 'call.state', state: 'ringing' });
+    expect(st.status).toBe('ringing');
+    st = applyEvent(st, { t: 'call.state', state: 'failed', reason: 'busy' });
+    expect(st.status).toBe('failed');
+    expect(st.endReason).toBe('busy');
+  });
 });

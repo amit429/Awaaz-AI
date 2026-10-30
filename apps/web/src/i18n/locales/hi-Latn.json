@@ -291,7 +291,17 @@
     "captionsTitle": "Captions ki bhasha",
     "captionsHint": "Wo jo bolenge wo is bhasha mein likha aayega. Aakhri kuch lines phir se translate hongi.",
     "translating": "{{lang}} mein translate ho raha hai",
-    "queued": "Unke bolne ka intezar hai. Jaise hi woh bolenge, aapka message bol diya jayega."
+    "queued": "Unke bolne ka intezar hai. Jaise hi woh bolenge, aapka message bol diya jayega.",
+    "reasons": {
+      "busy": "Line busy hai.",
+      "no_answer": "Phone nahi uthaya.",
+      "declined": "Unhone call kaat diya.",
+      "failed": "Call nahi laga.",
+      "callee_hung_up": "Unhone phone rakh diya.",
+      "user": "Aapne call khatam kiya.",
+      "max_call_minutes": "Time khatam ho gaya.",
+      "app_disconnected": "App disconnect ho gaya."
+    }
   },
   "scam": {
     "otp_request": {

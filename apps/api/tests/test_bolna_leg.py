@@ -14,8 +14,9 @@ from app.store import InMemoryStore
 
 
 class FakeBolna:
-    def __init__(self, fail: str | None = None):
+    def __init__(self, fail: str | None = None, refuse_stops: int = 0):
         self.fail, self.started, self.stopped = fail, [], []
+        self.refuse_stops = refuse_stops  # Bolna refuses this many stops ("not started yet")
 
     async def start_call(self, agent_id, to, user_data):
         if self.fail:
@@ -25,6 +26,9 @@ class FakeBolna:
 
     async def stop_call(self, execution_id):
         self.stopped.append(execution_id)
+        if len(self.stopped) <= self.refuse_stops:
+            return "initiated"
+        return "stopped"
 
 
 def make_leg(**kw) -> BolnaLeg:
@@ -38,6 +42,7 @@ def make_leg(**kw) -> BolnaLeg:
         max_wait=1.0,
         tick=0.02,
         batch=0.05,
+        stop_retry=0.02,
         **kw,
     )
 
@@ -197,7 +202,82 @@ async def test_terminal_status_hangs_up_once():
 async def test_hangup_stops_the_call():
     leg, _ = await started_leg()
     await leg.hangup()
+    await leg.stopped()
     assert leg.client.stopped == ["exec-1"] and not leg.active
+
+
+async def test_hangup_keeps_trying_while_bolna_has_not_started_dialling():
+    """Bolna refuses a stop until the call exists on the phone network, then dials anyway: the
+    user pressed End but the phone rang 4 s later (30 Oct)."""
+    leg = make_leg()
+    leg.client = FakeBolna(refuse_stops=3)
+    h = Heard()
+    await leg.start(h.heard, h.hangup)
+    await leg.hangup()
+    await asyncio.wait_for(leg.stopped(), 1.0)
+    assert len(leg.client.stopped) == 4  # three refusals, then accepted
+
+
+async def test_hangup_before_bolna_answered_the_start_still_stops_the_call():
+    class SlowStart(FakeBolna):
+        async def start_call(self, agent_id, to, user_data):
+            await asyncio.sleep(0.1)
+            return await super().start_call(agent_id, to, user_data)
+
+    leg = make_leg()
+    leg.client = SlowStart()
+    h = Heard()
+    starting = asyncio.create_task(leg.start(h.heard, h.hangup))
+    await asyncio.sleep(0.02)
+    await leg.hangup()  # End pressed while the call is still being placed
+    await starting
+    await asyncio.wait_for(leg.stopped(), 1.0)
+    assert leg.client.stopped == ["exec-1"]
+
+
+class States:
+    def __init__(self):
+        self.seen: list[str] = []
+
+    async def __call__(self, state):
+        self.seen.append(state)
+
+
+async def test_progress_follows_bolnas_status_and_each_state_is_reported_once():
+    leg, _ = await started_leg()
+    states = States()
+    leg.on_state = states
+    for status in ("queued", "initiated", "ringing", "ringing", "in-progress", "in-progress"):
+        await leg.on_status(status)
+    assert states.seen == ["ringing", "connected"]
+
+
+async def test_the_other_person_speaking_proves_the_call_was_answered():
+    leg, _ = await started_leg()
+    states = States()
+    leg.on_state = states
+    task = asyncio.create_task(collect(leg, 1, "हेलो"))
+    await asyncio.sleep(0.05)
+    assert states.seen == ["connected"]
+    await leg.hangup()
+    await task
+
+
+@pytest.mark.parametrize(
+    "status, reason",
+    [
+        ("busy", "busy"),
+        ("no-answer", "no_answer"),
+        ("call-disconnected", "declined"),
+        ("canceled", "declined"),
+        ("failed", "failed"),
+    ],
+)
+async def test_a_call_that_ends_before_pickup_says_why(status, reason):
+    leg, h = await started_leg()
+    await leg.on_status("ringing")
+    await leg.on_status(status)
+    assert h.hung == [reason]
 
 
 def test_registry_routes_by_token_and_falls_back_to_the_only_active_leg():
@@ -247,6 +327,24 @@ def async_client():
     return httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test")
 
 
+async def _bolna_says(ac, status):
+    secret = get_settings().webhook_secret
+    r = await ac.post(f"/v1/webhooks/bolna?s={secret}", json={"id": "exec-1", "status": status})
+    assert r.status_code == 200
+
+
+async def _placed_call(ac):
+    r = await ac.post(
+        "/v1/calls", json={"to": "+919876543210"}, headers={"Authorization": f"Bearer {_token()}"}
+    )
+    assert r.status_code == 200, r.text
+    session = registry.get(r.json()["session_id"])
+    session.prepare = as_is
+    q = session.subscribe()
+    await session.start()
+    return session, q
+
+
 async def _drain_until(q, pred, timeout=2.0):
     seen = []
     while True:
@@ -274,6 +372,7 @@ async def test_live_call_flow_captions_reply_and_hangup(env, monkeypatch):
         q = session.subscribe()
         await session.start()
         assert fake.started[0][2]["call_id"] == call_id
+        await _bolna_says(ac, "in-progress")  # the callee picks up
         await _drain_until(q, lambda e: e["t"] == "you.final" and e["source"] == "disclosure")
 
         # Bolna reports what the callee said; we answer with the text the user typed
@@ -325,3 +424,49 @@ async def test_webhook_requires_secret(env):
     async with async_client() as ac:
         r = await ac.post("/v1/webhooks/bolna?s=nope", json={})
     assert r.status_code == 403
+
+
+async def test_connected_is_shown_only_when_the_callee_picks_up(env, monkeypatch):
+    monkeypatch.setattr("app.services.calls.BolnaClient", lambda settings: FakeBolna())
+    async with async_client() as ac:
+        session, q = await _placed_call(ac)
+        seen = await _drain_until(q, lambda e: e["t"] == "call.state")
+        assert seen[-1]["state"] == "connecting"
+        assert q.empty()  # no "connected", no disclosure bubble before anyone answers
+
+        await _bolna_says(ac, "ringing")
+        seen = await _drain_until(q, lambda e: e["t"] == "call.state")
+        assert seen[-1]["state"] == "ringing" and q.empty()
+
+        await _bolna_says(ac, "in-progress")
+        seen = await _drain_until(q, lambda e: e["t"] == "you.final")
+        assert [e["state"] for e in seen if e["t"] == "call.state"] == ["connected"]
+        assert seen[-1]["source"] == "disclosure"
+        await session.end("user")
+
+
+@pytest.mark.parametrize(
+    "status, reason",
+    [("busy", "busy"), ("no-answer", "no_answer"), ("call-disconnected", "declined")],
+)
+async def test_a_call_cut_before_pickup_fails_with_the_reason(env, monkeypatch, status, reason):
+    monkeypatch.setattr("app.services.calls.BolnaClient", lambda settings: FakeBolna())
+    async with async_client() as ac:
+        session, q = await _placed_call(ac)
+        await _bolna_says(ac, "ringing")
+        await _bolna_says(ac, status)
+        seen = await _drain_until(q, lambda e: e["t"] == "call.state" and e["state"] == "failed")
+        assert seen[-1]["reason"] == reason
+        assert registry.get(session.call_id) is None  # cleaned up
+
+
+async def test_ending_from_the_app_stops_the_phone_call(env, monkeypatch):
+    fake = FakeBolna()
+    monkeypatch.setattr("app.services.calls.BolnaClient", lambda settings: fake)
+    async with async_client() as ac:
+        session, q = await _placed_call(ac)
+        await _bolna_says(ac, "in-progress")
+        await session.handle({"t": "call.end"})
+        await _drain_until(q, lambda e: e["t"] == "call.state" and e["state"] == "ended")
+        await asyncio.wait_for(session.leg.stopped(), 1.0)
+        assert fake.stopped == ["exec-1"]

@@ -13,7 +13,7 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 
 | t | Fields | When |
 |---|---|---|
-| `call.state` | `state` (`ringing`, `connected`, `ended`, `failed`), `reason?`, `elapsed_ms` | Call progress |
+| `call.state` | `state` (`connecting`, `ringing`, `connected`, `ended`, `failed`), `reason?`, `elapsed_ms` | Call progress. On a phone call `connected` means the other person picked up; a call that ends before that is `failed` with reason `busy`, `no_answer`, `declined` or `failed` |
 | `caption.partial` | `turn`, `text` | Interim transcript (≤ 5/s) |
 | `caption.final` | `turn`, `text`, `lang`, `translated?`, `confidence`, `entities[]` | End of the other person’s turn |
 | `you.final` | `turn`, `text`, `source`, `original?` | A user turn was spoken or transcribed (typed, reply, phrase, draft, voice, clarity). `original` is what the user typed when it was converted (Hinglish to native script) |

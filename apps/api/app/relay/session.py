@@ -51,6 +51,9 @@ DIGIT_RUN = re.compile(r"(?<!\d)\d{4,8}(?!\d)")
 Preparer = Callable[[str], Awaitable[Prepared]]
 
 
+NOT_ANSWERED = {"busy", "no_answer", "declined", "failed"}  # reasons a phone leg gives before pickup
+
+
 async def as_is(text: str) -> Prepared:
     return Prepared(text, False, "as_is")
 
@@ -278,22 +281,40 @@ class RelaySession:
 
     # ---------- lifecycle ----------
     async def start(self) -> None:
-        """Dial and connect (mock: instantly), speak the disclosure, let the callee answer."""
+        """Dial. A mock callee answers at once; on a phone call "connected" and the disclosure
+        wait until the other person picks up (the leg reports ringing and connected)."""
         if self.started:
             return
         self.started = True
-        await self.store.update_call(self.call_id, status="ringing")
-        self._set_state("ringing")
-        self._set_state("connected")
-        await self.store.update_call(self.call_id, status="connected")
-        line = disclosure_line(self.preset, self.call_lang, self.name, self.reply_ctx.gender)
-        await self._you(line, "disclosure", speaker="system")
+        if getattr(self.leg, "reports_progress", False):
+            self.leg.on_state = self._leg_state
+            self._set_state("connecting")
+        else:
+            await self.store.update_call(self.call_id, status="ringing")
+            self._set_state("ringing")
+            await self._connected()
         self._spawn(self._watchdog())
         try:
             await self.leg.start(self._heard, self._leg_hangup)
         except Exception as exc:  # noqa: BLE001 - show the user why the call could not start
             log.warning("leg failed to start: %s", exc)
             await self.fail(getattr(exc, "message", None) or "Could not start the call")
+
+    async def _connected(self) -> None:
+        self._set_state("connected")
+        await self.store.update_call(self.call_id, status="connected")
+        line = disclosure_line(self.preset, self.call_lang, self.name, self.reply_ctx.gender)
+        await self._you(line, "disclosure", speaker="system")
+
+    async def _leg_state(self, state: str) -> None:
+        """Progress reported by a phone leg: ringing, then connected when they pick up."""
+        if self.ended:
+            return
+        if state == "ringing":
+            await self.store.update_call(self.call_id, status="ringing")
+            self._set_state("ringing")
+        elif state == "connected":
+            await self._connected()
 
     async def fail(self, reason: str) -> None:
         if self.ended:
@@ -341,7 +362,10 @@ class RelaySession:
             self.emit({"t": "caption.partial", "turn": self.seq + 1, "text": text})
 
     async def _leg_hangup(self, reason: str) -> None:
-        await self.end(reason)
+        if reason in NOT_ANSWERED:  # cut before anyone picked up
+            await self.fail(reason)
+        else:
+            await self.end(reason)
 
     async def hold(self) -> None:
         """Tell the other person the user is typing, please hold (also used by WhatsApp's "hold")."""
