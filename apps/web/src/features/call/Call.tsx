@@ -382,14 +382,14 @@ export function Call() {
       {/* Input bar */}
       <div className="pb-safe shrink-0 px-1.5 pb-1.5 pt-0.5">
         {live ? (
-          <form className="flex items-end gap-1.5" onSubmit={(e) => { e.preventDefault(); sendText(); }}>
+          <form className="flex min-w-0 items-end gap-1.5" onSubmit={(e) => { e.preventDefault(); sendText(); }}>
             {voice.active ? (
-              <div className="flex min-h-12 flex-1 items-center gap-3 rounded-[1.6rem] bg-[var(--chat-composer)] px-4 py-2" aria-live="polite">
+              <div className="flex min-h-12 min-w-0 flex-1 items-center gap-2 overflow-hidden rounded-[1.6rem] bg-[var(--chat-composer)] px-3 py-2" aria-live="polite">
                 <span className="size-2.5 shrink-0 animate-pulse rounded-full bg-[var(--chat-danger)]" aria-hidden="true" />
                 <span className="min-w-0 flex-1 truncate text-[15px]">{heard ? t('call.voiceHeard', { text: heard }) : <>{t('call.voiceListening')}<Dots /></>}</span>
-                <label className="flex shrink-0 items-center gap-2 text-[13px] text-[var(--chat-muted)]">
-                  {t('call.autoSend')}
-                  <Switch checked={autoSend} onCheckedChange={changeAutoSend} aria-label={t('call.autoSend')} />
+                <label className="flex min-w-0 max-w-[45%] shrink-0 items-center gap-1.5 text-[13px] text-[var(--chat-muted)]">
+                  <span className="min-w-0 truncate">{t('call.autoSend')}</span>
+                  <Switch className="shrink-0" checked={autoSend} onCheckedChange={changeAutoSend} aria-label={t('call.autoSend')} />
                 </label>
               </div>
             ) : (
