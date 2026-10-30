@@ -16,6 +16,7 @@ import { api } from '@/lib/api';
 import { applyEvent, initialState, type FeedItem } from '@/lib/feed';
 import { RelayClient } from '@/lib/relay';
 import { buzz, speak, stopSpeaking, useLiveVoice } from '@/lib/speech';
+import { createVoiceBuffer, type VoiceBuffer } from '@/lib/voiceBuffer';
 import { cn } from '@/lib/utils';
 import { ActionCard, BubbleActions, DayDivider, Dots, MyBubble, Note, TheirBubble } from './ChatParts';
 
@@ -150,24 +151,38 @@ export function Call() {
     try { return localStorage.getItem('awaaz-voice-auto') !== 'off'; } catch { return true; }
   });
   const [heard, setHeard] = useState('');
+  // Phrases are sent as one message after a real pause, so a breath mid-sentence does not split it.
+  const sendVoice = useRef((_message: string) => undefined as void);
+  sendVoice.current = (message) => {
+    setHeard('');
+    dispatch({ t: 'local.pending', id: `p${Date.now()}`, text: message });
+    client.current?.send({ t: 'user.say', text: message, source: 'voice' });
+  };
+  const voiceBuffer = useRef<VoiceBuffer | null>(null);
+  voiceBuffer.current ??= createVoiceBuffer((message) => sendVoice.current(message));
   const voice = useLiveVoice(typeLang === 'hi-Latn' ? 'hi' : typeLang, {
     // The other person is not left in silence while the user is mid-sentence.
-    onSpeechStart: () => client.current?.send({ t: 'user.typing' }),
+    onSpeechStart: () => {
+      voiceBuffer.current?.speechStarted();
+      client.current?.send({ t: 'user.typing' });
+    },
     onText: (spoken) => {
-      setHeard(spoken);
       if (autoSend) {
-        dispatch({ t: 'local.pending', id: `p${Date.now()}`, text: spoken });
-        client.current?.send({ t: 'user.say', text: spoken, source: 'voice' });
+        setHeard(voiceBuffer.current?.text(spoken) ?? spoken);
       } else {
         setMode('type');
-        setText(spoken);
+        setText((before) => (before.trim() ? `${before.trim()} ${spoken}` : spoken));
       }
     },
     onError: (code) => toast.error(t(code === 'denied' ? 'call.micDenied' : 'call.voiceFailed')),
   });
+  useEffect(() => () => voiceBuffer.current?.cancel(), []);
 
   function toggleVoice() {
-    if (voice.active) return voice.stop();
+    if (voice.active) {
+      voiceBuffer.current?.flush(); // whatever was heard before stopping is still sent
+      return voice.stop();
+    }
     stopSpeaking();
     setHeard('');
     void voice.start();
@@ -200,6 +215,7 @@ export function Call() {
   const preview = state.feed.find((i): i is Extract<FeedItem, { kind: 'preview' }> => i.kind === 'preview');
   const live = state.status === 'connecting' || state.status === 'ringing' || state.status === 'connected';
   useEffect(() => {
+    if (!live) voiceBuffer.current?.cancel(); // the call is over: nothing more is sent
     if (!live && voice.active) voice.stop();
   }, [live]); // eslint-disable-line react-hooks/exhaustive-deps
 
