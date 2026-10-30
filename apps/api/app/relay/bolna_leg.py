@@ -8,13 +8,15 @@ something to say (see docs/SPIKE-bolna.md for why: fragments, one waiter, no unr
 import asyncio
 import contextlib
 import time
+from collections import deque
 from collections.abc import AsyncIterator
 from typing import Protocol
 
 from app.relay.legs import HangupCallback, HeardCallback
 
 SETTLE = 1.2  # seconds without new fragments before a turn counts as finished
-MAX_WAIT = 60.0  # an open request is kept this long after the last thing said on it
+MAX_WAIT = 60.0  # an open request is kept this long waiting for the user to send something
+BATCH = 0.3  # after the first message, wait this long for others sent right behind it
 ENDS = ".!?।॥"
 TICK = 0.3
 
@@ -47,15 +49,17 @@ class BolnaLeg:
         settle: float = SETTLE,
         max_wait: float = MAX_WAIT,
         tick: float = TICK,
+        batch: float = BATCH,
     ) -> None:
         self.client, self.agent_id, self.to = client, agent_id, to
         self.call_id, self.disclosure = call_id, disclosure
-        self.settle, self.max_wait, self.tick = settle, max_wait, tick
+        self.settle, self.max_wait, self.tick, self.batch = settle, max_wait, tick, batch
         self.execution_id: str | None = None
         self.active = False
         self._on_heard: HeardCallback | None = None
         self._on_hangup: HangupCallback | None = None
-        self._replies: asyncio.Queue[tuple[str, bool]] = asyncio.Queue()
+        self._replies: deque[tuple[str, bool]] = deque()  # (text, final) waiting to be spoken
+        self._ready = asyncio.Event()  # set while _replies is not empty
         self._generation = 0
         self._turn_text: dict[int, str] = {}
         self._final_text: dict[int, str] = {}  # what of each turn is already shown as final
@@ -76,8 +80,15 @@ class BolnaLeg:
         waits until the other person speaks again (Bolna only asks after they speak)."""
         return self._open > 0
 
+    @property
+    def can_hold_line(self) -> bool:
+        """Bolna voices a response only once it is complete, and drops it if the other person
+        speaks first, so a "please wait" line can never be heard while the user is still typing."""
+        return False
+
     async def speak(self, text: str, *, final: bool = True) -> None:
-        self._replies.put_nowait((text, final))
+        self._replies.append((text, final))
+        self._ready.set()
 
     async def hangup(self) -> None:
         self.active = False
@@ -96,9 +107,11 @@ class BolnaLeg:
     async def on_request(self, turn: int, heard: str) -> AsyncIterator[str]:
         """One Bolna request = the callee spoke (maybe a fragment). Yields what to say back.
 
-        The request stays open after a reply, so the user can send several messages in a row and
-        each is spoken at once. It closes when the callee speaks again (a newer request takes
-        over) or after `max_wait` seconds with nothing to say.
+        Bolna voices a response only when it is complete, so the request is held open only until
+        the user sends something, then answered and closed at once (messages sent right behind
+        each other go out together). A held-open request left typed messages unspoken until the
+        other person talked again, and they were dropped if the call ended first. A message sent
+        after the request closed waits for the next one.
         """
         self._generation += 1
         mine = self._generation
@@ -114,20 +127,39 @@ class BolnaLeg:
             while time.monotonic() < deadline:
                 if self._generation != mine or not self.active:
                     return  # a newer fragment owns the reply, or the call is over
-                try:
-                    text, _final = await asyncio.wait_for(self._replies.get(), self.tick)
-                except TimeoutError:
+                batch = self._take()
+                if not batch:
+                    with contextlib.suppress(TimeoutError):
+                        await asyncio.wait_for(self._ready.wait(), self.tick)
                     continue
-                if self._generation != mine:
-                    self._replies.put_nowait((text, _final))
-                    return
+                if not any(final for _, final in batch):
+                    continue  # only a hold line: it cannot be heard in time, see can_hold_line
                 await self._finalize(turn)  # the user replied: the caption must be final by now
-                yield end_sentence(text)
-                deadline = time.monotonic() + self.max_wait  # stay open for the next message
+                await asyncio.sleep(self.batch)  # catch messages sent right behind this one
+                batch += self._take()
+                if self._generation != mine or not self.active:
+                    self._give_back(batch)
+                    return
+                for text, final in batch:
+                    if final:
+                        yield end_sentence(text)
+                return
         finally:
             self._open -= 1
 
     # ---------- internals ----------
+    def _take(self) -> list[tuple[str, bool]]:
+        items = list(self._replies)
+        self._replies.clear()
+        self._ready.clear()
+        return items
+
+    def _give_back(self, items: list[tuple[str, bool]]) -> None:
+        """Return taken messages to the front of the queue, in their original order."""
+        self._replies.extendleft(reversed(items))
+        if self._replies:
+            self._ready.set()
+
     def _restart_settle(self, turn: int) -> None:
         if self._settle_task:
             self._settle_task.cancel()

@@ -26,10 +26,16 @@ class RedactSecrets(logging.Filter):
     of the server logs."""
 
     def filter(self, record: logging.LogRecord) -> bool:
-        message = record.getMessage()
-        if "token=" in message or "s=" in message:
-            record.msg, record.args = _SECRET.sub(r"\1***", message), ()
+        # uvicorn's access formatter unpacks record.args, so redact them in place.
+        if isinstance(record.args, tuple):
+            record.args = tuple(self._clean(a) for a in record.args)
+        elif isinstance(record.msg, str):
+            record.msg = self._clean(record.msg)
         return True
+
+    @staticmethod
+    def _clean(value: object) -> object:
+        return _SECRET.sub(r"\1***", value) if isinstance(value, str) else value
 
 
 def create_app() -> FastAPI:

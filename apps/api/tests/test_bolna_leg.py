@@ -37,6 +37,7 @@ def make_leg(**kw) -> BolnaLeg:
         settle=0.1,
         max_wait=1.0,
         tick=0.02,
+        batch=0.05,
         **kw,
     )
 
@@ -93,13 +94,23 @@ async def test_reply_goes_to_newest_request_and_finalises_the_caption_first():
     assert ("Telma 40 hai", True) in h.events
 
 
-async def test_keeper_line_then_reply_in_one_response():
+async def test_hold_line_is_not_voiced_ahead_of_the_reply():
+    """Bolna voices a response only once it is complete, so a "please wait" line sent before the
+    reply is heard glued to it (and not at all if the other person speaks first). Drop it."""
     leg, _ = await started_leg()
     task = asyncio.create_task(collect(leg, 1, "kuch"))
     await asyncio.sleep(0.02)
     await leg.speak("Ek minute", final=False)
     await leg.speak("Haan ji", final=True)
-    assert await task == ["Ek minute. ", "Haan ji. "]
+    assert await task == ["Haan ji. "]
+
+
+async def test_hold_line_alone_is_never_spoken():
+    leg, _ = await started_leg()
+    task = asyncio.create_task(collect(leg, 1, "kuch"))
+    await asyncio.sleep(0.02)
+    await leg.speak("Ek minute", final=False)
+    assert await task == []
 
 
 async def test_reply_typed_before_next_request_is_held():
@@ -108,18 +119,52 @@ async def test_reply_typed_before_next_request_is_held():
     assert await collect(leg, 2, "naya") == ["Pehle se. "]
 
 
-async def test_several_messages_in_a_row_are_all_spoken_on_the_open_request():
-    """The other person waits silently while the user sends two messages: both must be spoken
-    (before, only the first was; the second waited for them to speak again)."""
+async def test_a_reply_closes_the_request_so_bolna_speaks_it_now():
+    """Bolna only voices a response when it is complete: a request held open after the reply left
+    the typed message unspoken (or lost) until the other person talked again."""
     leg, _ = await started_leg()
     task = asyncio.create_task(collect(leg, 1, "Boliye"))
     await asyncio.sleep(0.02)
     assert leg.listening
     await leg.speak("Pehli baat")
-    await asyncio.sleep(0.3)
+    assert await asyncio.wait_for(task, 0.5) == ["Pehli baat. "]  # max_wait is 1.0 s
+    assert not leg.listening
+
+
+async def test_messages_sent_together_are_spoken_in_one_response():
+    leg, _ = await started_leg()
+    task = asyncio.create_task(collect(leg, 1, "Boliye"))
+    await asyncio.sleep(0.02)
+    await leg.speak("Pehli baat")
     await leg.speak("Doosri baat")
-    assert await task == ["Pehli baat. ", "Doosri baat. "]
-    assert not leg.listening  # closed after max_wait with nothing more to say
+    assert await asyncio.wait_for(task, 0.5) == ["Pehli baat. ", "Doosri baat. "]
+
+
+async def test_a_message_after_the_response_closed_waits_for_the_next_request():
+    leg, _ = await started_leg()
+    task = asyncio.create_task(collect(leg, 1, "Boliye"))
+    await asyncio.sleep(0.02)
+    await leg.speak("Pehli baat")
+    await asyncio.wait_for(task, 0.5)
+    await leg.speak("Baad ki baat")
+    assert not leg.listening
+    assert await collect(leg, 2, "haan") == ["Baad ki baat. "]
+
+
+async def test_queued_messages_keep_their_order_when_a_newer_fragment_takes_over():
+    leg, _ = await started_leg()
+    old = asyncio.create_task(collect(leg, 1, "kuch"))
+    await asyncio.sleep(0.02)
+    new = asyncio.create_task(collect(leg, 1, "kuch aur"))  # newer fragment owns the reply
+    await asyncio.sleep(0.02)
+    await leg.speak("Ek")
+    await leg.speak("Do")  # both queued before the old request wakes up
+    assert await asyncio.wait_for(old, 0.5) == []
+    assert await asyncio.wait_for(new, 0.5) == ["Ek. ", "Do. "]
+
+
+async def test_bolna_leg_cannot_voice_a_hold_line_while_the_user_types():
+    assert make_leg().can_hold_line is False
 
 
 async def test_a_late_fragment_of_a_finished_sentence_is_still_shown():

@@ -345,8 +345,8 @@ class RelaySession:
 
     async def hold(self) -> None:
         """Tell the other person the user is typing, please hold (also used by WhatsApp's "hold")."""
-        if self.ended:
-            return
+        if self.ended or getattr(self.leg, "can_hold_line", True) is False:
+            return  # nothing to show: the other person would never hear it in time
         line = keeper_line(self.call_lang, self.name, self.reply_ctx.gender)
         await self._you(line, "keeper", speaker="system")
         self.emit({"t": "keeper.spoken"})
