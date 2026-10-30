@@ -246,9 +246,11 @@ export function Call() {
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    // Enter sends on a computer keyboard; on a phone it starts a new line and the button sends (as in WhatsApp).
-    const touch = window.matchMedia('(pointer: coarse)').matches;
-    if (e.key === 'Enter' && !e.shiftKey && !touch && !e.nativeEvent.isComposing) {
+    // Enter sends on a computer; on a phone it starts a new line and the button sends (as in WhatsApp).
+    // "A computer" means any mouse or trackpad is attached: `pointer: coarse` alone is also true on
+    // touchscreen laptops and in browser device emulation, where Enter wrongly made a new line.
+    const hasMouse = window.matchMedia('(any-pointer: fine)').matches;
+    if (e.key === 'Enter' && !e.shiftKey && hasMouse && !e.nativeEvent.isComposing) {
       e.preventDefault();
       sendText();
     }
