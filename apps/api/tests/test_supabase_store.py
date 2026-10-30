@@ -136,3 +136,18 @@ async def test_seconds_used_today_sums_this_users_durations_since_midnight_ist()
 
     store, _ = make_store(handler)
     assert await store.seconds_used_today("u1") == 120
+
+
+async def test_end_orphaned_calls_marks_in_flight_calls_ended():
+    """Sessions live in memory: after a restart no call can still be running."""
+
+    def handler(req):
+        return httpx.Response(200, json=[{"id": "c1"}, {"id": "c2"}])
+
+    store, seen = make_store(handler)
+    assert await store.end_orphaned_calls() == 2
+    req = seen[-1]
+    assert req.method == "PATCH" and req.url.path.endswith("/calls")
+    assert req.url.params["status"] == "in.(created,ringing,connected)"
+    sent = body(req)
+    assert sent["status"] == "ended" and sent["ended_at"]

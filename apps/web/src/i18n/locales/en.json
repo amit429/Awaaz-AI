@@ -242,7 +242,8 @@
       "callee_hung_up": "They hung up.",
       "user": "You ended the call.",
       "max_call_minutes": "Time limit reached.",
-      "app_disconnected": "The app disconnected."
+      "app_disconnected": "The app disconnected.",
+      "server_restarted": "The call was interrupted by a service update."
     },
     "waiting": "Waiting for them to speak.",
     "back": "Back to calls",

@@ -300,7 +300,8 @@
       "callee_hung_up": "Unhone phone rakh diya.",
       "user": "Aapne call khatam kiya.",
       "max_call_minutes": "Time khatam ho gaya.",
-      "app_disconnected": "App disconnect ho gaya."
+      "app_disconnected": "App disconnect ho gaya.",
+      "server_restarted": "Service update ki wajah se call beech mein ruk gayi."
     }
   },
   "scam": {

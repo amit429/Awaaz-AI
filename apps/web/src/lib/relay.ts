@@ -42,6 +42,8 @@ export class RelayClient {
       const ev = JSON.parse(String(m.data)) as ServerEvent;
       if ('turn' in ev && typeof ev.turn === 'number') this.lastTurn = Math.max(this.lastTurn, ev.turn);
       this.onEvent(ev);
+      // The call is over (including "the server restarted and lost it"): do not reconnect.
+      if (ev.t === 'call.state' && (ev.state === 'ended' || ev.state === 'failed')) this.closed = true;
     };
     ws.onclose = () => {
       clearInterval(this.pingTimer);

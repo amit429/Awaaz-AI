@@ -300,7 +300,8 @@
       "callee_hung_up": "ਉਹਨਾਂ ਨੇ ਫੋਨ ਰੱਖ ਦਿੱਤਾ।",
       "user": "ਤੁਸੀਂ ਫੋਨ ਕੱਟ ਦਿੱਤਾ।",
       "max_call_minutes": "ਸਮਾਂ ਪੂਰਾ ਹੋ ਗਿਆ।",
-      "app_disconnected": "ਐਪ ਦਾ ਸੰਪਰਕ ਟੁੱਟ ਗਿਆ।"
+      "app_disconnected": "ਐਪ ਦਾ ਸੰਪਰਕ ਟੁੱਟ ਗਿਆ।",
+      "server_restarted": "ਸਰਵਿਸ ਅਪਡੇਟ ਕਰਕੇ ਕਾਲ ਵਿੱਚੇ ਰੁਕ ਗਈ।"
     }
   },
   "scam": {

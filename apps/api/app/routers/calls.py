@@ -11,7 +11,7 @@ from app.providers.gemini import GeminiLlm
 from app.relay import registry
 from app.services.calls import CallError, create_relay_call
 from app.services.summary import summarise
-from app.store import Store, get_store
+from app.store import IN_FLIGHT, Store, get_store
 
 router = APIRouter(tags=["calls"])
 
@@ -101,6 +101,19 @@ async def relay(
         await ws.close(code=4401)
         return
     session = registry.get(session_id)
+    if session is None:
+        # A restart wipes the in-memory sessions. Say so, instead of refusing the socket and
+        # leaving the app "reconnecting" for ever.
+        call = await get_store().get_call(session_id)
+        if call and call.get("user_id") == user_id:
+            lost = call.get("status") in IN_FLIGHT
+            await ws.accept()
+            await ws.send_json(
+                {"t": "call.state", "state": "ended", "elapsed_ms": 0}
+                | ({"reason": "server_restarted"} if lost else {})
+            )
+            await ws.close()
+            return
     if session is None or session.user_id != user_id:
         await ws.close(code=4404)
         return

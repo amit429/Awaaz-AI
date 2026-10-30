@@ -1,5 +1,7 @@
 import logging
 import re
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +18,7 @@ from app.routers import (
     webhooks_wa,
 )
 from app.routers import settings as settings_router
+from app.store import get_store
 
 
 _SECRET = re.compile(r"((?:token|s)=)[^&\s\"']+")
@@ -50,13 +53,26 @@ def _log_app_events() -> None:
         app_log.propagate = False
 
 
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    """Calls live in this process's memory: any call still marked in progress belongs to a
+    process that is gone (a deploy or crash), so close it instead of showing "in progress" for ever."""
+    try:
+        fixed = await get_store().end_orphaned_calls()
+        if fixed:
+            logging.getLogger("awaaz").info("closed %d call(s) left over from a restart", fixed)
+    except Exception:  # never stop the API from starting over housekeeping
+        logging.getLogger("awaaz").exception("could not close left-over calls")
+    yield
+
+
 def create_app() -> FastAPI:
     _log_app_events()
     for name in ("uvicorn.access", "uvicorn.error"):
         if not any(isinstance(f, RedactSecrets) for f in logging.getLogger(name).filters):
             logging.getLogger(name).addFilter(RedactSecrets())
     settings = get_settings()
-    app = FastAPI(title="Awaaz API")
+    app = FastAPI(title="Awaaz API", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origin_list,

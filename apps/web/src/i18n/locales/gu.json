@@ -300,7 +300,8 @@
       "callee_hung_up": "તેમણે ફોન મૂકી દીધો.",
       "user": "તમે ફોન મૂકી દીધો.",
       "max_call_minutes": "સમય પૂરો થઈ ગયો.",
-      "app_disconnected": "ઍપ બંધ થઈ ગઈ."
+      "app_disconnected": "ઍપ બંધ થઈ ગઈ.",
+      "server_restarted": "સર્વિસ અપડેટના કારણે કોલ કપાઈ ગયો."
     }
   },
   "scam": {

@@ -300,7 +300,8 @@
       "callee_hung_up": "त्यांनी फोन ठेवला.",
       "user": "तुम्ही कॉल बंद केला.",
       "max_call_minutes": "वेळ संपली.",
-      "app_disconnected": "ॲप डिस्कनेक्ट झाले."
+      "app_disconnected": "ॲप डिस्कनेक्ट झाले.",
+      "server_restarted": "सर्व्हिस अपडेटमुळे कॉल मधेच कट झाला."
     }
   },
   "scam": {

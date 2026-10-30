@@ -67,3 +67,13 @@ async def test_ended_call_records_duration():
     await s.end("user")
     call = await store.get_call("c9")
     assert call["status"] == "ended" and call["duration_s"] >= 0 and call["ended_at"]
+
+
+async def test_in_memory_store_ends_orphaned_calls_but_leaves_finished_ones():
+    from app.store import InMemoryStore
+
+    store = InMemoryStore()
+    for call_id, status in (("a", "created"), ("b", "ringing"), ("c", "connected"), ("d", "ended")):
+        await store.create_call({"id": call_id, "user_id": "u", "status": status})
+    assert await store.end_orphaned_calls() == 3
+    assert {c: (await store.get_call(c))["status"] for c in "abcd"} == dict.fromkeys("abcd", "ended")

@@ -300,7 +300,8 @@
       "callee_hung_up": "उन्होंने फ़ोन रख दिया।",
       "user": "आपने कॉल काट दिया।",
       "max_call_minutes": "समय पूरा हो गया।",
-      "app_disconnected": "ऐप का कनेक्शन कट गया।"
+      "app_disconnected": "ऐप का कनेक्शन कट गया।",
+      "server_restarted": "सर्विस अपडेट की वजह से कॉल रुक गई।"
     }
   },
   "scam": {

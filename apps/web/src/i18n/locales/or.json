@@ -300,7 +300,8 @@
       "callee_hung_up": "ସେ ଫୋନ୍ ରଖିଦେଲେ।",
       "user": "ଆପଣ କଲ୍ କାଟିଲେ।",
       "max_call_minutes": "ସମୟ ସରିଗଲା।",
-      "app_disconnected": "ଆପ୍ ଡିସକନେକ୍ଟ ହୋଇଗଲା।"
+      "app_disconnected": "ଆପ୍ ଡିସକନେକ୍ଟ ହୋଇଗଲା।",
+      "server_restarted": "ସର୍ଭିସ୍ ଅପଡେଟ୍ ଯୋଗୁଁ କଲ୍ କଟିଗଲା।"
     }
   },
   "scam": {

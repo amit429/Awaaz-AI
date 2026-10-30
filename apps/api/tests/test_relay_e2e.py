@@ -286,3 +286,27 @@ def test_normal_pharmacy_call_never_warns():
             ws.send_json({"t": "user.say", "text": text, "source": "typed"})
         seen = recv(ws, lambda e: e["t"] == "caption.final" and "₹30" in e["text"], limit=20)
     assert not any(e["t"] == "scam.warning" for e in seen)
+
+
+def test_reconnecting_to_a_call_the_server_lost_says_it_ended():
+    """A restart wipes the in-memory sessions: the app must be told, not left "reconnecting"."""
+    call = create()
+    registry.clear()  # the server restarted
+    with connect(call["session_id"]) as ws:
+        events = recv(ws, is_("call.state", state="ended"))
+    assert events[-1]["reason"] == "server_restarted"
+
+
+def test_reconnecting_to_a_call_that_is_not_yours_is_still_refused():
+    call = create("user-1")
+    registry.clear()
+    with pytest.raises(WebSocketDisconnect), connect(call["session_id"], sub="user-2") as ws:
+        ws.receive_json()
+
+
+def test_reconnecting_to_a_call_that_never_existed_is_refused():
+    with (
+        pytest.raises(WebSocketDisconnect),
+        connect("00000000-0000-0000-0000-000000000000") as ws,
+    ):
+        ws.receive_json()

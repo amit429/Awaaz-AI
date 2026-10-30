@@ -30,12 +30,20 @@ class Profile:
     gender: str = "unspecified"  # male | female | unspecified: Hindi and Marathi verbs need it
 
 
+IN_FLIGHT = ("created", "ringing", "connected")  # call statuses of a call that is still running
+
+
 class Store(Protocol):
     async def get_profile(self, user_id: str) -> Profile: ...
     async def put_profile(self, profile: Profile) -> None: ...
     async def wa_user(self, wa_id: str, name: str | None) -> str: ...
     async def create_call(self, call: dict[str, Any]) -> None: ...
     async def update_call(self, call_id: str, **fields: Any) -> None: ...
+    async def end_orphaned_calls(self) -> int:
+        """Mark calls still shown as in progress as ended (sessions are in memory, so after a
+        restart none of them is running). Returns how many were fixed."""
+        ...
+
     async def add_turn(self, call_id: str, turn: dict[str, Any]) -> None: ...
     async def get_call(self, call_id: str) -> dict[str, Any] | None: ...
     async def get_turns(self, call_id: str) -> list[dict[str, Any]]: ...
@@ -140,6 +148,12 @@ class InMemoryStore:
 
     async def update_call(self, call_id: str, **fields: Any) -> None:
         self.calls[call_id].update(fields)
+
+    async def end_orphaned_calls(self) -> int:
+        stuck = [c for c in self.calls.values() if c.get("status") in IN_FLIGHT]
+        for call in stuck:
+            call.update(status="ended", ended_at=datetime.now(UTC).isoformat())
+        return len(stuck)
 
     async def add_turn(self, call_id: str, turn: dict[str, Any]) -> None:
         self.turns[call_id].append(turn)

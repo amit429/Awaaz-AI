@@ -2,12 +2,13 @@
 
 import asyncio
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
 
 from app.config import Settings
-from app.store import Profile, ist_day_start
+from app.store import IN_FLIGHT, Profile, ist_day_start
 
 log = logging.getLogger("awaaz.store")
 
@@ -294,6 +295,16 @@ class SupabaseStore:
 
     async def update_call(self, call_id: str, **fields: Any) -> None:
         await self._rest("PATCH", "calls", params={"id": f"eq.{call_id}"}, json=fields)
+
+    async def end_orphaned_calls(self) -> int:
+        rows = await self._rest(
+            "PATCH",
+            "calls",
+            params={"status": f"in.({','.join(IN_FLIGHT)})"},
+            json={"status": "ended", "ended_at": datetime.now(UTC).isoformat()},
+            prefer="return=representation",
+        )
+        return len(rows or [])
 
     async def add_turn(self, call_id: str, turn: dict[str, Any]) -> None:
         """Persist in the background: a slow database must never delay a live call."""
