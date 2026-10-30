@@ -2,7 +2,8 @@
   "nav": {
     "calls": "ਕਾਲਾਂ",
     "contacts": "ਸੰਪਰਕ",
-    "me": "ਮੈਂ"
+    "me": "ਮੈਂ",
+    "log": "ਕਾਲ ਹਿਸਟਰੀ"
   },
   "common": {
     "loading": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
@@ -82,7 +83,18 @@
     "practiceSharma": "ਦਵਾਈਆਂ ਦੀ ਦੁਕਾਨ, ਹਿੰਦੀ",
     "practiceNetra": "ਕਲੀਨਿਕ, ਮਰਾਠੀ",
     "practiceScam": "ਬੈਂਕ ਦੀ ਠੱਗੀ ਵਾਲੀ ਕਾਲ",
-    "unknownNumber": "ਅਣਜਾਣ ਨੰਬਰ"
+    "unknownNumber": "ਅਣਜਾਣ ਨੰਬਰ",
+    "statsTitle": "ਪਿਛਲੇ 7 ਦਿਨ",
+    "stats": {
+      "calls": "ਕਾਲਾਂ",
+      "talk": "ਗੱਲਬਾਤ ਦਾ ਸਮਾਂ",
+      "answered": "ਚੁੱਕੀਆਂ ਗਈਆਂ",
+      "top": "ਸਭ ਤੋਂ ਵੱਧ ਕਾਲਾਂ",
+      "answeredHint": "{{total}} ਵਿੱਚੋਂ {{answered}} ਕਾਲਾਂ",
+      "topHint": "ਕਾਲਾਂ: {{count}}",
+      "callsHint": "ਆਖਰੀ: {{when}}",
+      "talkHint": "ਔਸਤ {{time}}"
+    }
   },
   "status": {
     "created": "ਜੁੜਿਆ ਨਹੀਂ",
@@ -365,5 +377,15 @@
     "agree": "ਮਨਜ਼ੂਰ ਹੈ ਅਤੇ ਅੱਗੇ ਵਧੋ",
     "decline": "ਨਹੀਂ ਧੰਨਵਾਦ, ਬਾਹਰ ਆਓ",
     "failed": "ਤੁਹਾਡੀ ਚੋਣ ਸੰਭਾਲੀ ਨਹੀਂ ਜਾ ਸਕੀ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+  },
+  "log": {
+    "title": "ਕਾਲ ਹਿਸਟਰੀ",
+    "filters": "ਦਿਖਾਓ",
+    "filter_all": "ਸਾਰੀਆਂ",
+    "filter_answered": "ਚੁੱਕੀਆਂ ਗਈਆਂ",
+    "filter_missed": "ਨਾ ਚੁੱਕੀਆਂ ਗਈਆਂ",
+    "emptyTitle": "ਇੱਥੇ ਕੋਈ ਕਾਲ ਨਹੀਂ ਹੈ",
+    "emptyBody": "ਤੁਹਾਡੀਆਂ ਕੀਤੀਆਂ ਕਾਲਾਂ ਇੱਥੇ ਦਿਸਣਗੀਆਂ।",
+    "emptyFilter": "ਇਸ ਤਰ੍ਹਾਂ ਦੀ ਕੋਈ ਕਾਲ ਨਹੀਂ ਹੈ।"
   }
 }

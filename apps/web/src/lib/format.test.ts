@@ -14,3 +14,16 @@ describe('format', () => {
     expect(maskNumber('+919876543210')).toBe('••••3210');
   });
 });
+
+describe('duration', () => {
+  it('reads naturally from seconds to hours', async () => {
+    const { duration } = await import('./format');
+    expect(duration(0)).toBe('0 s');
+    expect(duration(45)).toBe('45 s');
+    expect(duration(60)).toBe('1 min');
+    expect(duration(185)).toBe('3 min');
+    expect(duration(3600)).toBe('1 h');
+    expect(duration(3900)).toBe('1 h 5 min');
+    expect(duration(null)).toBe('—');
+  });
+});

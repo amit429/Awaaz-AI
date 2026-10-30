@@ -2,7 +2,8 @@
   "nav": {
     "calls": "कॉल",
     "contacts": "संपर्क",
-    "me": "मैं"
+    "me": "मैं",
+    "log": "कॉल सूची"
   },
   "common": {
     "loading": "लोड हो रहा है…",
@@ -82,7 +83,18 @@
     "practiceSharma": "दवा की दुकान, हिंदी",
     "practiceNetra": "क्लिनिक, मराठी",
     "practiceScam": "बैंक के नाम से धोखेबाज़ी की कॉल",
-    "unknownNumber": "अनजान नंबर"
+    "unknownNumber": "अनजान नंबर",
+    "statsTitle": "पिछले 7 दिन",
+    "stats": {
+      "calls": "कॉल",
+      "talk": "बात का समय",
+      "answered": "उठाई गई",
+      "top": "सबसे ज़्यादा कॉल",
+      "answeredHint": "{{total}} में से {{answered}} कॉल",
+      "topHint": "कॉल: {{count}}",
+      "callsHint": "आखिरी: {{when}}",
+      "talkHint": "औसत {{time}}"
+    }
   },
   "status": {
     "created": "कॉल नहीं लगी",
@@ -365,5 +377,15 @@
     "agree": "मंज़ूर है, आगे बढ़ें",
     "decline": "नहीं, साइन आउट करें",
     "failed": "आपकी पसंद सेव नहीं हो सकी। कृपया दोबारा कोशिश करें।"
+  },
+  "log": {
+    "title": "कॉल सूची",
+    "filters": "देखें",
+    "filter_all": "सभी",
+    "filter_answered": "उठाई गई",
+    "filter_missed": "नहीं उठाई गई",
+    "emptyTitle": "यहाँ कोई कॉल नहीं है",
+    "emptyBody": "आपके किए गए कॉल यहाँ दिखाई देंगे।",
+    "emptyFilter": "इस तरह की कोई कॉल नहीं मिली।"
   }
 }

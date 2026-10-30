@@ -2,7 +2,8 @@
   "nav": {
     "calls": "କଲ୍",
     "contacts": "ସମ୍ପର୍କ",
-    "me": "ମୁଁ"
+    "me": "ମୁଁ",
+    "log": "କଲ୍ ତାଲିକା"
   },
   "common": {
     "loading": "ଲୋଡ୍ ହେଉଛି…",
@@ -82,7 +83,18 @@
     "practiceSharma": "ଫାର୍ମାସୀ (ହିନ୍ଦୀ)",
     "practiceNetra": "କ୍ଲିନିକ୍ (ମରାଠୀ)",
     "practiceScam": "ବ୍ୟାଙ୍କ ଠକେଇ କଲ୍",
-    "unknownNumber": "ଅଜଣା ନମ୍ବର"
+    "unknownNumber": "ଅଜଣା ନମ୍ବର",
+    "statsTitle": "ଗତ ୭ ଦିନ",
+    "stats": {
+      "calls": "କଲ୍",
+      "talk": "କଥା ହେବା ସମୟ",
+      "answered": "ଉଠାଯାଇଛି",
+      "top": "ସବୁଠୁ ବେଶି କଲ୍",
+      "answeredHint": "{{total}} ରୁ {{answered}} ଟି କଲ୍",
+      "topHint": "କଲ୍: {{count}}",
+      "callsHint": "ଶେଷ: {{when}}",
+      "talkHint": "ହାରାହାରି {{time}}"
+    }
   },
   "status": {
     "created": "ଯୋଡ଼ି ହୋଇନାହିଁ",
@@ -365,5 +377,15 @@
     "agree": "ରାଜି ଅଛି ଏବଂ ଆଗକୁ ବଢ଼ନ୍ତୁ",
     "decline": "ନା ଥାଉ, ସାଇନ୍ ଆଉଟ୍ କରନ୍ତୁ",
     "failed": "ଆପଣଙ୍କ ପସନ୍ଦ ସେଭ୍ ହୋଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"
+  },
+  "log": {
+    "title": "କଲ୍ ତାଲିକା",
+    "filters": "ଦେଖାନ୍ତୁ",
+    "filter_all": "ସବୁ",
+    "filter_answered": "ଉଠାଯାଇଛି",
+    "filter_missed": "ଉଠାଯାଇନାହିଁ",
+    "emptyTitle": "ଏଠାରେ କିଛି କଲ୍ ନାହିଁ",
+    "emptyBody": "ଆପଣ କରୁଥିବା କଲ୍ ଏଠାରେ ଦେଖାଯିବ।",
+    "emptyFilter": "ଏଥିରେ କୌଣସି କଲ୍ ନାହିଁ।"
   }
 }

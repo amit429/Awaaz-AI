@@ -2,7 +2,8 @@
   "nav": {
     "calls": "Calls",
     "contacts": "Contacts",
-    "me": "Main"
+    "me": "Main",
+    "log": "Call history"
   },
   "common": {
     "loading": "Chalu ho raha hai…",
@@ -82,7 +83,18 @@
     "practiceSharma": "Medical shop, Hindi",
     "practiceNetra": "Clinic, Marathi",
     "practiceScam": "Bank ki nakli call",
-    "unknownNumber": "Anjaan number"
+    "unknownNumber": "Anjaan number",
+    "statsTitle": "Pichhle 7 din",
+    "stats": {
+      "calls": "Calls",
+      "talk": "Baat ka time",
+      "answered": "Uthai gayi",
+      "top": "Sabse zyada call",
+      "answeredHint": "{{total}} mein se {{answered}} calls",
+      "topHint": "Calls: {{count}}",
+      "callsHint": "Aakhri: {{when}}",
+      "talkHint": "Ausat {{time}}"
+    }
   },
   "status": {
     "created": "Connect nahi hua",
@@ -365,5 +377,15 @@
     "agree": "Manein aur aage badhein",
     "decline": "Nahi chahiye, sign out karein",
     "failed": "Aapka choice save nahi ho paya. Kripya phir se koshish karein."
+  },
+  "log": {
+    "title": "Call history",
+    "filters": "Dikhayein",
+    "filter_all": "Sabhi",
+    "filter_answered": "Uthai gayi",
+    "filter_missed": "Nahi uthai",
+    "emptyTitle": "Yahan koi call nahi hai",
+    "emptyBody": "Aapki ki hui calls yahan dikhengi.",
+    "emptyFilter": "Is filter mein koi call nahi hai."
   }
 }

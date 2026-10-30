@@ -1,5 +1,5 @@
-import { ChevronRight, Loader2, Phone } from 'lucide-react';
-import { useState } from 'react';
+import { CircleCheck, Clock, Loader2, Phone, Star } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelect } from '@/components/LanguageSelect';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +7,7 @@ import { AppShell } from '@/components/AppShell';
 import { EmptyState, Person, RowList } from '@/components/Person';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { StatCard } from '@/components/StatCard';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,8 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCalls, useContacts } from '@/hooks/useData';
 import { createCall } from '@/lib/api';
-import { maskNumber, when } from '@/lib/format';
+import { duration, when } from '@/lib/format';
+import { callStats } from '@/lib/stats';
 
 const PRACTICE = [
   { name: 'Sharma Medical', detail: 'home.practiceSharma', number: '+919800000001', callee: 'pharmacy' },
@@ -46,7 +48,7 @@ export function Home() {
   }
 
   const favourites = (contacts.data ?? []).filter((c) => c.favourite);
-  const recent = (calls.data ?? []).filter((c) => c.kind !== 'task').slice(0, 8);
+  const stats = useMemo(() => callStats(calls.data ?? []), [calls.data]);
   const loading = contacts.isLoading || calls.isLoading;
 
   return (
@@ -75,23 +77,25 @@ export function Home() {
         )}
 
         <section className="grid gap-3">
-          <h2 className="text-sm font-medium text-muted-foreground">{t('home.recent')}</h2>
-          {!loading && recent.length === 0 ? (
+          <h2 className="text-sm font-medium text-muted-foreground">{t('home.statsTitle')}</h2>
+          {loading ? (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-[110px] rounded-xl" />)}
+            </div>
+          ) : (calls.data ?? []).length === 0 ? (
             <EmptyState title={t('home.noCallsTitle')} body={t('home.noCallsBody')} action={<Button onClick={() => setOpen(true)}>{t('home.newCall')}</Button>} />
           ) : (
-            <RowList>
-              {recent.map((c) => (
-                <button key={c.id} type="button" onClick={() => nav(`/calls/${c.id}`)} className="flex w-full items-center gap-3 p-3.5 text-left transition-colors hover:bg-secondary/60">
-                  <Person name={c.name} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{c.name ?? maskNumber(c.other_number)}</p>
-                    <p className="truncate text-sm text-muted-foreground">{when(c.created_at)}</p>
-                  </div>
-                  <Badge variant={c.status === 'ended' ? 'secondary' : 'outline'}>{t(`status.${c.status}`, { defaultValue: c.status })}</Badge>
-                  <ChevronRight className="size-4 text-muted-foreground" />
-                </button>
-              ))}
-            </RowList>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <StatCard icon={Phone} label={t('home.stats.calls')} value={String(stats.calls)} hint={stats.lastAt ? t('home.stats.callsHint', { when: when(stats.lastAt) }) : undefined} />
+              <StatCard icon={Clock} label={t('home.stats.talk')} value={stats.talkSeconds ? duration(stats.talkSeconds) : '—'} hint={stats.avgSeconds ? t('home.stats.talkHint', { time: duration(stats.avgSeconds) }) : undefined} />
+              <StatCard
+                icon={CircleCheck}
+                label={t('home.stats.answered')}
+                value={stats.answeredPct == null ? '—' : `${stats.answeredPct}%`}
+                hint={stats.finished ? t('home.stats.answeredHint', { answered: stats.answered, total: stats.finished }) : undefined}
+              />
+              <StatCard icon={Star} label={t('home.stats.top')} value={stats.top?.name ?? '—'} hint={stats.top ? t('home.stats.topHint', { count: stats.top.calls }) : undefined} />
+            </div>
           )}
         </section>
 

@@ -10,6 +10,7 @@ import { Consent } from './features/consent/Consent';
 import { Call } from './features/call/Call';
 import { Contacts } from './features/contacts/Contacts';
 import { CallDetail } from './features/history/CallDetail';
+import { CallLog } from './features/history/CallLog';
 import { Home } from './features/home/Home';
 import { Onboarding } from './features/onboarding/Onboarding';
 import { Me } from './features/profile/Me';
@@ -60,6 +61,7 @@ export function App() {
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/me" element={<Me />} />
         <Route path="/me/phrases" element={<Phrases />} />
+        <Route path="/calls" element={<CallLog />} />
         <Route path="/calls/:id" element={<CallDetail />} />
         <Route path="/call/:sessionId" element={<Call />} />
       </Route>

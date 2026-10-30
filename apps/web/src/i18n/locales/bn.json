@@ -2,7 +2,8 @@
   "nav": {
     "calls": "ফোন",
     "contacts": "পরিচিতি",
-    "me": "আমি"
+    "me": "আমি",
+    "log": "কলের তালিকা"
   },
   "common": {
     "loading": "একটু দাঁড়ান…",
@@ -82,7 +83,18 @@
     "practiceSharma": "ওষুধের দোকান, হিন্দি",
     "practiceNetra": "ক্লিনিক, মারাঠি",
     "practiceScam": "ব্যাংক প্রতারণার কল",
-    "unknownNumber": "অজানা নম্বর"
+    "unknownNumber": "অজানা নম্বর",
+    "statsTitle": "গত ৭ দিন",
+    "stats": {
+      "calls": "কল",
+      "talk": "কথা বলার সময়",
+      "answered": "ধরা হয়েছে",
+      "top": "সবচেয়ে বেশি কল",
+      "answeredHint": "{{total}}টি কলের মধ্যে {{answered}}টি ধরা হয়েছে",
+      "topHint": "কল: {{count}}",
+      "callsHint": "শেষ: {{when}}",
+      "talkHint": "গড়ে {{time}}"
+    }
   },
   "status": {
     "created": "কানেক্ট হয়নি",
@@ -365,5 +377,15 @@
     "agree": "রাজি আছি, এগিয়ে যান",
     "decline": "না ধন্যবাদ, বেরিয়ে যান",
     "failed": "আপনার পছন্দ সেভ করা গেল না। আবার চেষ্টা করুন।"
+  },
+  "log": {
+    "title": "কলের তালিকা",
+    "filters": "দেখুন",
+    "filter_all": "সব",
+    "filter_answered": "ধরা হয়েছে",
+    "filter_missed": "ধরা হয়নি",
+    "emptyTitle": "এখানে কোনো কল নেই",
+    "emptyBody": "আপনার করা কলগুলো এখানে দেখা যাবে।",
+    "emptyFilter": "এমন কোনো কল পাওয়া যায়নি।"
   }
 }

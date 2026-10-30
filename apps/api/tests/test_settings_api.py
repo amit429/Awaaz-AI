@@ -129,3 +129,13 @@ def test_call_history_lists_calls_with_contact_names(client):
         "+919800000077": None,
     }
     assert all(h["status"] == "created" for h in history)
+
+
+def test_call_history_can_return_more_than_the_default_page(client):
+    for n in range(3):
+        made = client.post("/v1/calls", json={"to": f"+91980000010{n}"}).json()
+        registry.get(made["session_id"]).ended = True
+    assert len(client.get("/v1/calls?limit=2").json()) == 2
+    assert len(client.get("/v1/calls?limit=200").json()) == 3
+    assert client.get("/v1/calls?limit=0").status_code == 422
+    assert client.get("/v1/calls?limit=5000").status_code == 422

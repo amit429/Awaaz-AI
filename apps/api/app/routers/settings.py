@@ -1,6 +1,6 @@
 """Settings API: profile, contacts, phrases, call history. The app talks only to this API."""
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 
 from app.auth import current_user
 from app.config import Settings, get_settings
@@ -119,9 +119,11 @@ async def delete_phrase(
 
 @router.get("/v1/calls")
 async def call_history(
-    user_id: str = Depends(current_user), store: Store = Depends(get_store)
+    limit: int = Query(30, ge=1, le=200),
+    user_id: str = Depends(current_user),
+    store: Store = Depends(get_store),
 ) -> list[dict]:
-    calls = await store.list_calls(user_id)
+    calls = await store.list_calls(user_id, limit)
     names = {c["phone_e164"]: c["name"] for c in await store.list_contacts(user_id)}
     keep = (
         "id",

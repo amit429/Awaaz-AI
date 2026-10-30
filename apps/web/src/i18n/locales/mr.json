@@ -2,7 +2,8 @@
   "nav": {
     "calls": "कॉल्स",
     "contacts": "कॉन्टॅक्ट्स",
-    "me": "मी"
+    "me": "मी",
+    "log": "कॉलची नोंद"
   },
   "common": {
     "loading": "लोड होत आहे…",
@@ -82,7 +83,18 @@
     "practiceSharma": "मेडिकल स्टोअर, हिंदी",
     "practiceNetra": "क्लिनिक, मराठी",
     "practiceScam": "बँकेच्या नावाने फसवणूक करणारा कॉल",
-    "unknownNumber": "अनोळखी नंबर"
+    "unknownNumber": "अनोळखी नंबर",
+    "statsTitle": "गेल्या ७ दिवसांत",
+    "stats": {
+      "calls": "कॉल्स",
+      "talk": "बोलण्याचा वेळ",
+      "answered": "उचललेले",
+      "top": "जास्त फोन केलेले",
+      "answeredHint": "{{total}} पैकी {{answered}} कॉल्स",
+      "topHint": "कॉल्स: {{count}}",
+      "callsHint": "शेवटचा: {{when}}",
+      "talkHint": "सरासरी {{time}}"
+    }
   },
   "status": {
     "created": "जोडले नाही",
@@ -365,5 +377,15 @@
     "agree": "मान्य आहे, पुढे जा",
     "decline": "नको, बाहेर पडा",
     "failed": "तुमची पसंती सेव्ह करता आली नाही. कृपया पुन्हा प्रयत्न करा."
+  },
+  "log": {
+    "title": "कॉलची नोंद",
+    "filters": "दाखवा",
+    "filter_all": "सर्व",
+    "filter_answered": "उचललेले",
+    "filter_missed": "न उचललेले",
+    "emptyTitle": "इथे एकही कॉल नाही",
+    "emptyBody": "तुम्ही केलेले कॉल्स इथे दिसतील.",
+    "emptyFilter": "यानुसार कोणतेही कॉल्स नाहीत."
   }
 }

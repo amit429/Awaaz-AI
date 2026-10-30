@@ -2,7 +2,8 @@
   "nav": {
     "calls": "કોલ",
     "contacts": "સંપર્કો",
-    "me": "હું"
+    "me": "હું",
+    "log": "કોલની યાદી"
   },
   "common": {
     "loading": "રાહ જુઓ…",
@@ -82,7 +83,18 @@
     "practiceSharma": "દવાની દુકાન, હિન્દી",
     "practiceNetra": "ક્લિનિક, મરાઠી",
     "practiceScam": "બેંક ફ્રોડનો કોલ",
-    "unknownNumber": "અજાણ્યો નંબર"
+    "unknownNumber": "અજાણ્યો નંબર",
+    "statsTitle": "છેલ્લા 7 દિવસ",
+    "stats": {
+      "calls": "કોલ",
+      "talk": "વાતનો સમય",
+      "answered": "ઉપાડેલા",
+      "top": "સૌથી વધુ કોલ",
+      "answeredHint": "{{total}} માંથી {{answered}} કોલ ઉપાડ્યા",
+      "topHint": "કોલ: {{count}}",
+      "callsHint": "છેલ્લે: {{when}}",
+      "talkHint": "સરેરાશ {{time}}"
+    }
   },
   "status": {
     "created": "જોડાયેલ નથી",
@@ -365,5 +377,15 @@
     "agree": "મંજૂર છે, આગળ વધો",
     "decline": "ના, બહાર નીકળો",
     "failed": "તમારી પસંદગી સાચવી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો."
+  },
+  "log": {
+    "title": "કોલની યાદી",
+    "filters": "જુઓ",
+    "filter_all": "બધા",
+    "filter_answered": "ઉપાડેલા",
+    "filter_missed": "ન ઉપાડેલા",
+    "emptyTitle": "અહીં કોઈ કોલ નથી",
+    "emptyBody": "તમે કરેલા કોલ અહીં દેખાશે.",
+    "emptyFilter": "આમાં કોઈ કોલ નથી."
   }
 }

@@ -2,7 +2,8 @@
   "nav": {
     "calls": "Calls",
     "contacts": "Contacts",
-    "me": "Me"
+    "me": "Me",
+    "log": "Call log"
   },
   "common": {
     "loading": "Loading…",
@@ -82,7 +83,18 @@
     "practiceSharma": "Pharmacy, Hindi",
     "practiceNetra": "Clinic, Marathi",
     "practiceScam": "A bank scam call",
-    "unknownNumber": "Unknown number"
+    "unknownNumber": "Unknown number",
+    "statsTitle": "Last 7 days",
+    "stats": {
+      "calls": "Calls",
+      "talk": "Talk time",
+      "answered": "Picked up",
+      "top": "Most called",
+      "answeredHint": "{{answered}} of {{total}} calls",
+      "topHint": "Calls: {{count}}",
+      "callsHint": "Last: {{when}}",
+      "talkHint": "Average {{time}}"
+    }
   },
   "status": {
     "created": "Not connected",
@@ -365,5 +377,15 @@
     "agree": "Agree and continue",
     "decline": "No thanks, sign out",
     "failed": "Could not save your choice. Please try again."
+  },
+  "log": {
+    "title": "Call log",
+    "filters": "Show",
+    "filter_all": "All",
+    "filter_answered": "Picked up",
+    "filter_missed": "Not picked up",
+    "emptyTitle": "No calls here",
+    "emptyBody": "Calls you make will show up here.",
+    "emptyFilter": "No calls match this filter."
   }
 }

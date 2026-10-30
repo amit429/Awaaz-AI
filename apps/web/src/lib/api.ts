@@ -51,7 +51,7 @@ export const api = {
   phrases: () => request<Phrase[]>('/phrases'),
   addPhrase: (p: Omit<Phrase, 'id'>) => request<Phrase>('/phrases', send('POST', p)),
   deletePhrase: (id: string) => request<void>(`/phrases/${id}`, send('DELETE')),
-  calls: () => request<CallRow[]>('/calls'),
+  calls: () => request<CallRow[]>('/calls?limit=200'),
   call: (id: string) => request<{ call: CallRow; turns: Turn[] }>(`/calls/${id}`),
   createCall: (to: string, callee?: string, language?: string) => request<CreatedCall>('/calls', send('POST', { to, callee, call_language: language })),
   transcribe: async (audio: Blob, lang: string) => {

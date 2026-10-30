@@ -1,4 +1,4 @@
-import { Phone, User, Users, type LucideIcon } from 'lucide-react';
+import { History, Phone, User, Users, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { Brand } from '@/components/Brand';
@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 
 const TABS: { to: string; icon: LucideIcon; key: string; end?: boolean }[] = [
   { to: '/', icon: Phone, key: 'calls', end: true },
+  { to: '/calls', icon: History, key: 'log' },
   { to: '/contacts', icon: Users, key: 'contacts' },
   { to: '/me', icon: User, key: 'me' },
 ];

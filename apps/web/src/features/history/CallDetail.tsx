@@ -40,7 +40,7 @@ export function CallDetail() {
   }
 
   return (
-    <AppShell title={call?.name ?? (call ? maskNumber(call.other_number) : t('common.call'))} action={<Button variant="ghost" asChild><Link to="/"><ChevronLeft className="size-4" /> {t('nav.calls')}</Link></Button>}>
+    <AppShell title={call?.name ?? (call ? maskNumber(call.other_number) : t('common.call'))} action={<Button variant="ghost" asChild><Link to="/calls"><ChevronLeft className="size-4" /> {t('nav.log')}</Link></Button>}>
       {q.isLoading && <Skeleton className="h-48 w-full rounded-2xl" />}
       {q.isError && <Alert variant="destructive" role="alert"><AlertDescription>{t('history.loadFailed')}</AlertDescription></Alert>}
       {call && (

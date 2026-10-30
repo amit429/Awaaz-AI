@@ -56,6 +56,8 @@ export interface CallRow {
   created_at: string;
   call_lang: string | null;
   duration_s: number | null;
+  /** 'bolna' for a phone call, 'mock' for a scripted practice call. */
+  provider?: string | null;
 }
 
 export interface Turn {
