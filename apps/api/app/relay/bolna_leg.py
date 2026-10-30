@@ -17,6 +17,8 @@ from app.relay.legs import HangupCallback, HeardCallback
 
 log = logging.getLogger("awaaz.bolna_leg")
 
+GOODBYES = 3  # how often the goodbye is said if the other person keeps talking
+LINGER = 180.0  # an ended call stays reachable this long for Bolna's last request
 STOP_RETRY = 2.0  # seconds between stop attempts while Bolna refuses
 STOP_TRIES = 45  # about 90 s: Bolna can take 30 s to start dialling a call it already accepted
 SETTLE = 1.2  # seconds without new fragments before a turn counts as finished
@@ -68,11 +70,17 @@ class BolnaLeg:
         tick: float = TICK,
         batch: float = BATCH,
         stop_retry: float = STOP_RETRY,
+        goodbye: str = "",
+        linger: float = LINGER,
     ) -> None:
         self.client, self.agent_id, self.to = client, agent_id, to
         self.call_id, self.disclosure = call_id, disclosure
         self.settle, self.max_wait, self.tick, self.batch = settle, max_wait, tick, batch
         self.stop_retry = stop_retry
+        self.goodbye, self.linger = goodbye, linger
+        self.on_finished: Callable[[], None] | None = None  # set by the registry
+        self._ending = False
+        self._goodbyes_left = 0
         self.reports_progress = True  # the session waits for our ringing / connected, see on_state
         self.on_state: Callable[[str], Awaitable[None]] | None = None
         self.answered = False
@@ -119,11 +127,34 @@ class BolnaLeg:
         self._ready.set()
 
     async def hangup(self) -> None:
+        """End the call. Bolna can only cancel a call that has not started; a live one ends when
+        its hangup prompt sees the assistant say goodbye, so say it on its next request (now, if
+        one is waiting) and keep the leg reachable until the call is over."""
         self.active = False
         self._hangup_requested = True
+        self._ending = True
+        self._goodbyes_left = GOODBYES if self.goodbye else 0
         if self._settle_task:
             self._settle_task.cancel()
         self._begin_stop()
+        if self.lingering:
+            task = asyncio.create_task(self._release_later())
+            _background.add(task)
+            task.add_done_callback(_background.discard)
+
+    @property
+    def lingering(self) -> bool:
+        """Ended by the user, but Bolna may still ask what to say."""
+        return self._ending and self._goodbyes_left > 0
+
+    async def _release_later(self) -> None:
+        await asyncio.sleep(self.linger)
+        self._finished()
+
+    def _finished(self) -> None:
+        self._goodbyes_left = 0
+        if self.on_finished:
+            self.on_finished()
 
     def _begin_stop(self) -> None:
         if self.execution_id and self._stopper is None:
@@ -141,13 +172,17 @@ class BolnaLeg:
         (seen 30 Oct: End pressed, phone rang 4 s later): keep asking until it accepts."""
         for _ in range(STOP_TRIES):
             outcome = await self.client.stop_call(execution_id)
-            if outcome is None or outcome == "stopped" or outcome in TERMINAL:
-                return
+            if outcome is None or outcome == "stopped" or outcome in TERMINAL or outcome in ANSWERED:
+                return  # a live call cannot be stopped from outside: see hangup()
             await asyncio.sleep(self.stop_retry)
         log.warning("gave up stopping a call Bolna kept refusing to stop")
 
     # ---------- driven by Bolna ----------
     async def on_status(self, status: str) -> None:
+        if self._ending:
+            if status in TERMINAL:
+                self._finished()  # the call is over, nothing more to say
+            return
         if status == "ringing":
             await self._progress("ringing")
         elif status in ANSWERED:
@@ -195,8 +230,15 @@ class BolnaLeg:
         try:
             deadline = time.monotonic() + self.max_wait
             while time.monotonic() < deadline:
-                if self._generation != mine or not self.active:
-                    return  # a newer fragment owns the reply, or the call is over
+                if self._generation != mine:
+                    return  # a newer fragment owns the reply
+                if self._ending:
+                    if self._goodbyes_left > 0:
+                        self._goodbyes_left -= 1
+                        yield end_sentence(self.goodbye)
+                    return  # the user ended the call: only the goodbye is said
+                if not self.active:
+                    return
                 batch = self._take()
                 if not batch:
                     with contextlib.suppress(TimeoutError):

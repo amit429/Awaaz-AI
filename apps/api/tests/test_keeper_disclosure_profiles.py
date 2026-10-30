@@ -1,4 +1,4 @@
-from app.relay.disclosure import ask_repeat_line, disclosure_line, keeper_line
+from app.relay.disclosure import ask_repeat_line, disclosure_line, goodbye_line, keeper_line
 from app.relay.keeper import Keeper
 from app.services.profiles import disability_phrase, resolve_modes
 
@@ -99,3 +99,9 @@ def test_drafts_and_translations_are_told_the_users_gender():
     assert "masculine" in gender_note("male") and "feminine" in gender_note("female")
     assert "avoid gendered" in gender_note("unspecified")
     assert "feminine" in _translate_prompt("I am coming", "hi-IN", "female")
+
+
+def test_goodbye_line_says_the_user_ended_the_call_in_the_call_language():
+    assert goodbye_line("en-IN", "Amit") == "Amit has ended the call. Goodbye."
+    assert "Amit" in goodbye_line("hi-IN", "Amit") and "Amit" in goodbye_line("mr-IN", "Amit")
+    assert goodbye_line("ta-IN", "Amit") == goodbye_line("en-IN", "Amit")  # falls back to English

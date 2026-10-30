@@ -1,4 +1,5 @@
-"""Fixed spoken lines: the disclosure (every relay call, not configurable), keeper, ask-again."""
+"""Fixed spoken lines: the disclosure (every relay call, not configurable), keeper, ask-again,
+goodbye (the user pressed End)."""
 
 from app.specs import load_json
 
@@ -33,3 +34,10 @@ def keeper_line(lang: str, name: str, gender: str = "unspecified") -> str:
 
 def ask_repeat_line(lang: str) -> str:
     return _pick(load_json("messages/disclosure_lines.json")["ask_repeat"], short_lang(lang))
+
+
+def goodbye_line(lang: str, name: str) -> str:
+    """Said when the user ends the call: Bolna cannot hang up a live call from outside, so this
+    is the reply that lets its hangup prompt end the conversation."""
+    block = load_json("messages/disclosure_lines.json")["goodbye"]
+    return _pick(block, short_lang(lang)).format(name=name)

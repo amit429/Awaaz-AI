@@ -43,5 +43,10 @@
     "hi": "Maaf kijiye, kya aap phir se bol sakte hain?",
     "mr": "माफ करा, पुन्हा सांगाल का?",
     "en": "Sorry, could you please say that again?"
+  },
+  "goodbye": {
+    "en": "{name} has ended the call. Goodbye.",
+    "hi": "{name} ने कॉल समाप्त कर दिया है। नमस्ते।",
+    "mr": "{name} यांनी कॉल संपवला आहे. नमस्कार."
   }
 }

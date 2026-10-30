@@ -14,9 +14,12 @@ from app.store import InMemoryStore
 
 
 class FakeBolna:
-    def __init__(self, fail: str | None = None, refuse_stops: int = 0):
+    def __init__(
+        self, fail: str | None = None, refuse_stops: int = 0, live_status: str | None = None
+    ):
         self.fail, self.started, self.stopped = fail, [], []
         self.refuse_stops = refuse_stops  # Bolna refuses this many stops ("not started yet")
+        self.live_status = live_status  # a call in progress: Bolna refuses every stop
 
     async def start_call(self, agent_id, to, user_data):
         if self.fail:
@@ -26,6 +29,8 @@ class FakeBolna:
 
     async def stop_call(self, execution_id):
         self.stopped.append(execution_id)
+        if self.live_status:
+            return self.live_status
         if len(self.stopped) <= self.refuse_stops:
             return "initiated"
         return "stopped"
@@ -43,6 +48,8 @@ def make_leg(**kw) -> BolnaLeg:
         tick=0.02,
         batch=0.05,
         stop_retry=0.02,
+        goodbye="Amit ne call khatam kiya. Namaste.",
+        linger=0.5,
         **kw,
     )
 
@@ -470,3 +477,70 @@ async def test_ending_from_the_app_stops_the_phone_call(env, monkeypatch):
         await _drain_until(q, lambda e: e["t"] == "call.state" and e["state"] == "ended")
         await asyncio.wait_for(session.leg.stopped(), 1.0)
         assert fake.stopped == ["exec-1"]
+
+
+# ---------- ending a call that is already live ----------
+GOODBYE = "Amit ne call khatam kiya. Namaste. "
+
+
+async def test_bolna_cannot_stop_a_live_call_so_it_is_asked_once_not_hammered():
+    """Bolna's stop only cancels calls that have not started: "Cannot stop call with status:
+    in-progress" (30 Oct). Retrying is pointless once the call is live."""
+    leg = make_leg()
+    leg.client = FakeBolna(live_status="in-progress")
+    await leg.start(Heard().heard, Heard().hangup)
+    await leg.hangup()
+    await asyncio.wait_for(leg.stopped(), 1.0)
+    assert leg.client.stopped == ["exec-1"]
+
+
+async def test_ending_while_bolna_waits_says_goodbye_and_closes_the_request():
+    leg, _ = await started_leg()
+    task = asyncio.create_task(collect(leg, 1, "Boliye"))
+    await asyncio.sleep(0.02)
+    await leg.hangup()
+    assert await asyncio.wait_for(task, 0.5) == [GOODBYE]
+
+
+async def test_ending_between_requests_says_goodbye_the_next_time_they_speak():
+    leg, _ = await started_leg()
+    await leg.hangup()
+    assert await collect(leg, 2, "hello?") == [GOODBYE]
+
+
+async def test_goodbye_is_repeated_a_few_times_if_they_keep_talking_then_stops():
+    leg, _ = await started_leg()
+    await leg.hangup()
+    for turn in (2, 3, 4):
+        assert await collect(leg, turn, "hello?") == [GOODBYE]
+    assert await collect(leg, 5, "hello?") == []
+
+
+async def test_typed_messages_after_ending_are_not_spoken():
+    leg, _ = await started_leg()
+    await leg.hangup()
+    await leg.speak("Der se likha hua")
+    assert await collect(leg, 2, "haan") == [GOODBYE]
+
+
+async def test_an_ended_call_stays_registered_until_bolna_reports_it_over():
+    bolna_registry.clear()
+    leg, _ = await started_leg()
+    bolna_registry.add(leg)
+    await leg.hangup()
+    bolna_registry.release(leg.call_id)  # the session cleans up
+    assert bolna_registry.for_execution("exec-1") is leg  # Bolna may still ask for the goodbye
+    await leg.on_status("call-disconnected")
+    assert bolna_registry.for_execution("exec-1") is None
+    bolna_registry.clear()
+
+
+async def test_an_ended_call_is_released_after_the_linger_time_even_if_bolna_is_silent():
+    bolna_registry.clear()
+    leg, _ = await started_leg()
+    bolna_registry.add(leg)
+    await leg.hangup()
+    bolna_registry.release(leg.call_id)
+    await asyncio.sleep(0.7)  # linger is 0.5 s in tests
+    assert bolna_registry.for_execution("exec-1") is None
+    bolna_registry.clear()

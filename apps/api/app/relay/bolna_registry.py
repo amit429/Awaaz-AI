@@ -10,9 +10,19 @@ TOKEN = re.compile(r"\[\[awaaz:call=([A-Za-z0-9-]+)\]\]")
 
 def add(leg: BolnaLeg) -> None:
     _legs[leg.call_id] = leg
+    leg.on_finished = lambda: remove(leg.call_id)
 
 
 def remove(call_id: str) -> None:
+    _legs.pop(call_id, None)
+
+
+def release(call_id: str) -> None:
+    """The session is over. Keep a leg that still owes the other person a goodbye: Bolna will
+    ask for it the next time they speak (the leg removes itself once the call is over)."""
+    leg = _legs.get(call_id)
+    if leg is not None and leg.lingering:
+        return
     _legs.pop(call_id, None)
 
 

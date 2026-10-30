@@ -8,7 +8,7 @@ from app.providers.gemini import GeminiLlm
 from app.providers.mocks import FakeCallee
 from app.relay import bolna_registry, registry
 from app.relay.bolna_leg import BolnaLeg
-from app.relay.disclosure import disclosure_line
+from app.relay.disclosure import disclosure_line, goodbye_line
 from app.relay.legs import MockLeg
 from app.relay.session import RelaySession
 from app.services.languages import call_code, make_translator
@@ -71,6 +71,7 @@ async def create_relay_call(
             disclosure=disclosure_line(
                 profile.preset, call_lang, profile.display_name, profile.gender
             ),
+            goodbye=goodbye_line(call_lang, profile.display_name),
         )
         bolna_registry.add(leg)
     await store.create_call(
@@ -90,7 +91,7 @@ async def create_relay_call(
 
     def cleanup() -> None:
         registry.remove(call_id)
-        bolna_registry.remove(call_id)
+        bolna_registry.release(call_id)
 
     reply_ctx = ReplyContext(
         user_name=profile.display_name,
