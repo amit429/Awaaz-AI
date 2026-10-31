@@ -8,6 +8,7 @@ Awaaz lets someone who is deaf, hard of hearing, or unable to speak make a norma
 |---|---|
 | **Live demo** | https://awaazai.amitpile.com |
 | **Demo video** | [Watch the product demo](https://drive.google.com/file/d/1_YVymzp7M7whLlO46LlsLWu_1i0iuzD4/view?usp=sharing) (9 min 20 s) |
+| **Pitch deck video, PRD and technical document** | [Open the Drive folder](https://drive.google.com/drive/folders/15OgLta1L-DYyXkYyXeb-49kupR8pO1vx?usp=sharing) |
 | **Try it first** | Sign in, then use **Practice calls** on the Calls screen. They need no phone number and work for everyone. |
 | **Real phone calls** | Work only for numbers verified in Bolna. See [Try a real call](#try-a-real-call-verified-numbers-only). |
 
@@ -495,6 +496,7 @@ docs/             decisions, design, deploy notes, architecture for incoming cal
 | [`specs/protocol/relay-events.md`](specs/protocol/relay-events.md) | The live-call events between the app and the API |
 | [`specs/messages/whatsapp_templates.md`](specs/messages/whatsapp_templates.md) | WhatsApp message templates |
 | [`docs/PRD.md`](docs/PRD.md), [`docs/PRD-ADDENDUM-v2.md`](docs/PRD-ADDENDUM-v2.md) | Original product requirements |
+| [Drive folder](https://drive.google.com/drive/folders/15OgLta1L-DYyXkYyXeb-49kupR8pO1vx?usp=sharing) | The pitch deck video, the PRD and the technical document, as shared files |
 | [`PROGRESS.md`](PROGRESS.md) | What is done, in progress and unverified |
 
 ## Known limits
