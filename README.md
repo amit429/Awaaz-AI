@@ -11,10 +11,9 @@ Awaaz lets someone who is deaf, hard of hearing, or unable to speak make a norma
 | **Try it first** | Sign in, then use **Practice calls** on the Calls screen. They need no phone number and work for everyone. |
 | **Real phone calls** | Work only for numbers verified in Bolna. See [Try a real call](#try-a-real-call-verified-numbers-only). |
 
-<p align="center">
-  <a href="https://drive.google.com/file/d/1_YVymzp7M7whLlO46LlsLWu_1i0iuzD4/view?usp=sharing"><img src="docs/screenshots/demo-video-thumbnail.jpg" width="640" alt="Watch the Awaaz AI product demo video (9 min 20 s)"></a><br>
-  <sub>▶ Watch the product demo: sign-up, a live Marathi call, a live Hindi call with voice, and the incoming-calls design (9 min 20 s)</sub>
-</p>
+### Product demo video
+
+<a href="https://drive.google.com/file/d/1_YVymzp7M7whLlO46LlsLWu_1i0iuzD4/view?usp=sharing"><img src="docs/screenshots/demo-video-thumbnail.jpg" width="640" alt="Product demo video"></a>
 
 <p>
   <img src="docs/screenshots/05-home.png" width="190" alt="The dashboard with last-7-days stat cards">
