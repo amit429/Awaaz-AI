@@ -24,7 +24,7 @@ Transport: one WebSocket per call, `wss://<api>/v1/relay/{session_id}?token=<sup
 | `say.queued` | — | The phone line is not listening right now (Bolna only asks after the other person speaks): the message is said when they speak next |
 | `scam.warning` | `reason`, `turn` | OTP/PIN/CVV/remote-app request detected |
 | `ivr.menu` | `options[]` (`digit`, `label`) | Phone menu parsed from captions |
-| `keeper.spoken` | — | “Please hold” line was said to the other person |
+| `keeper.spoken` | — | “Please hold” line was said to the other person (not sent on Bolna phone legs: Bolna speaks a reply only when its response is complete, so the line could not be heard in time) |
 | `respeak.started` / `respeak.ended` | `turn`, `rate` | Clear voice playback |
 | `mode.updated` | `talk_modes[]`, `hear_modes[]` | After `mode.set` |
 | `caption.translation` | `turn`, `lang`, `text` | The caption of `turn` in the reading language; follows `caption.final` (captions are never held back for translation) |
